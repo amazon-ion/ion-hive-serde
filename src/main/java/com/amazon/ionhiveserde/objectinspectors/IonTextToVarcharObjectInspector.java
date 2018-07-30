@@ -21,6 +21,8 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import software.amazon.ion.IonText;
 import software.amazon.ion.IonValue;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 /**
  * Adapts an {@link IonText} for the varchar Hive type
  */

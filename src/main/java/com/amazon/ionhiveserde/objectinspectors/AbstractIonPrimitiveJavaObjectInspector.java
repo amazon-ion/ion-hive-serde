@@ -14,14 +14,16 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
-import org.apache.hadoop.hive.serde2.objectinspector.primitive.AbstractPrimitiveJavaObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.AbstractPrimitiveObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.PrimitiveTypeInfo;
 import software.amazon.ion.IonValue;
+
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
 
 /**
  * Base class for all Ion Primitive/Scalar, Object Inspectors
  */
-public abstract class AbstractIonPrimitiveJavaObjectInspector extends AbstractPrimitiveJavaObjectInspector {
+public abstract class AbstractIonPrimitiveJavaObjectInspector extends AbstractPrimitiveObjectInspector {
 
     AbstractIonPrimitiveJavaObjectInspector(final PrimitiveTypeInfo typeInfo) {
         super(typeInfo);
@@ -38,7 +40,8 @@ public abstract class AbstractIonPrimitiveJavaObjectInspector extends AbstractPr
         return ionValue.clone();
     }
 
-    static boolean isIonNull(final IonValue ionValue) {
-        return ionValue == null || ionValue.isNullValue();
+    @Override
+    public boolean preferWritable() {
+        return false;
     }
 }

@@ -20,6 +20,8 @@ import org.apache.hadoop.io.DoubleWritable;
 import software.amazon.ion.IonFloat;
 import software.amazon.ion.IonValue;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 /**
  * Adapts an {@link IonFloat} for the double Hive type
  */

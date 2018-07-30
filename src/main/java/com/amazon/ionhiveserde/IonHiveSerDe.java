@@ -14,9 +14,8 @@
 
 package com.amazon.ionhiveserde;
 
-import com.amazon.ionhiveserde.objectinspectors.IonStructObjectInspector;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.amazon.ionhiveserde.objectinspectors.IonStructToStructInspector;
+import com.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.hive.serde2.AbstractSerDe;
@@ -57,11 +56,12 @@ import java.util.Properties;
  * </p>
  */
 public class IonHiveSerDe extends AbstractSerDe {
-    public static final Log LOGGER = LogFactory.getLog(IonHiveSerDe.class);
 
     private IonSystem ion;
 
-    private IonStructObjectInspector objectInspector;
+    private ObjectInspector objectInspector;
+    private IonObjectInspectorFactory objectInspectorFactory;
+
     private Class<? extends Writable> serializedClass;
 
     private SerDeStats stats;
@@ -70,14 +70,15 @@ public class IonHiveSerDe extends AbstractSerDe {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("deprecation") // we are forced to override this constructor even though it's deprecated
     public void initialize(final @Nullable Configuration conf, final Properties tbl) throws SerDeException {
-
         stats = new SerDeStats();
-        StructTypeInfo tableInfo = (StructTypeInfo) TypeInfoFactory.getStructTypeInfo(readColumnNames(tbl), readColumnTypes(tbl));
+        final StructTypeInfo tableInfo = (StructTypeInfo) TypeInfoFactory.getStructTypeInfo(readColumnNames(tbl), readColumnTypes(tbl));
 
         ion = buildIonSystem(conf);
 
-        objectInspector = new IonStructObjectInspector(tableInfo); // TODO get from the OI factory
+        objectInspectorFactory = new IonObjectInspectorFactory(tableInfo);
+        objectInspector = objectInspectorFactory.objectInspectorFor(tableInfo);
 
         serializedClass = Text.class; // TODO pick from config
     }
@@ -94,7 +95,7 @@ public class IonHiveSerDe extends AbstractSerDe {
      * {@inheritDoc}
      */
     @Override
-    public Writable serialize(Object obj, ObjectInspector objectInspector) throws SerDeException {
+    public Writable serialize(final Object obj, final ObjectInspector objectInspector) throws SerDeException {
         final StringBuilder out = new StringBuilder();
         final StructObjectInspector structObjectInspector = (StructObjectInspector) objectInspector;
 
@@ -104,7 +105,7 @@ public class IonHiveSerDe extends AbstractSerDe {
             for (StructField field : structObjectInspector.getAllStructFieldRefs()) {
                 writer.setFieldName(field.getFieldName());
 
-                Object fieldData = structObjectInspector.getStructFieldData(obj, field);
+                final Object fieldData = structObjectInspector.getStructFieldData(obj, field);
                 serializeFieldData(writer, fieldData, field.getFieldObjectInspector());
             }
 
@@ -113,32 +114,24 @@ public class IonHiveSerDe extends AbstractSerDe {
             throw new SerDeException(e);
         }
 
+        // TODO binary or text from config
         return new Text(out.toString());
     }
 
-    private void serializeFieldData(IonWriter writer, Object fieldData, ObjectInspector objectInspector) throws IOException, SerDeException {
+    private void serializeFieldData(final IonWriter writer, final Object fieldData, final ObjectInspector objectInspector) throws IOException, SerDeException {
         if (fieldData == null) return;
 
-        switch (objectInspector.getCategory()) {
-            case PRIMITIVE:
-                serializePrimitiveFieldData(writer, fieldData, (PrimitiveObjectInspector) objectInspector);
-                break;
-            default:
-                throw new UnsupportedOperationException("TODO not implemented");
+        if (objectInspector.getCategory() == ObjectInspector.Category.PRIMITIVE) {
+            final PrimitiveObjectInspector primitiveObjectInspector = (PrimitiveObjectInspector) objectInspector;
+            switch (primitiveObjectInspector.getPrimitiveCategory()) {
+                case VOID:
+                case UNKNOWN:
+                    throw new SerDeException("Unknown primitive");
+            }
         }
-    }
 
-    private void serializePrimitiveFieldData(IonWriter writer, Object fieldData, PrimitiveObjectInspector objectInspector) throws IOException, SerDeException {
-        switch (objectInspector.getPrimitiveCategory()) {
-            case VOID:
-                throw new UnsupportedOperationException("TODO not implemented");
-            case UNKNOWN:
-                throw new SerDeException("Unknown primitive");
-            default:
-                final IonValue ionValue = (IonValue) fieldData;
-                ionValue.writeTo(writer);
-                break;
-        }
+        final IonValue ionValue = (IonValue) fieldData;
+        ionValue.writeTo(writer);
     }
 
     /**
@@ -153,7 +146,7 @@ public class IonHiveSerDe extends AbstractSerDe {
      * {@inheritDoc}
      */
     @Override
-    public Object deserialize(Writable blob) throws SerDeException {
+    public Object deserialize(final Writable blob) throws SerDeException {
         IonValue value;
 
         if (blob instanceof Text) {
@@ -187,7 +180,7 @@ public class IonHiveSerDe extends AbstractSerDe {
     }
 
     private List<String> readColumnNames(final Properties tbl) {
-        String columnNameProperty = tbl.getProperty(serdeConstants.LIST_COLUMNS);
+        final String columnNameProperty = tbl.getProperty(serdeConstants.LIST_COLUMNS);
 
         if (columnNameProperty.isEmpty()) {
             return new ArrayList<>();
@@ -197,7 +190,7 @@ public class IonHiveSerDe extends AbstractSerDe {
     }
 
     private List<TypeInfo> readColumnTypes(final Properties tbl) {
-        String columnTypeProperty = tbl.getProperty(serdeConstants.LIST_COLUMN_TYPES);
+        final String columnTypeProperty = tbl.getProperty(serdeConstants.LIST_COLUMN_TYPES);
 
         if (columnTypeProperty.isEmpty()) {
             return new ArrayList<>();

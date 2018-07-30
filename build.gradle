@@ -1,4 +1,32 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at:
+ *
+ *      http://aws.amazon.com/apache2.0/
+ *
+ * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
+ */
+
+// sets up kotlin plugin
+buildscript {
+    ext.kotlin_version = '1.2.61'
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 apply plugin: 'java-library'
+apply plugin: "kotlin"
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -7,19 +35,26 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    // to make compileOnly available to testing scope
+    testCompile.extendsFrom(compileOnly)
+}
+
 dependencies {
-    compile 'software.amazon.ion:ion-java:1.0.+'
+    // Included in the single-jar
+    compile "software.amazon.ion:ion-java:1.0.+"
 
-    compileOnly 'org.apache.hive:hive-serde:1.1.+'
-    compileOnly 'org.apache.hadoop:hadoop-common:2.6.+'
-    compileOnly 'org.apache.hadoop:hadoop-main:2.6.+'
-
-    testCompile 'junit:junit:4.+'
-    testCompile 'pl.pragmatists:JUnitParams:1.1.1'
+    // Provided by the Hive installation
+    compileOnly "org.apache.hive:hive-serde:1.1.+"
+    compileOnly "org.apache.hadoop:hadoop-common:2.6.+"
+    compileOnly "org.apache.hadoop:hadoop-main:2.6.+"
 
     // using kotlin to make tests less verbose
-    testCompile 'org.jetbrains.kotlin:kotlin-stdlib:1.2.+'
-    testCompile 'org.jetbrains.kotlin:kotlin-test-junit:1.2.+'
+    testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+
+    testCompile "junit:junit:4.+"
+    testCompile "pl.pragmatists:JUnitParams:1.1.+"
 }
 
 task singleJar(type: Jar) {

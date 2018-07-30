@@ -21,11 +21,13 @@ import software.amazon.ion.IntegerSize;
 import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 /**
  * Adapts an {@link IonInt} for the int Hive type
  */
 public class IonIntToIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements IntObjectInspector {
-    IonIntToIntObjectInspector() {
+    public IonIntToIntObjectInspector() {
         super(TypeInfoFactory.intTypeInfo);
     }
 

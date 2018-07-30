@@ -20,12 +20,14 @@ import org.apache.hadoop.io.BooleanWritable;
 import software.amazon.ion.IonBool;
 import software.amazon.ion.IonValue;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 /**
  * Adapts an {@link IonBool} for the boolean Hive type
  */
 public class IonBooleanToBooleanObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements BooleanObjectInspector {
 
-    IonBooleanToBooleanObjectInspector() {
+    public IonBooleanToBooleanObjectInspector() {
         super(TypeInfoFactory.booleanTypeInfo);
     }
 

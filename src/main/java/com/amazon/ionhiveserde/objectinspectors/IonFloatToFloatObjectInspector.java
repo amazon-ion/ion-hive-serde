@@ -20,6 +20,8 @@ import org.apache.hadoop.io.FloatWritable;
 import software.amazon.ion.IonFloat;
 import software.amazon.ion.IonValue;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 /**
  * Adapts an {@link IonFloat} for the float Hive type
  */

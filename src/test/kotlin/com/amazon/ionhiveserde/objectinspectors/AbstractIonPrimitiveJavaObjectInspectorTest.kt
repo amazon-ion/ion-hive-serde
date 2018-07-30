@@ -14,19 +14,14 @@
 
 package com.amazon.ionhiveserde.objectinspectors
 
+import com.amazon.ionhiveserde.ionNull
 import org.junit.Test
-import software.amazon.ion.system.IonSystemBuilder
 import kotlin.test.assertNull
 
 /**
  * Base class for ObjectInspector unit tests with common helper methods
  */
 abstract class AbstractIonPrimitiveJavaObjectInspectorTest {
-    companion object {
-        internal val ION = IonSystemBuilder.standard().build()
-        internal val ionNull = ION.newNull()
-    }
-
     protected abstract val subject: AbstractIonPrimitiveJavaObjectInspector
 
     @Test

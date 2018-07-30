@@ -14,6 +14,7 @@
 
 package com.amazon.ionhiveserde.objectinspectors
 
+import com.amazon.ionhiveserde.ION
 import org.apache.hadoop.hive.common.type.HiveVarchar
 import org.apache.hadoop.hive.serde2.io.HiveVarcharWritable
 import org.junit.Test

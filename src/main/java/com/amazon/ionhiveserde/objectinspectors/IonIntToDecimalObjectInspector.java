@@ -22,8 +22,10 @@ import software.amazon.ion.IonDecimal;
 import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 /**
- * Adapts an {@link IonInt} for the decimal Hive type
+ * Adapts an {@link IonInt} for the decimal Hive type.
  */
 public class IonIntToDecimalObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements HiveDecimalObjectInspector {
     IonIntToDecimalObjectInspector() {

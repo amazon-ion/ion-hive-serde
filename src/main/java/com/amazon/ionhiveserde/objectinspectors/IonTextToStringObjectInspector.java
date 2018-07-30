@@ -20,6 +20,8 @@ import org.apache.hadoop.io.Text;
 import software.amazon.ion.IonText;
 import software.amazon.ion.IonValue;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 /**
  * Adapts an {@link IonText} for the string Hive type
  */

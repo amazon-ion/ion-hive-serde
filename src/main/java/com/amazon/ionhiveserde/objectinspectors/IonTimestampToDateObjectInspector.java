@@ -22,6 +22,8 @@ import software.amazon.ion.IonValue;
 
 import java.sql.Date;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 /**
  * Adapts an {@link IonTimestamp} for the date Hive type
  */
