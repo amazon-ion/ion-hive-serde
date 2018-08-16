@@ -1,0 +1,29 @@
+apply plugin: 'java-library'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'software.amazon.ion:ion-java:1.0.+'
+
+    compileOnly 'org.apache.hive:hive-serde:1.1.+'
+    compileOnly 'org.apache.hadoop:hadoop-common:2.6.+'
+    compileOnly 'org.apache.hadoop:hadoop-main:2.6.+'
+
+    testCompile 'junit:junit:4.+'
+    testCompile 'pl.pragmatists:JUnitParams:1.1.1'
+
+    // using kotlin to make tests less verbose
+    testCompile 'org.jetbrains.kotlin:kotlin-stdlib:1.2.+'
+    testCompile 'org.jetbrains.kotlin:kotlin-test-junit:1.2.+'
+}
+
+task singleJar(type: Jar) {
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
