@@ -12,14 +12,39 @@
  * language governing permissions and limitations under the License.
  */
 
-package com.amazon.ionhiveserde.objectinspectors;
+package com.amazon.ionhiveserde.objectinspectors.factories;
 
+import com.amazon.ionhiveserde.objectinspectors.IonBooleanToBooleanObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonDecimalToDecimalObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonFloatToDoubleObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonFloatToFloatObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonIntToBigIntObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonIntToSmallIntObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonIntToTinyIntObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonLobToBinaryObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonSequenceToListObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonStructToStructInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonTextToCharObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonTextToStringObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonTextToVarcharObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonTimestampToDateObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonTimestampToTimestampObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonUnionObjectInspector;
 import com.amazon.ionhiveserde.util.LRUCache;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.CharTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.ListTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.MapTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.PrimitiveTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.UnionTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.VarcharTypeInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Factory to create Ion object inspectors. Caches object inspectors based on {@link TypeInfo}
@@ -29,6 +54,9 @@ public class IonObjectInspectorFactory {
     // FIXME figure out a default
     private static LRUCache<TypeInfo, ObjectInspector> CACHE = new LRUCache<>(50);
 
+    /**
+     * Provides a potentially cached ObjectInspector for the respective typeInfo
+     */
     public static ObjectInspector objectInspectorFor(final TypeInfo typeInfo) {
         if (CACHE.containsKey(typeInfo)) {
             return CACHE.get(typeInfo);
@@ -37,7 +65,7 @@ public class IonObjectInspectorFactory {
         ObjectInspector objectInspector = null;
         switch (typeInfo.getCategory()) {
             case PRIMITIVE:
-                PrimitiveTypeInfo primitiveTypeInfo = (PrimitiveTypeInfo) typeInfo;
+                final PrimitiveTypeInfo primitiveTypeInfo = (PrimitiveTypeInfo) typeInfo;
                 switch (primitiveTypeInfo.getPrimitiveCategory()) {
                     case BOOLEAN:
                         objectInspector = new IonBooleanToBooleanObjectInspector();
@@ -73,12 +101,12 @@ public class IonObjectInspectorFactory {
                         break;
 
                     case CHAR:
-                        CharTypeInfo charTypeInfo = (CharTypeInfo) primitiveTypeInfo;
+                        final CharTypeInfo charTypeInfo = (CharTypeInfo) primitiveTypeInfo;
                         objectInspector = new IonTextToCharObjectInspector(charTypeInfo.getLength());
                         break;
 
                     case VARCHAR:
-                        VarcharTypeInfo varcharTypeInfo = (VarcharTypeInfo) primitiveTypeInfo;
+                        final VarcharTypeInfo varcharTypeInfo = (VarcharTypeInfo) primitiveTypeInfo;
                         objectInspector = new IonTextToVarcharObjectInspector(varcharTypeInfo.getLength());
                         break;
 
@@ -99,14 +127,38 @@ public class IonObjectInspectorFactory {
                         break;
 
                     case VOID:
-                        throw new UnsupportedOperationException("TODO not implemented");
-
                     case UNKNOWN:
                         throw new UnsupportedOperationException("Unknown primitive category");
                 }
                 break;
-            default:
-                throw new UnsupportedOperationException("TODO not implemented");
+
+            case STRUCT:
+                objectInspector = new IonStructToStructInspector((StructTypeInfo) typeInfo);
+                break;
+
+            case MAP:
+                final MapTypeInfo mapTypeInfo = (MapTypeInfo) typeInfo;
+
+                // FIXME validate key must be string
+                final ObjectInspector valueObjectInspector = IonObjectInspectorFactory.objectInspectorFor(mapTypeInfo.getMapValueTypeInfo());
+
+                objectInspector = new IonStructToMapObjectInspector(valueObjectInspector);
+                break;
+
+            case LIST:
+                final ListTypeInfo listTypeInfo = (ListTypeInfo) typeInfo;
+                final ObjectInspector elementObjectInspector = IonObjectInspectorFactory.objectInspectorFor(listTypeInfo.getListElementTypeInfo());
+                objectInspector = new IonSequenceToListObjectInspector(elementObjectInspector);
+                break;
+
+            case UNION:
+                final UnionTypeInfo unionTypeInfo = (UnionTypeInfo) typeInfo;
+                final List<ObjectInspector> objectInspectors = new ArrayList<>(unionTypeInfo.getAllUnionObjectTypeInfos().size());
+                for (TypeInfo type : unionTypeInfo.getAllUnionObjectTypeInfos()) {
+                    objectInspectors.add(IonObjectInspectorFactory.objectInspectorFor(type));
+                }
+                objectInspector = new IonUnionObjectInspector(objectInspectors);
+                break;
         }
 
         CACHE.put(typeInfo, objectInspector);

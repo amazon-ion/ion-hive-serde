@@ -14,21 +14,13 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import software.amazon.ion.IonValue;
+
 /**
- * Validates a {@link String} length, throwing if the string is longer than expected
+ * Utility methods for Ion values
  */
-// FIXME: name
-class TextMaxLengthValidator {
-
-    /**
-     * @return the string s if it does not exceed the max length
-     * @throws IllegalArgumentException if the string is longer than max length
-     */
-    String validate(final String s, int maxLength) {
-        if (s.length() > maxLength) {
-            throw new IllegalArgumentException("text is longer than allowed. Size: " + s.length() + ", max: " + maxLength);
-        }
-
-        return s;
+public class IonUtil {
+    static boolean isIonNull(final IonValue ionValue) {
+        return ionValue == null || ionValue.isNullValue();
     }
 }

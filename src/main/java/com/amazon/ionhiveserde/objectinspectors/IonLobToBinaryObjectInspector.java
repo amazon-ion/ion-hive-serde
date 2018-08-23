@@ -20,6 +20,8 @@ import org.apache.hadoop.io.BytesWritable;
 import software.amazon.ion.IonLob;
 import software.amazon.ion.IonValue;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 /**
  * Adapts an {@link IonLob} for the binary Hive type
  */

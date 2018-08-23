@@ -14,6 +14,7 @@
 
 package com.amazon.ionhiveserde.objectinspectors
 
+import com.amazon.ionhiveserde.ION
 import org.junit.Test
 
 abstract class AbstractIonTextToMaxLengthObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspectorTest() {

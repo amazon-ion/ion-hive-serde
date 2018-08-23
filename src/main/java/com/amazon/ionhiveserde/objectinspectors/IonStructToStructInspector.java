@@ -14,6 +14,7 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import com.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
@@ -21,24 +22,22 @@ import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import software.amazon.ion.IonStruct;
+import software.amazon.ion.IonValue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Placeholder implementation for structs, just enough to allow for simple roundtrip tests.
+ * Adapts an {@link IonStruct} for the struct Hive type.
  */
-public class IonStructObjectInspector extends StructObjectInspector {
+public class IonStructToStructInspector extends StructObjectInspector {
 
     private final Map<String, IonStructField> fieldsByName;
     private final List<IonStructField> fields;
 
-    public IonStructObjectInspector(StructTypeInfo tableInfo) {
-        // FIXME move some of this to a factory to cache it
-
+    public IonStructToStructInspector(final StructTypeInfo tableInfo) {
         fieldsByName = new HashMap<>();
         fields = new ArrayList<>();
 
@@ -47,7 +46,7 @@ public class IonStructObjectInspector extends StructObjectInspector {
             TypeInfo typeInfo = tableInfo.getAllStructFieldTypeInfos().get(i);
 
             ObjectInspector objectInspector = IonObjectInspectorFactory.objectInspectorFor(typeInfo);
-            IonStructField field = new IonStructField(fieldName, objectInspector, i, "");
+            IonStructField field = new IonStructField(fieldName, objectInspector, i);
 
             fields.add(field);
             fieldsByName.put(fieldName, field);
@@ -66,7 +65,9 @@ public class IonStructObjectInspector extends StructObjectInspector {
      * {@inheritDoc}
      */
     @Override
-    public StructField getStructFieldRef(String fieldName) {
+    public StructField getStructFieldRef(final String fieldName) {
+        if (fieldName == null) throw new IllegalArgumentException("field name cannot be null");
+
         return fieldsByName.get(fieldName);
     }
 
@@ -74,7 +75,10 @@ public class IonStructObjectInspector extends StructObjectInspector {
      * {@inheritDoc}
      */
     @Override
-    public Object getStructFieldData(Object data, StructField fieldRef) {
+    public Object getStructFieldData(final Object data, final StructField fieldRef) {
+        if (IonUtil.isIonNull((IonValue) data)) return null;
+        if (fieldRef == null) throw new IllegalArgumentException("fieldRef name cannot be null");
+
         IonStruct struct = (IonStruct) data;
 
         return struct.get(fieldRef.getFieldName());
@@ -84,18 +88,16 @@ public class IonStructObjectInspector extends StructObjectInspector {
      * {@inheritDoc}
      */
     @Override
-    public List<Object> getStructFieldsDataAsList(Object data) {
-        if (data == null) {
-            return null;
-        }
-        // We support both List<Object> and Object[]
-        // so we have to do differently.
-        if (!(data instanceof List)) {
-            data = Arrays.asList((Object[]) data);
+    public List<Object> getStructFieldsDataAsList(final Object data) {
+        if (IonUtil.isIonNull((IonValue) data)) return null;
+
+        IonStruct struct = (IonStruct) data;
+
+        List<Object> list = new ArrayList<>(struct.size());
+        for (IonValue v : struct) {
+            list.add(v);
         }
 
-        List<Object> list = (List<Object>) data;
-        assert (list.size() == fields.size());
         return list;
     }
 
@@ -117,16 +119,15 @@ public class IonStructObjectInspector extends StructObjectInspector {
 
     private static class IonStructField implements StructField {
 
+        private static final String FIELD_COMMENT = "";
         private final String fieldName;
         private final ObjectInspector fieldObjectInspector;
         private final int fieldID;
-        private final String fieldComment; // FIXME what is this?
 
-        IonStructField(String fieldName, ObjectInspector fieldObjectInspector, int fieldID, String fieldComment) {
+        IonStructField(final String fieldName, final ObjectInspector fieldObjectInspector, int fieldID) {
             this.fieldName = fieldName;
             this.fieldObjectInspector = fieldObjectInspector;
             this.fieldID = fieldID;
-            this.fieldComment = fieldComment;
         }
 
         /**
@@ -158,7 +159,7 @@ public class IonStructObjectInspector extends StructObjectInspector {
          */
         @Override
         public String getFieldComment() {
-            return fieldComment;
+            return FIELD_COMMENT;
         }
     }
 }

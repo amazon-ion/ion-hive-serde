@@ -15,27 +15,31 @@
 package com.amazon.ionhiveserde.objectinspectors
 
 import com.amazon.ionhiveserde.ION
-import org.apache.hadoop.io.BooleanWritable
+import com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull
 import org.junit.Test
-import kotlin.test.assertEquals
+import software.amazon.ion.IonType
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
-class IonBooleanToBooleanObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspectorTest() {
-
-    override val subject = IonBooleanToBooleanObjectInspector()
+class IonUtilTest {
 
     @Test
-    fun getPrimitiveWritableObject() {
-        val ionValue = ION.newBool(true)
-        val actual = subject.getPrimitiveWritableObject(ionValue)
-
-        assertEquals(BooleanWritable(true), actual)
+    fun isIonNullForNotNull() {
+        assertFalse(isIonNull(ION.newInt(1)))
     }
 
     @Test
-    fun getPrimitiveJavaObject() {
-        val ionValue = ION.newBool(true)
-        val actual = subject.getPrimitiveJavaObject(ionValue)
+    fun isIonNullForNull() {
+        assertTrue(isIonNull(null))
+    }
 
-        assertEquals(true, actual)
+    @Test
+    fun isIonNullForIonNull() {
+        assertTrue(isIonNull(ION.newNull()))
+    }
+
+    @Test
+    fun isIonNullForTypedNull() {
+        assertTrue(isIonNull(ION.newNull(IonType.BOOL)))
     }
 }

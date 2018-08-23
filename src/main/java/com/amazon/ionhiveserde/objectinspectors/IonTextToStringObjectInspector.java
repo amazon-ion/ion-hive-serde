@@ -20,6 +20,8 @@ import org.apache.hadoop.io.Text;
 import software.amazon.ion.IonText;
 import software.amazon.ion.IonValue;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 /**
  * Adapts an {@link IonText} for the string Hive type
  */
@@ -33,21 +35,21 @@ public class IonTextToStringObjectInspector extends AbstractIonPrimitiveJavaObje
      * {@inheritDoc}
      */
     @Override
-    public String getPrimitiveJavaObject(final Object o) {
+    public Text getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
         IonText ionValue = (IonText) o;
-        return ionValue.stringValue();
+        return new Text(ionValue.stringValue());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Text getPrimitiveWritableObject(final Object o) {
+    public String getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
         IonText ionValue = (IonText) o;
-        return new Text(ionValue.stringValue());
+        return ionValue.stringValue();
     }
 }

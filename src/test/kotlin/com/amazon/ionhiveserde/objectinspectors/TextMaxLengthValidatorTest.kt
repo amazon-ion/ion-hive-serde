@@ -14,28 +14,35 @@
 
 package com.amazon.ionhiveserde.objectinspectors
 
-import com.amazon.ionhiveserde.ION
-import org.apache.hadoop.io.BooleanWritable
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class IonBooleanToBooleanObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspectorTest() {
-
-    override val subject = IonBooleanToBooleanObjectInspector()
+class TextMaxLengthValidatorTest {
+    private val subject = TextMaxLengthValidator()
 
     @Test
-    fun getPrimitiveWritableObject() {
-        val ionValue = ION.newBool(true)
-        val actual = subject.getPrimitiveWritableObject(ionValue)
+    fun validateForValidString() {
+        val expected = "1234567"
+        val actual = subject.validate(expected, 7)
 
-        assertEquals(BooleanWritable(true), actual)
+        assertEquals(expected, actual)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun validateForInvalidString() {
+        subject.validate("1234567", 6)
     }
 
     @Test
-    fun getPrimitiveJavaObject() {
-        val ionValue = ION.newBool(true)
-        val actual = subject.getPrimitiveJavaObject(ionValue)
+    fun validateForSizeZero() {
+        val expected = ""
+        val actual = subject.validate(expected, 0)
 
-        assertEquals(true, actual)
+        assertEquals(expected, actual)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun validateForInvalidSize() {
+        subject.validate("1234567", -1)
     }
 }

@@ -21,12 +21,14 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import software.amazon.ion.IonDecimal;
 import software.amazon.ion.IonValue;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 /**
  * Adapts an {@link IonDecimal} for the decimal Hive type
  */
 public class IonDecimalToDecimalObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements HiveDecimalObjectInspector {
 
-    IonDecimalToDecimalObjectInspector() {
+    public IonDecimalToDecimalObjectInspector() {
         super(TypeInfoFactory.decimalTypeInfo);
     }
 

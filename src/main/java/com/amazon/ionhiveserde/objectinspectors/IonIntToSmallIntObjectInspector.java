@@ -21,6 +21,12 @@ import software.amazon.ion.IntegerSize;
 import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
+/**
+ * Adapts an {@link IonInt} for the smallint Hive type. Throws if the hive type does not have enough precision to
+ * represent the {@link IonInt}
+ */
 /**
  * Adapts an {@link IonInt} for the smallint Hive type
  */

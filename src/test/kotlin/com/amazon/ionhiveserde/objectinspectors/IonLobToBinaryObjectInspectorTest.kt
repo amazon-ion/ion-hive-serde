@@ -14,6 +14,7 @@
 
 package com.amazon.ionhiveserde.objectinspectors
 
+import com.amazon.ionhiveserde.ION
 import junitparams.JUnitParamsRunner
 import junitparams.NamedParameters
 import junitparams.Parameters

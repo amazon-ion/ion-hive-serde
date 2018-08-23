@@ -73,7 +73,7 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
      * is accessOrder the least recently will be the eldest entry
      */
     @Override
-    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+    protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
         return size() > maxEntries;
     }
 }

@@ -14,6 +14,7 @@
 
 package com.amazon.ionhiveserde.objectinspectors
 
+import com.amazon.ionhiveserde.ION
 import org.apache.hadoop.hive.serde2.io.ByteWritable
 import org.junit.Test
 import kotlin.test.assertEquals
