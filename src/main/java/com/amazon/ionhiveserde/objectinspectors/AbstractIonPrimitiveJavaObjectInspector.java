@@ -19,7 +19,7 @@ import org.apache.hadoop.hive.serde2.typeinfo.PrimitiveTypeInfo;
 import software.amazon.ion.IonValue;
 
 /**
- * TODO
+ * Base class for all Ion Primitive/Scalar, Object Inspectors
  */
 public abstract class AbstractIonPrimitiveJavaObjectInspector extends AbstractPrimitiveJavaObjectInspector {
 

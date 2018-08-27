@@ -21,7 +21,7 @@ import software.amazon.ion.IonText;
 import software.amazon.ion.IonValue;
 
 /**
- * Object Inspector for {@link software.amazon.ion.IonText} to {@link String}
+ * Adapts an {@link IonText} for the string Hive type
  */
 public class IonTextToStringObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements StringObjectInspector {
 

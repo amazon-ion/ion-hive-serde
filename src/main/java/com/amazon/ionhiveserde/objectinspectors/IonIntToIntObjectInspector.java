@@ -21,6 +21,9 @@ import software.amazon.ion.IntegerSize;
 import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
+/**
+ * Adapts an {@link IonInt} for the int Hive type
+ */
 public class IonIntToIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements IntObjectInspector {
     IonIntToIntObjectInspector() {
         super(TypeInfoFactory.intTypeInfo);

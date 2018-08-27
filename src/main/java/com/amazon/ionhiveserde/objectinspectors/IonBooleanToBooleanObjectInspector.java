@@ -21,7 +21,7 @@ import software.amazon.ion.IonBool;
 import software.amazon.ion.IonValue;
 
 /**
- * Adapts an {@link IonBool} into a domain that Hives understands
+ * Adapts an {@link IonBool} for the boolean Hive type
  */
 public class IonBooleanToBooleanObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements BooleanObjectInspector {
 

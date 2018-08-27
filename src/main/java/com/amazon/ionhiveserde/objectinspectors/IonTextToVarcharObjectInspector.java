@@ -22,7 +22,7 @@ import software.amazon.ion.IonText;
 import software.amazon.ion.IonValue;
 
 /**
- * Object Inspector for {@link software.amazon.ion.IonText} to {@link HiveVarchar}
+ * Adapts an {@link IonText} for the varchar Hive type
  */
 public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements HiveVarcharObjectInspector {
     private static final int DEFAULT_LENGTH = HiveVarchar.MAX_VARCHAR_LENGTH;

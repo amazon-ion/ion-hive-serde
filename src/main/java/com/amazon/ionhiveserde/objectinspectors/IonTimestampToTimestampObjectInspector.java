@@ -23,7 +23,7 @@ import software.amazon.ion.IonValue;
 import java.sql.Timestamp;
 
 /**
- * Object Inspector for {@link IonTimestamp} to {@link Timestamp}
+ * Adapts an {@link IonTimestamp} for the timestamp Hive type
  */
 public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements TimestampObjectInspector {
 

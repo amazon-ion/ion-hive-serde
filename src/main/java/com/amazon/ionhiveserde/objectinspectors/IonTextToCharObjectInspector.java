@@ -22,7 +22,7 @@ import software.amazon.ion.IonText;
 import software.amazon.ion.IonValue;
 
 /**
- * Object Inspector for {@link software.amazon.ion.IonText} to {@link HiveChar}
+ * Adapts an {@link IonText} for the char Hive type
  */
 public class IonTextToCharObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements HiveCharObjectInspector {
 

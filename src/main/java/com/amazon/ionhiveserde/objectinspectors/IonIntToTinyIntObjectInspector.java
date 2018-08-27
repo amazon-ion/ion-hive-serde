@@ -21,6 +21,9 @@ import software.amazon.ion.IntegerSize;
 import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
+/**
+ * Adapts an {@link IonInt} for the tinyint Hive type
+ */
 public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements ByteObjectInspector {
 
     private static int MIN_VALUE = -128;
@@ -48,7 +51,7 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
     }
 
     private boolean validRange(IonInt ionValue) {
-        // runs after checking that fits in a java int
+        // runs after checking that fits in a Java int
         int intValue = ionValue.intValue();
         return MIN_VALUE <= intValue && intValue <= MAX_VALUE;
     }

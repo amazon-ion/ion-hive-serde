@@ -30,8 +30,6 @@ import java.util.Map;
 
 /**
  * Placeholder implementation for structs, just enough to allow for simple roundtrip tests.
- * <p>
- * FIXME make it package private
  */
 public class IonStructObjectInspector extends StructObjectInspector {
 

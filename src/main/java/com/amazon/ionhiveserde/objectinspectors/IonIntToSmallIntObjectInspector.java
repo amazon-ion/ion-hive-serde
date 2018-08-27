@@ -48,7 +48,7 @@ public class IonIntToSmallIntObjectInspector extends AbstractIonPrimitiveJavaObj
     }
 
     private boolean validRange(IonInt ionValue) {
-        // runs after checking that fits in a java int
+        // runs after checking that fits in a Java int
         int intValue = ionValue.intValue();
         return MIN_VALUE <= intValue && intValue <= MAX_VALUE;
     }

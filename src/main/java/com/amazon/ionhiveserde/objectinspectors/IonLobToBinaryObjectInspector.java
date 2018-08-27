@@ -21,9 +21,7 @@ import software.amazon.ion.IonLob;
 import software.amazon.ion.IonValue;
 
 /**
- * <p>
- * Object Inspector for {@link IonLob} to byte[].
- * </p>
+ * Adapts an {@link IonLob} for the binary Hive type
  */
 public class IonLobToBinaryObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements BinaryObjectInspector {
 
