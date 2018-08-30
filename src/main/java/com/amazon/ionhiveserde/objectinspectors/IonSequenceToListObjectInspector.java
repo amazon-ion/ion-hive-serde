@@ -14,14 +14,13 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static org.apache.hadoop.hive.serde.serdeConstants.LIST_TYPE_NAME;
+
+import java.util.List;
 import org.apache.hadoop.hive.serde2.objectinspector.ListObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import software.amazon.ion.IonSequence;
 import software.amazon.ion.IonValue;
-
-import java.util.List;
-
-import static org.apache.hadoop.hive.serde.serdeConstants.LIST_TYPE_NAME;
 
 /**
  * Adapts an {@link IonSequence} for the array<> Hive type.
@@ -35,7 +34,7 @@ public class IonSequenceToListObjectInspector implements ListObjectInspector {
     }
 
     /**
-     * Elements object inspectors
+     * Elements object inspectors.
      */
     @Override
     public ObjectInspector getListElementObjectInspector() {
@@ -44,17 +43,23 @@ public class IonSequenceToListObjectInspector implements ListObjectInspector {
 
     @Override
     public Object getListElement(Object data, int index) {
-        if (IonUtil.isIonNull((IonValue) data)) return null;
+        if (IonUtil.isIonNull((IonValue) data)) {
+            return null;
+        }
 
         final IonSequence sequence = (IonSequence) data;
-        if (index < 0 || sequence.size() <= index) return null;
+        if (index < 0 || sequence.size() <= index) {
+            return null;
+        }
 
         return sequence.get(index);
     }
 
     @Override
     public int getListLength(Object data) {
-        if (IonUtil.isIonNull((IonValue) data)) return -1;
+        if (IonUtil.isIonNull((IonValue) data)) {
+            return -1;
+        }
 
         final IonSequence sequence = (IonSequence) data;
         return sequence.size();
@@ -62,7 +67,9 @@ public class IonSequenceToListObjectInspector implements ListObjectInspector {
 
     @Override
     public List<?> getList(Object data) {
-        if (IonUtil.isIonNull((IonValue) data)) return null;
+        if (IonUtil.isIonNull((IonValue) data)) {
+            return null;
+        }
 
         return (IonSequence) data;
     }

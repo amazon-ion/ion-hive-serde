@@ -18,8 +18,8 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
-class LRUCacheTest {
-    val subject = LRUCache<Int, String>(3)
+class LruCacheTest {
+    val subject = LruCache<Int, String>(3)
 
     @Test
     fun eldestIsLeastRecentlyUse() {

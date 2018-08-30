@@ -14,18 +14,19 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.Text;
 import software.amazon.ion.IonText;
 import software.amazon.ion.IonValue;
 
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-
 /**
- * Adapts an {@link IonText} for the string Hive type
+ * Adapts an {@link IonText} for the string Hive type.
  */
-public class IonTextToStringObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements StringObjectInspector {
+public class IonTextToStringObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+    StringObjectInspector {
 
     public IonTextToStringObjectInspector() {
         super(TypeInfoFactory.stringTypeInfo);
@@ -36,7 +37,9 @@ public class IonTextToStringObjectInspector extends AbstractIonPrimitiveJavaObje
      */
     @Override
     public Text getPrimitiveWritableObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         IonText ionValue = (IonText) o;
         return new Text(ionValue.stringValue());
@@ -47,7 +50,9 @@ public class IonTextToStringObjectInspector extends AbstractIonPrimitiveJavaObje
      */
     @Override
     public String getPrimitiveJavaObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         IonText ionValue = (IonText) o;
         return ionValue.stringValue();

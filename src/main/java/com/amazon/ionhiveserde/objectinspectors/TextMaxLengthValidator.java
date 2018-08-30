@@ -15,18 +15,21 @@
 package com.amazon.ionhiveserde.objectinspectors;
 
 /**
- * Validates a {@link String} length, throwing if the string is longer than expected
+ * Validates a {@link String} length, throwing if the string is longer than expected.
  */
 // FIXME: name
 class TextMaxLengthValidator {
 
     /**
+     * Validates and returns the string.
+     *
      * @return the string s if it does not exceed the max length
      * @throws IllegalArgumentException if the string is longer than max length
      */
     String validate(final String s, int maxLength) {
         if (s.length() > maxLength) {
-            throw new IllegalArgumentException("text is longer than allowed. Size: " + s.length() + ", max: " + maxLength);
+            throw new IllegalArgumentException(
+                "text is longer than allowed. Size: " + s.length() + ", max: " + maxLength);
         }
 
         return s;

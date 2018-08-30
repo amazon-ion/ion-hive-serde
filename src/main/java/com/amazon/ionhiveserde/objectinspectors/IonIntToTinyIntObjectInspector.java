@@ -14,6 +14,8 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import org.apache.hadoop.hive.serde2.io.ByteWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.ByteObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
@@ -21,12 +23,11 @@ import software.amazon.ion.IntegerSize;
 import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-
 /**
- * Adapts an {@link IonInt} for the tinyint Hive type
+ * Adapts an {@link IonInt} for the tinyint Hive type.
  */
-public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements ByteObjectInspector {
+public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+    ByteObjectInspector {
 
     private static int MIN_VALUE = -128;
     private static int MAX_VALUE = 127;
@@ -40,7 +41,9 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
      */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         IonInt ionValue = (IonInt) o;
         validateSize(ionValue);
@@ -51,7 +54,8 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
         boolean correctIntSize = ionValue.getIntegerSize() == IntegerSize.INT;
 
         if (!correctIntSize || !validRange(ionValue)) {
-            throw new IllegalArgumentException("insufficient precision for " + ionValue.toString() + " as " + this.typeInfo.getTypeName());
+            throw new IllegalArgumentException(
+                "insufficient precision for " + ionValue.toString() + " as " + this.typeInfo.getTypeName());
         }
     }
 
@@ -74,7 +78,9 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
      */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         IonInt ionValue = (IonInt) o;
         validateSize(ionValue);

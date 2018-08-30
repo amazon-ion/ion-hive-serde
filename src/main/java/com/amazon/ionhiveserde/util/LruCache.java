@@ -19,14 +19,14 @@ import java.util.Map;
 
 /**
  * <p>
- * An in memory <a href="https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)">Least recently used (LRU)</a> Cache
- * implementation
+ * An in memory <a href="https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)">Least
+ * recently used (LRU)</a> Cache implementation.
  * </p>
  *
  * @param <K> Key type
  * @param <V> Value Type
  */
-public class LRUCache<K, V> extends LinkedHashMap<K, V> {
+public class LruCache<K, V> extends LinkedHashMap<K, V> {
 
     // from java.util.HashMap
     private static final float DEFAULT_LOAD_FACTOR = 0.75f;
@@ -35,36 +35,33 @@ public class LRUCache<K, V> extends LinkedHashMap<K, V> {
     private final int maxEntries;
 
     /**
-     * Constructs an empty <tt>LRUCache</tt> instance with the
-     * specified initial capacity and max entries.
+     * Constructs an empty <tt>LruCache</tt> instance with the specified initial capacity and max entries.
      *
      * @param initialCapacity initial cache capacity, will grow to maxEntries
-     * @param maxEntries      maximum number of entries
+     * @param maxEntries maximum number of entries
      */
-    public LRUCache(int initialCapacity, int maxEntries) {
+    public LruCache(int initialCapacity, int maxEntries) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR, maxEntries);
     }
 
     /**
-     * Constructs an empty <tt>LRUCache</tt> instance with the
-     * specified initial capacity, load factor and max entries.
+     * Constructs an empty <tt>LruCache</tt> instance with the specified initial capacity, load factor and max entries.
      *
      * @param initialCapacity initial cache capacity, will grow to maxEntries
-     * @param loadFactor      backing hash table load factor
-     * @param maxEntries      maximum number of entries
+     * @param loadFactor backing hash table load factor
+     * @param maxEntries maximum number of entries
      */
-    public LRUCache(int initialCapacity, float loadFactor, int maxEntries) {
+    public LruCache(int initialCapacity, float loadFactor, int maxEntries) {
         super(initialCapacity, loadFactor, true); // true to use accessOrder as the ordering mode
         this.maxEntries = maxEntries;
     }
 
     /**
-     * Constructs an empty <tt>LRUCache</tt> instance with the
-     * specified max entries.
+     * Constructs an empty <tt>LruCache</tt> instance with the specified max entries.
      *
      * @param maxEntries maximum number of entries
      */
-    public LRUCache(int maxEntries) {
+    public LruCache(int maxEntries) {
         this(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR, maxEntries);
     }
 

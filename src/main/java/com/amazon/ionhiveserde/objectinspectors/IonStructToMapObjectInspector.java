@@ -14,17 +14,16 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static org.apache.hadoop.hive.serde.serdeConstants.MAP_TYPE_NAME;
+
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.hadoop.hive.serde2.objectinspector.MapObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import software.amazon.ion.IonStruct;
 import software.amazon.ion.IonSymbol;
 import software.amazon.ion.IonValue;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.apache.hadoop.hive.serde.serdeConstants.MAP_TYPE_NAME;
 
 /**
  * Adapts an {@link IonStruct} for the map<> Hive type.
@@ -50,8 +49,12 @@ public class IonStructToMapObjectInspector implements MapObjectInspector {
 
     @Override
     public Object getMapValueElement(final Object data, final Object key) {
-        if (IonUtil.isIonNull((IonValue) data)) return null;
-        if (key == null) throw new IllegalArgumentException("key cannot be null");
+        if (IonUtil.isIonNull((IonValue) data)) {
+            return null;
+        }
+        if (key == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
 
         final IonStruct struct = (IonStruct) data;
         final IonSymbol symbol = (IonSymbol) key;
@@ -61,7 +64,9 @@ public class IonStructToMapObjectInspector implements MapObjectInspector {
 
     @Override
     public Map<?, ?> getMap(final Object data) {
-        if (IonUtil.isIonNull((IonValue) data)) return null;
+        if (IonUtil.isIonNull((IonValue) data)) {
+            return null;
+        }
 
         final IonStruct struct = (IonStruct) data;
 
@@ -75,7 +80,9 @@ public class IonStructToMapObjectInspector implements MapObjectInspector {
 
     @Override
     public int getMapSize(final Object data) {
-        if (IonUtil.isIonNull((IonValue) data)) return -1;
+        if (IonUtil.isIonNull((IonValue) data)) {
+            return -1;
+        }
 
         final IonStruct struct = (IonStruct) data;
 

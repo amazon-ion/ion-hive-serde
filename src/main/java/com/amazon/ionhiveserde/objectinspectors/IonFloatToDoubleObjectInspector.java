@@ -14,18 +14,19 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.DoubleObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.DoubleWritable;
 import software.amazon.ion.IonFloat;
 import software.amazon.ion.IonValue;
 
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-
 /**
- * Adapts an {@link IonFloat} for the double Hive type
+ * Adapts an {@link IonFloat} for the double Hive type.
  */
-public class IonFloatToDoubleObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements DoubleObjectInspector {
+public class IonFloatToDoubleObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+    DoubleObjectInspector {
 
     public IonFloatToDoubleObjectInspector() {
         super(TypeInfoFactory.doubleTypeInfo);
@@ -36,7 +37,9 @@ public class IonFloatToDoubleObjectInspector extends AbstractIonPrimitiveJavaObj
      */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         IonFloat ionValue = (IonFloat) o;
         return new DoubleWritable(ionValue.doubleValue());
@@ -55,7 +58,9 @@ public class IonFloatToDoubleObjectInspector extends AbstractIonPrimitiveJavaObj
      */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         IonFloat ionValue = (IonFloat) o;
         return ionValue.doubleValue();

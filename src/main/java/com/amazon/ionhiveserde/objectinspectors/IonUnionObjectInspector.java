@@ -14,6 +14,9 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
+import java.util.List;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
@@ -21,10 +24,6 @@ import org.apache.hadoop.hive.serde2.objectinspector.UnionObjectInspector;
 import software.amazon.ion.IonSequence;
 import software.amazon.ion.IonStruct;
 import software.amazon.ion.IonValue;
-
-import java.util.List;
-
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
 
 /**
  * Union type object inspector. Delegates to the specific type object inspector
@@ -51,7 +50,9 @@ public class IonUnionObjectInspector implements UnionObjectInspector {
     @Override
     public byte getTag(final Object o) {
         // when null assumes it's the first type of the union type
-        if (isIonNull((IonValue) o)) return 0;
+        if (isIonNull((IonValue) o)) {
+            return 0;
+        }
 
         for (byte i = 0; i < objectInspectors.size(); i++) {
             final ObjectInspector objectInspector = objectInspectors.get(i);
@@ -73,10 +74,9 @@ public class IonUnionObjectInspector implements UnionObjectInspector {
                     return i;
 
                 case PRIMITIVE: {
-                    final PrimitiveObjectInspector primitiveObjectInspector = (PrimitiveObjectInspector) objectInspector;
                     try {
                         // try to parse it, return if able to
-                        primitiveObjectInspector.getPrimitiveJavaObject(o);
+                        ((PrimitiveObjectInspector) objectInspector).getPrimitiveJavaObject(o);
                         return i;
                     } catch (Exception ex) {
                         continue;
@@ -84,11 +84,14 @@ public class IonUnionObjectInspector implements UnionObjectInspector {
                 }
 
                 default:
-                    throw new IllegalStateException("Object Inspector " + objectInspector.toString() + " Not supported for object " + o.toString());
+                    throw new IllegalStateException(
+                        "Object Inspector " + objectInspector.toString() + " Not supported for object " + o.toString());
             }
         }
 
-        throw new IllegalStateException("No suitable Object Inspector found for object  " + o.toString() + " of class " + o.getClass().getCanonicalName());
+        throw new IllegalStateException(
+            "No suitable Object Inspector found for object  " + o.toString() + " of class " + o.getClass()
+                .getCanonicalName());
     }
 
     /**
@@ -96,7 +99,9 @@ public class IonUnionObjectInspector implements UnionObjectInspector {
      */
     @Override
     public Object getField(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return o;
     }

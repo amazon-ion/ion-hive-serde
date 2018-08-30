@@ -14,6 +14,8 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import org.apache.hadoop.hive.common.type.HiveVarchar;
 import org.apache.hadoop.hive.serde2.io.HiveVarcharWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.HiveVarcharObjectInspector;
@@ -21,12 +23,12 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import software.amazon.ion.IonText;
 import software.amazon.ion.IonValue;
 
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-
 /**
- * Adapts an {@link IonText} for the varchar Hive type
+ * Adapts an {@link IonText} for the varchar Hive type.
  */
-public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements HiveVarcharObjectInspector {
+public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+    HiveVarcharObjectInspector {
+
     private static final int DEFAULT_LENGTH = HiveVarchar.MAX_VARCHAR_LENGTH;
 
     private final int length;
@@ -36,6 +38,11 @@ public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObj
         this(DEFAULT_LENGTH);
     }
 
+    /**
+     * Creates an IonText to varchar with a maximum length.
+     *
+     * @param length max length
+     */
     public IonTextToVarcharObjectInspector(final int length) {
         super(TypeInfoFactory.getVarcharTypeInfo(length));
 
@@ -47,7 +54,9 @@ public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObj
      */
     @Override
     public HiveVarcharWritable getPrimitiveWritableObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         IonText ionValue = (IonText) o;
         String text = ionValue.stringValue();
@@ -61,7 +70,9 @@ public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObj
      */
     @Override
     public HiveVarchar getPrimitiveJavaObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         IonText ionValue = (IonText) o;
         String text = ionValue.stringValue();

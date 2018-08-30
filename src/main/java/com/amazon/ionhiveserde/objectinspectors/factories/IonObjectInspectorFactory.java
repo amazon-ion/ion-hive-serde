@@ -32,7 +32,9 @@ import com.amazon.ionhiveserde.objectinspectors.IonTextToVarcharObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonTimestampToDateObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonTimestampToTimestampObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonUnionObjectInspector;
-import com.amazon.ionhiveserde.util.LRUCache;
+import com.amazon.ionhiveserde.util.LruCache;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.CharTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.ListTypeInfo;
@@ -43,19 +45,16 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.UnionTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.VarcharTypeInfo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Factory to create Ion object inspectors. Caches object inspectors based on {@link TypeInfo}
+ * Factory to create Ion object inspectors. Caches object inspectors based on {@link TypeInfo}.
  */
 public class IonObjectInspectorFactory {
 
     // FIXME figure out a default
-    private static LRUCache<TypeInfo, ObjectInspector> CACHE = new LRUCache<>(50);
+    private static LruCache<TypeInfo, ObjectInspector> CACHE = new LruCache<>(50);
 
     /**
-     * Provides a potentially cached ObjectInspector for the respective typeInfo
+     * Provides a potentially cached ObjectInspector for the respective typeInfo.
      */
     public static ObjectInspector objectInspectorFor(final TypeInfo typeInfo) {
         if (CACHE.containsKey(typeInfo)) {
@@ -140,20 +139,23 @@ public class IonObjectInspectorFactory {
                 final MapTypeInfo mapTypeInfo = (MapTypeInfo) typeInfo;
 
                 // FIXME validate key must be string
-                final ObjectInspector valueObjectInspector = IonObjectInspectorFactory.objectInspectorFor(mapTypeInfo.getMapValueTypeInfo());
+                final ObjectInspector valueObjectInspector = IonObjectInspectorFactory
+                    .objectInspectorFor(mapTypeInfo.getMapValueTypeInfo());
 
                 objectInspector = new IonStructToMapObjectInspector(valueObjectInspector);
                 break;
 
             case LIST:
                 final ListTypeInfo listTypeInfo = (ListTypeInfo) typeInfo;
-                final ObjectInspector elementObjectInspector = IonObjectInspectorFactory.objectInspectorFor(listTypeInfo.getListElementTypeInfo());
+                final ObjectInspector elementObjectInspector = IonObjectInspectorFactory
+                    .objectInspectorFor(listTypeInfo.getListElementTypeInfo());
                 objectInspector = new IonSequenceToListObjectInspector(elementObjectInspector);
                 break;
 
             case UNION:
                 final UnionTypeInfo unionTypeInfo = (UnionTypeInfo) typeInfo;
-                final List<ObjectInspector> objectInspectors = new ArrayList<>(unionTypeInfo.getAllUnionObjectTypeInfos().size());
+                final List<ObjectInspector> objectInspectors = new ArrayList<>(
+                    unionTypeInfo.getAllUnionObjectTypeInfos().size());
                 for (TypeInfo type : unionTypeInfo.getAllUnionObjectTypeInfos()) {
                     objectInspectors.add(IonObjectInspectorFactory.objectInspectorFor(type));
                 }
