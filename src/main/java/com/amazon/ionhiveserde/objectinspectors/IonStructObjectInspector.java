@@ -54,16 +54,25 @@ public class IonStructObjectInspector extends StructObjectInspector {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<? extends StructField> getAllStructFieldRefs() {
         return fields;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public StructField getStructFieldRef(String fieldName) {
         return fieldsByName.get(fieldName);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getStructFieldData(Object data, StructField fieldRef) {
         IonStruct struct = (IonStruct) data;
@@ -71,6 +80,9 @@ public class IonStructObjectInspector extends StructObjectInspector {
         return struct.get(fieldRef.getFieldName());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Object> getStructFieldsDataAsList(Object data) {
         if (data == null) {
@@ -87,11 +99,17 @@ public class IonStructObjectInspector extends StructObjectInspector {
         return list;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getTypeName() {
         return ObjectInspectorUtils.getStandardStructTypeName(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Category getCategory() {
         return Category.STRUCT;
@@ -111,21 +129,33 @@ public class IonStructObjectInspector extends StructObjectInspector {
             this.fieldComment = fieldComment;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public String getFieldName() {
             return fieldName;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public ObjectInspector getFieldObjectInspector() {
             return fieldObjectInspector;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public int getFieldID() {
             return fieldID;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public String getFieldComment() {
             return fieldComment;

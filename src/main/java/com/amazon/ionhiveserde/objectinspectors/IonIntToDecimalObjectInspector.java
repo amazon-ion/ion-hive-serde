@@ -21,11 +21,17 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
+/**
+ * Adapts an {@link IonInt} for the decimal Hive type
+ */
 public class IonIntToDecimalObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements HiveDecimalObjectInspector {
     IonIntToDecimalObjectInspector() {
         super(TypeInfoFactory.shortTypeInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HiveDecimalWritable getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -34,6 +40,9 @@ public class IonIntToDecimalObjectInspector extends AbstractIonPrimitiveJavaObje
         return new HiveDecimalWritable(HiveDecimal.create(ionValue.bigIntegerValue()));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HiveDecimal getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;

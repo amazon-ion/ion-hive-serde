@@ -25,10 +25,13 @@ import software.amazon.ion.IonValue;
  */
 public class IonLobToBinaryObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements BinaryObjectInspector {
 
-    IonLobToBinaryObjectInspector() {
+    public IonLobToBinaryObjectInspector() {
         super(TypeInfoFactory.binaryTypeInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BytesWritable getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -37,6 +40,9 @@ public class IonLobToBinaryObjectInspector extends AbstractIonPrimitiveJavaObjec
         return new BytesWritable(ionValue.getBytes());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte[] getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;

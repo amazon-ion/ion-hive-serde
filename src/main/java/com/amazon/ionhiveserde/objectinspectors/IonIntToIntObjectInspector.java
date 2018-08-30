@@ -29,6 +29,9 @@ public class IonIntToIntObjectInspector extends AbstractIonPrimitiveJavaObjectIn
         super(TypeInfoFactory.intTypeInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -44,11 +47,17 @@ public class IonIntToIntObjectInspector extends AbstractIonPrimitiveJavaObjectIn
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int get(Object o) {
         return (int) getPrimitiveJavaObject(o);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;

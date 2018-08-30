@@ -30,6 +30,9 @@ public class IonDecimalToDecimalObjectInspector extends AbstractIonPrimitiveJava
         super(TypeInfoFactory.decimalTypeInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HiveDecimalWritable getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -38,6 +41,9 @@ public class IonDecimalToDecimalObjectInspector extends AbstractIonPrimitiveJava
         return new HiveDecimalWritable(HiveDecimal.create(ionValue.bigDecimalValue()));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HiveDecimal getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;

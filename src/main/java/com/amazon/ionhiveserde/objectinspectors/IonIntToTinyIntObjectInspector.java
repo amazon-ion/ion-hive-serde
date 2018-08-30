@@ -29,10 +29,13 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
     private static int MIN_VALUE = -128;
     private static int MAX_VALUE = 127;
 
-    IonIntToTinyIntObjectInspector() {
+    public IonIntToTinyIntObjectInspector() {
         super(TypeInfoFactory.byteTypeInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -56,11 +59,17 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
         return MIN_VALUE <= intValue && intValue <= MAX_VALUE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte get(Object o) {
         return (byte) getPrimitiveJavaObject(o);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;

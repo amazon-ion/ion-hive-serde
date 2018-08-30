@@ -47,12 +47,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-/*
-TODO
-Move null handling to abstract class
-add OI interfaces
-*/
-
 /**
  * <p>
  * Hive SerDe for the <a href="http://amzn.github.io/ion-docs/docs.html">Amazon Ion</a> data format
@@ -71,6 +65,9 @@ public class IonHiveSerDe extends AbstractSerDe {
 
     private SerDeStats stats;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void initialize(final @Nullable Configuration conf, final Properties tbl) throws SerDeException {
 
@@ -84,11 +81,17 @@ public class IonHiveSerDe extends AbstractSerDe {
         serializedClass = Text.class; // TODO pick from config
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Class<? extends Writable> getSerializedClass() {
         return serializedClass;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Writable serialize(Object obj, ObjectInspector objectInspector) throws SerDeException {
         final StringBuilder out = new StringBuilder();
@@ -139,14 +142,19 @@ public class IonHiveSerDe extends AbstractSerDe {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public SerDeStats getSerDeStats() {
         return stats;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object deserialize(Writable blob) throws SerDeException {
-        // TODO make a wrapper over IonValue to be able to make it lazy with a reader.
         IonValue value;
 
         if (blob instanceof Text) {
@@ -165,6 +173,9 @@ public class IonHiveSerDe extends AbstractSerDe {
         return value;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ObjectInspector getObjectInspector() throws SerDeException {
         return objectInspector;

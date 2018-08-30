@@ -21,12 +21,18 @@ import software.amazon.ion.IntegerSize;
 import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
+/**
+ * Adapts an {@link IonInt} for the bigint Hive type
+ */
 public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements LongObjectInspector {
 
-    IonIntToBigIntObjectInspector() {
+    public IonIntToBigIntObjectInspector() {
         super(TypeInfoFactory.longTypeInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -42,11 +48,17 @@ public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjec
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long get(Object o) {
         return (long) getPrimitiveJavaObject(o);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;

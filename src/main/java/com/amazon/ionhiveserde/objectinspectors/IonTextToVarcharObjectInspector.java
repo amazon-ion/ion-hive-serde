@@ -30,16 +30,19 @@ public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObj
     private final int length;
     private final TextMaxLengthValidator validator = new TextMaxLengthValidator();
 
-    IonTextToVarcharObjectInspector() {
+    public IonTextToVarcharObjectInspector() {
         this(DEFAULT_LENGTH);
     }
 
-    IonTextToVarcharObjectInspector(final int length) {
+    public IonTextToVarcharObjectInspector(final int length) {
         super(TypeInfoFactory.getVarcharTypeInfo(length));
 
         this.length = length;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HiveVarcharWritable getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -51,6 +54,9 @@ public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObj
         return new HiveVarcharWritable(hiveVarchar);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HiveVarchar getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;

@@ -27,10 +27,13 @@ import java.sql.Timestamp;
  */
 public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements TimestampObjectInspector {
 
-    IonTimestampToTimestampObjectInspector() {
+    public IonTimestampToTimestampObjectInspector() {
         super(TypeInfoFactory.timestampTypeInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public TimestampWritable getPrimitiveWritableObject(Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -39,6 +42,9 @@ public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitive
         return new TimestampWritable(new Timestamp(ionValue.getMillis()));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Timestamp getPrimitiveJavaObject(Object o) {
         if (isIonNull((IonValue) o)) return null;

@@ -31,16 +31,19 @@ public class IonTextToCharObjectInspector extends AbstractIonPrimitiveJavaObject
     private final int length;
     private final TextMaxLengthValidator validator = new TextMaxLengthValidator();
 
-    IonTextToCharObjectInspector() {
+    public IonTextToCharObjectInspector() {
         this(DEFAULT_LENGTH);
     }
 
-    IonTextToCharObjectInspector(final int length) {
+    public IonTextToCharObjectInspector(final int length) {
         super(TypeInfoFactory.getCharTypeInfo(length));
 
         this.length = length;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HiveCharWritable getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -53,6 +56,9 @@ public class IonTextToCharObjectInspector extends AbstractIonPrimitiveJavaObject
         return new HiveCharWritable(hiveVarchar);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HiveChar getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;

@@ -22,7 +22,7 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.VarcharTypeInfo;
 
 /**
- * Factory to create Ion object inspectors. Caches to reuse instances based on {@link TypeInfo}
+ * Factory to create Ion object inspectors. Caches object inspectors based on {@link TypeInfo}
  */
 public class IonObjectInspectorFactory {
 

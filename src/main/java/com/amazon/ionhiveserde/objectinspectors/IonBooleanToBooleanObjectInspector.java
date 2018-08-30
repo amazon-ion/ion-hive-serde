@@ -29,6 +29,9 @@ public class IonBooleanToBooleanObjectInspector extends AbstractIonPrimitiveJava
         super(TypeInfoFactory.booleanTypeInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -37,11 +40,17 @@ public class IonBooleanToBooleanObjectInspector extends AbstractIonPrimitiveJava
         return new BooleanWritable(ionValue.booleanValue());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean get(Object o) {
         return (boolean) getPrimitiveJavaObject(o);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;

@@ -21,15 +21,21 @@ import software.amazon.ion.IntegerSize;
 import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
+/**
+ * Adapts an {@link IonInt} for the smallint Hive type
+ */
 public class IonIntToSmallIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements ShortObjectInspector {
 
     private static int MIN_VALUE = Short.MIN_VALUE;
     private static int MAX_VALUE = Short.MAX_VALUE;
 
-    IonIntToSmallIntObjectInspector() {
+    public IonIntToSmallIntObjectInspector() {
         super(TypeInfoFactory.shortTypeInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -53,11 +59,17 @@ public class IonIntToSmallIntObjectInspector extends AbstractIonPrimitiveJavaObj
         return MIN_VALUE <= intValue && intValue <= MAX_VALUE;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public short get(Object o) {
         return (short) getPrimitiveJavaObject(o);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;

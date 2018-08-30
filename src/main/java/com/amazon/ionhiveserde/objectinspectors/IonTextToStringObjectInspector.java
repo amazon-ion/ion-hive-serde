@@ -25,7 +25,7 @@ import software.amazon.ion.IonValue;
  */
 public class IonTextToStringObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements StringObjectInspector {
 
-    IonTextToStringObjectInspector() {
+    public IonTextToStringObjectInspector() {
         super(TypeInfoFactory.stringTypeInfo);
     }
 

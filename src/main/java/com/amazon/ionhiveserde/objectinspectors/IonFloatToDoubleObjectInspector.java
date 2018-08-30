@@ -21,14 +21,17 @@ import software.amazon.ion.IonFloat;
 import software.amazon.ion.IonValue;
 
 /**
- * Adapts an {@link IonFloat} into a domain that Hives understands
+ * Adapts an {@link IonFloat} for the double Hive type
  */
 public class IonFloatToDoubleObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements DoubleObjectInspector {
 
-    IonFloatToDoubleObjectInspector() {
+    public IonFloatToDoubleObjectInspector() {
         super(TypeInfoFactory.doubleTypeInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -37,11 +40,17 @@ public class IonFloatToDoubleObjectInspector extends AbstractIonPrimitiveJavaObj
         return new DoubleWritable(ionValue.doubleValue());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double get(Object o) {
         return (double) getPrimitiveJavaObject(o);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;

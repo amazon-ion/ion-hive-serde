@@ -21,14 +21,17 @@ import software.amazon.ion.IonFloat;
 import software.amazon.ion.IonValue;
 
 /**
- * TODO jdoc
+ * Adapts an {@link IonFloat} for the float Hive type
  */
 public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements FloatObjectInspector {
 
-    IonFloatToFloatObjectInspector() {
+    public IonFloatToFloatObjectInspector() {
         super(TypeInfoFactory.floatTypeInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
@@ -47,11 +50,17 @@ public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObje
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public float get(Object o) {
         return (float) getPrimitiveJavaObject(o);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
