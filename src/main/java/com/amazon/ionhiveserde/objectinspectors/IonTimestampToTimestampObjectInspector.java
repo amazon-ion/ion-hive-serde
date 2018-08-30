@@ -14,20 +14,20 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
+import java.sql.Timestamp;
 import org.apache.hadoop.hive.serde2.io.TimestampWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.TimestampObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import software.amazon.ion.IonTimestamp;
 import software.amazon.ion.IonValue;
 
-import java.sql.Timestamp;
-
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-
 /**
- * Adapts an {@link IonTimestamp} for the timestamp Hive type
+ * Adapts an {@link IonTimestamp} for the timestamp Hive type.
  */
-public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements TimestampObjectInspector {
+public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+    TimestampObjectInspector {
 
     public IonTimestampToTimestampObjectInspector() {
         super(TypeInfoFactory.timestampTypeInfo);
@@ -37,8 +37,10 @@ public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitive
      * {@inheritDoc}
      */
     @Override
-    public TimestampWritable getPrimitiveWritableObject(Object o) {
-        if (isIonNull((IonValue) o)) return null;
+    public TimestampWritable getPrimitiveWritableObject(final Object o) {
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return new TimestampWritable(getPrimitiveJavaObject((IonTimestamp) o));
     }
@@ -47,8 +49,10 @@ public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitive
      * {@inheritDoc}
      */
     @Override
-    public Timestamp getPrimitiveJavaObject(Object o) {
-        if (isIonNull((IonValue) o)) return null;
+    public Timestamp getPrimitiveJavaObject(final Object o) {
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return getPrimitiveJavaObject((IonTimestamp) o);
     }

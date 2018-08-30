@@ -16,20 +16,17 @@ package com.amazon.ionhiveserde.objectinspectors;
 
 import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
 
-import com.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
-import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import software.amazon.ion.IonStruct;
 import software.amazon.ion.IonValue;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Adapts an {@link IonStruct} for the struct Hive type.
@@ -40,12 +37,13 @@ public class IonStructToStructInspector extends StructObjectInspector {
     private final List<IonStructField> fields;
 
     /**
-     * Creates a Ion struct to Hive struct object inspector
+     * Creates a Ion struct to Hive struct object inspector.
      *
      * @param structTypeInfo TypeInfo for all fields
      * @param fieldObjectInspectors list of field ObjectInspectors in order
      */
-    public IonStructToStructInspector(final StructTypeInfo structTypeInfo, final List<ObjectInspector> fieldObjectInspectors) {
+    public IonStructToStructInspector(final StructTypeInfo structTypeInfo,
+        final List<ObjectInspector> fieldObjectInspectors) {
         fieldsByName = new HashMap<>();
         fields = new ArrayList<>();
 
@@ -73,7 +71,9 @@ public class IonStructToStructInspector extends StructObjectInspector {
      */
     @Override
     public StructField getStructFieldRef(final String fieldName) {
-        if (fieldName == null) throw new IllegalArgumentException("field name cannot be null");
+        if (fieldName == null) {
+            throw new IllegalArgumentException("field name cannot be null");
+        }
 
         return fieldsByName.get(fieldName);
     }
@@ -83,8 +83,12 @@ public class IonStructToStructInspector extends StructObjectInspector {
      */
     @Override
     public Object getStructFieldData(final Object data, final StructField fieldRef) {
-        if (isIonNull((IonValue) data)) return null;
-        if (fieldRef == null) throw new IllegalArgumentException("fieldRef name cannot be null");
+        if (isIonNull((IonValue) data)) {
+            return null;
+        }
+        if (fieldRef == null) {
+            throw new IllegalArgumentException("fieldRef name cannot be null");
+        }
 
         final IonStruct struct = (IonStruct) data;
 
@@ -96,7 +100,9 @@ public class IonStructToStructInspector extends StructObjectInspector {
      */
     @Override
     public List<Object> getStructFieldsDataAsList(final Object data) {
-        if (isIonNull((IonValue) data)) return null;
+        if (isIonNull((IonValue) data)) {
+            return null;
+        }
 
         final IonStruct struct = (IonStruct) data;
 
@@ -129,12 +135,12 @@ public class IonStructToStructInspector extends StructObjectInspector {
         private static final String FIELD_COMMENT = "";
         private final String fieldName;
         private final ObjectInspector fieldObjectInspector;
-        private final int fieldID;
+        private final int fieldId;
 
-        IonStructField(final String fieldName, final ObjectInspector fieldObjectInspector, int fieldID) {
+        IonStructField(final String fieldName, final ObjectInspector fieldObjectInspector, final int fieldId) {
             this.fieldName = fieldName;
             this.fieldObjectInspector = fieldObjectInspector;
-            this.fieldID = fieldID;
+            this.fieldId = fieldId;
         }
 
         /**
@@ -158,7 +164,7 @@ public class IonStructToStructInspector extends StructObjectInspector {
          */
         @Override
         public int getFieldID() {
-            return fieldID;
+            return fieldId;
         }
 
         /**

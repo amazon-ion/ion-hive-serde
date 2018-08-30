@@ -14,6 +14,8 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import org.apache.hadoop.hive.serde2.io.ByteWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.ByteObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
@@ -21,15 +23,14 @@ import software.amazon.ion.IntegerSize;
 import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-
 /**
- * Adapts an {@link IonInt} for the tinyint Hive type
+ * Adapts an {@link IonInt} for the tinyint Hive type.
  */
-public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements ByteObjectInspector {
+public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+    ByteObjectInspector {
 
-    private final static int MIN_VALUE = -128;
-    private final static int MAX_VALUE = 127;
+    private static final int MIN_VALUE = -128;
+    private static final int MAX_VALUE = 127;
 
     public IonIntToTinyIntObjectInspector() {
         super(TypeInfoFactory.byteTypeInfo);
@@ -40,7 +41,9 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
      */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return new ByteWritable(getPrimitiveJavaObject((IonInt) o));
     }
@@ -49,11 +52,12 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
         boolean correctIntSize = ionValue.getIntegerSize() == IntegerSize.INT;
 
         if (!correctIntSize || !validRange(ionValue)) {
-            throw new IllegalArgumentException("insufficient precision for " + ionValue.toString() + " as " + this.typeInfo.getTypeName());
+            throw new IllegalArgumentException(
+                "insufficient precision for " + ionValue.toString() + " as " + this.typeInfo.getTypeName());
         }
     }
 
-    private boolean validRange(IonInt ionValue) {
+    private boolean validRange(final IonInt ionValue) {
         // runs after checking that fits in a Java int
         int intValue = ionValue.intValue();
         return MIN_VALUE <= intValue && intValue <= MAX_VALUE;
@@ -63,7 +67,7 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
      * {@inheritDoc}
      */
     @Override
-    public byte get(Object o) {
+    public byte get(final Object o) {
         return (byte) getPrimitiveJavaObject(o);
     }
 
@@ -72,7 +76,9 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
      */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return getPrimitiveJavaObject((IonInt) o);
     }

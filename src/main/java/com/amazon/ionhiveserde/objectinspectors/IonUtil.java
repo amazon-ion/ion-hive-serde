@@ -17,9 +17,10 @@ package com.amazon.ionhiveserde.objectinspectors;
 import software.amazon.ion.IonValue;
 
 /**
- * Utility methods for Ion values
+ * Utility methods for Ion values.
  */
 public class IonUtil {
+
     static boolean isIonNull(final IonValue ionValue) {
         return ionValue == null || ionValue.isNullValue();
     }

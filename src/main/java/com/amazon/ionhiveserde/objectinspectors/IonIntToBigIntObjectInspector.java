@@ -14,6 +14,8 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.LongObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.LongWritable;
@@ -21,12 +23,11 @@ import software.amazon.ion.IntegerSize;
 import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-
 /**
- * Adapts an {@link IonInt} for the bigint Hive type
+ * Adapts an {@link IonInt} for the bigint Hive type.
  */
-public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements LongObjectInspector {
+public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+    LongObjectInspector {
 
     public IonIntToBigIntObjectInspector() {
         super(TypeInfoFactory.longTypeInfo);
@@ -37,7 +38,9 @@ public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjec
      */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         IonInt ionValue = (IonInt) o;
         validateSize(ionValue);
@@ -46,7 +49,8 @@ public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjec
 
     private void validateSize(final IonInt ionValue) {
         if (ionValue.getIntegerSize() == IntegerSize.BIG_INTEGER) {
-            throw new IllegalArgumentException("insufficient precision for " + ionValue.toString() + " as " + this.typeInfo.getTypeName());
+            throw new IllegalArgumentException(
+                "insufficient precision for " + ionValue.toString() + " as " + this.typeInfo.getTypeName());
         }
     }
 
@@ -54,7 +58,7 @@ public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjec
      * {@inheritDoc}
      */
     @Override
-    public long get(Object o) {
+    public long get(final Object o) {
         return (long) getPrimitiveJavaObject(o);
     }
 
@@ -63,7 +67,9 @@ public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjec
      */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return getPrimitiveJavaObject((IonInt) o);
     }

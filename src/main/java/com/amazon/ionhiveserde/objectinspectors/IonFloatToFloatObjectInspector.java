@@ -14,18 +14,19 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.FloatObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.FloatWritable;
 import software.amazon.ion.IonFloat;
 import software.amazon.ion.IonValue;
 
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-
 /**
- * Adapts an {@link IonFloat} for the float Hive type
+ * Adapts an {@link IonFloat} for the float Hive type.
  */
-public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements FloatObjectInspector {
+public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+    FloatObjectInspector {
 
     public IonFloatToFloatObjectInspector() {
         super(TypeInfoFactory.floatTypeInfo);
@@ -36,7 +37,9 @@ public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObje
      */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return new FloatWritable(getPrimitiveJavaObject((IonFloat) o));
     }
@@ -46,7 +49,8 @@ public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObje
         final double d = ionFloat.doubleValue();
 
         if (Double.compare(f, d) != 0) {
-            throw new IllegalArgumentException("insufficient precision for " + ionFloat.toString() + " as " + this.typeInfo.getTypeName());
+            throw new IllegalArgumentException(
+                "insufficient precision for " + ionFloat.toString() + " as " + this.typeInfo.getTypeName());
         }
     }
 
@@ -54,7 +58,7 @@ public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObje
      * {@inheritDoc}
      */
     @Override
-    public float get(Object o) {
+    public float get(final Object o) {
         return (float) getPrimitiveJavaObject(o);
     }
 
@@ -63,7 +67,9 @@ public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObje
      */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return getPrimitiveJavaObject((IonFloat) o);
     }

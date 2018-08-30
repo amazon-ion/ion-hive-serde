@@ -14,8 +14,13 @@
 
 package com.amazon.ionhiveserde;
 
-import com.amazon.ionhiveserde.objectinspectors.IonStructToStructInspector;
 import com.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import javax.annotation.Nullable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.hive.serde2.AbstractSerDe;
@@ -33,26 +38,18 @@ import org.apache.hadoop.io.ByteWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import software.amazon.ion.IonDatagram;
-import software.amazon.ion.IonReader;
 import software.amazon.ion.IonSystem;
 import software.amazon.ion.IonType;
 import software.amazon.ion.IonValue;
 import software.amazon.ion.IonWriter;
 import software.amazon.ion.system.IonSystemBuilder;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-
 /**
  * <p>
- * Hive SerDe for the <a href="http://amzn.github.io/ion-docs/docs.html">Amazon Ion</a> data format
+ * Hive SerDe for the <a href="http://amzn.github.io/ion-docs/docs.html">Amazon Ion</a> data format.
  * </p>
  * <p>
- * For more information on Hive SerDes see <a href="https://cwiki.apache.org/confluence/display/Hive/SerDe">wiki</a>
+ * For more information on Hive SerDes see <a href="https://cwiki.apache.org/confluence/display/Hive/SerDe">wiki</a>.
  * </p>
  */
 public class IonHiveSerDe extends AbstractSerDe {
@@ -73,7 +70,8 @@ public class IonHiveSerDe extends AbstractSerDe {
     @SuppressWarnings("deprecation") // we are forced to override this constructor even though it's deprecated
     public void initialize(final @Nullable Configuration conf, final Properties tbl) throws SerDeException {
         stats = new SerDeStats();
-        final StructTypeInfo tableInfo = (StructTypeInfo) TypeInfoFactory.getStructTypeInfo(readColumnNames(tbl), readColumnTypes(tbl));
+        final StructTypeInfo tableInfo = (StructTypeInfo) TypeInfoFactory
+            .getStructTypeInfo(readColumnNames(tbl), readColumnTypes(tbl));
 
         ion = buildIonSystem(conf);
 
@@ -118,8 +116,12 @@ public class IonHiveSerDe extends AbstractSerDe {
         return new Text(out.toString());
     }
 
-    private void serializeFieldData(final IonWriter writer, final Object fieldData, final ObjectInspector objectInspector) throws IOException, SerDeException {
-        if (fieldData == null) return;
+    private void serializeFieldData(final IonWriter writer,
+                                    final Object fieldData,
+                                    final ObjectInspector objectInspector) throws IOException, SerDeException {
+        if (fieldData == null) {
+            return;
+        }
 
         if (objectInspector.getCategory() == ObjectInspector.Category.PRIMITIVE) {
             final PrimitiveObjectInspector primitiveObjectInspector = (PrimitiveObjectInspector) objectInspector;
@@ -157,7 +159,7 @@ public class IonHiveSerDe extends AbstractSerDe {
             final String rawText = text.toString().trim();
             final IonDatagram datagram = ion.getLoader().load(rawText);
 
-            if(datagram.size() != 1) {
+            if (datagram.size() != 1) {
                 throw new IllegalStateException("There cannot be more than one ion value");
             }
 

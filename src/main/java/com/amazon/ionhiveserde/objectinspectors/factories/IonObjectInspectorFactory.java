@@ -47,13 +47,18 @@ import org.apache.hadoop.hive.serde2.typeinfo.UnionTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.VarcharTypeInfo;
 
 /**
- * Factory to create Ion object inspectors. Caches object inspectors based on {@link TypeInfo}
+ * Factory to create Ion object inspectors. Caches object inspectors based on {@link TypeInfo}.
  */
 public class IonObjectInspectorFactory {
 
     // each SerDe instance use gets a new cache so the size is proportional to the table columns
     private final Map<TypeInfo, ObjectInspector> cache;
 
+    /**
+     * Creates a ObjectInspector factory pre caching the object inspectors for the structTypeInfo.
+     *
+     * @param structTypeInfo table type info.
+     */
     public IonObjectInspectorFactory(final StructTypeInfo structTypeInfo) {
         cache = new HashMap<>();
         for (final TypeInfo typeInfo : structTypeInfo.getAllStructFieldTypeInfos()) {
@@ -63,7 +68,7 @@ public class IonObjectInspectorFactory {
     }
 
     /**
-     * Provides a potentially cached ObjectInspector for the respective typeInfo
+     * Provides a potentially cached ObjectInspector for the respective typeInfo.
      */
     public ObjectInspector objectInspectorFor(final TypeInfo typeInfo) {
         if (cache.containsKey(typeInfo)) {
@@ -174,7 +179,8 @@ public class IonObjectInspectorFactory {
 
             case UNION:
                 final UnionTypeInfo unionTypeInfo = (UnionTypeInfo) typeInfo;
-                final List<ObjectInspector> objectInspectors = new ArrayList<>(unionTypeInfo.getAllUnionObjectTypeInfos().size());
+                final List<ObjectInspector> objectInspectors = new ArrayList<>(
+                    unionTypeInfo.getAllUnionObjectTypeInfos().size());
                 for (TypeInfo type : unionTypeInfo.getAllUnionObjectTypeInfos()) {
                     objectInspectors.add(objectInspectorFor(type));
                 }

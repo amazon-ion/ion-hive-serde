@@ -14,18 +14,19 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.BytesWritable;
 import software.amazon.ion.IonLob;
 import software.amazon.ion.IonValue;
 
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-
 /**
- * Adapts an {@link IonLob} for the binary Hive type
+ * Adapts an {@link IonLob} for the binary Hive type.
  */
-public class IonLobToBinaryObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements BinaryObjectInspector {
+public class IonLobToBinaryObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+    BinaryObjectInspector {
 
     public IonLobToBinaryObjectInspector() {
         super(TypeInfoFactory.binaryTypeInfo);
@@ -36,7 +37,9 @@ public class IonLobToBinaryObjectInspector extends AbstractIonPrimitiveJavaObjec
      */
     @Override
     public BytesWritable getPrimitiveWritableObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return new BytesWritable(getPrimitiveJavaObject((IonLob) o));
     }
@@ -46,7 +49,9 @@ public class IonLobToBinaryObjectInspector extends AbstractIonPrimitiveJavaObjec
      */
     @Override
     public byte[] getPrimitiveJavaObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return getPrimitiveJavaObject((IonLob) o);
     }

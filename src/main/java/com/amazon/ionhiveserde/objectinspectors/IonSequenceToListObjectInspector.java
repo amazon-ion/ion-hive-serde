@@ -14,15 +14,14 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+import static org.apache.hadoop.hive.serde.serdeConstants.LIST_TYPE_NAME;
+
+import java.util.List;
 import org.apache.hadoop.hive.serde2.objectinspector.ListObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import software.amazon.ion.IonSequence;
 import software.amazon.ion.IonValue;
-
-import java.util.List;
-
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-import static org.apache.hadoop.hive.serde.serdeConstants.LIST_TYPE_NAME;
 
 /**
  * Adapts an {@link IonSequence} for the array<> Hive type.
@@ -36,7 +35,7 @@ public class IonSequenceToListObjectInspector implements ListObjectInspector {
     }
 
     /**
-     * Elements object inspectors
+     * Elements object inspectors.
      */
     @Override
     public ObjectInspector getListElementObjectInspector() {
@@ -44,26 +43,34 @@ public class IonSequenceToListObjectInspector implements ListObjectInspector {
     }
 
     @Override
-    public Object getListElement(Object data, int index) {
-        if (isIonNull((IonValue) data)) return null;
+    public Object getListElement(final Object data, final int index) {
+        if (isIonNull((IonValue) data)) {
+            return null;
+        }
 
         final IonSequence sequence = (IonSequence) data;
-        if (index < 0 || sequence.size() <= index) return null;
+        if (index < 0 || sequence.size() <= index) {
+            return null;
+        }
 
         return sequence.get(index);
     }
 
     @Override
-    public int getListLength(Object data) {
-        if (isIonNull((IonValue) data)) return -1;
+    public int getListLength(final Object data) {
+        if (isIonNull((IonValue) data)) {
+            return -1;
+        }
 
         final IonSequence sequence = (IonSequence) data;
         return sequence.size();
     }
 
     @Override
-    public List<?> getList(Object data) {
-        if (isIonNull((IonValue) data)) return null;
+    public List<?> getList(final Object data) {
+        if (isIonNull((IonValue) data)) {
+            return null;
+        }
 
         return (IonSequence) data;
     }

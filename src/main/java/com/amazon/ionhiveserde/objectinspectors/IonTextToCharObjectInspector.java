@@ -14,6 +14,8 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import org.apache.hadoop.hive.common.type.HiveChar;
 import org.apache.hadoop.hive.serde2.io.HiveCharWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.HiveCharObjectInspector;
@@ -21,12 +23,11 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import software.amazon.ion.IonText;
 import software.amazon.ion.IonValue;
 
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-
 /**
- * Adapts an {@link IonText} for the char Hive type
+ * Adapts an {@link IonText} for the char Hive type.
  */
-public class IonTextToCharObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements HiveCharObjectInspector {
+public class IonTextToCharObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+    HiveCharObjectInspector {
 
     private static final int DEFAULT_LENGTH = HiveChar.MAX_CHAR_LENGTH;
 
@@ -37,6 +38,11 @@ public class IonTextToCharObjectInspector extends AbstractIonPrimitiveJavaObject
         this(DEFAULT_LENGTH);
     }
 
+    /**
+     * Creates an IonText to char with a maximum length.
+     *
+     * @param length max length
+     */
     public IonTextToCharObjectInspector(final int length) {
         super(TypeInfoFactory.getCharTypeInfo(length));
 
@@ -48,7 +54,9 @@ public class IonTextToCharObjectInspector extends AbstractIonPrimitiveJavaObject
      */
     @Override
     public HiveCharWritable getPrimitiveWritableObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return new HiveCharWritable(getPrimitiveJavaObject((IonText) o));
     }
@@ -58,7 +66,9 @@ public class IonTextToCharObjectInspector extends AbstractIonPrimitiveJavaObject
      */
     @Override
     public HiveChar getPrimitiveJavaObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return getPrimitiveJavaObject((IonText) o);
     }

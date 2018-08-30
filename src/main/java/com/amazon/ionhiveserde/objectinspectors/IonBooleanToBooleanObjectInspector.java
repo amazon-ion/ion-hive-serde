@@ -14,18 +14,19 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.BooleanObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.BooleanWritable;
 import software.amazon.ion.IonBool;
 import software.amazon.ion.IonValue;
 
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
-
 /**
- * Adapts an {@link IonBool} for the boolean Hive type
+ * Adapts an {@link IonBool} for the boolean Hive type.
  */
-public class IonBooleanToBooleanObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements BooleanObjectInspector {
+public class IonBooleanToBooleanObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+    BooleanObjectInspector {
 
     public IonBooleanToBooleanObjectInspector() {
         super(TypeInfoFactory.booleanTypeInfo);
@@ -36,7 +37,9 @@ public class IonBooleanToBooleanObjectInspector extends AbstractIonPrimitiveJava
      */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return new BooleanWritable(getPrimitiveJavaObject((IonBool) o));
     }
@@ -45,7 +48,7 @@ public class IonBooleanToBooleanObjectInspector extends AbstractIonPrimitiveJava
      * {@inheritDoc}
      */
     @Override
-    public boolean get(Object o) {
+    public boolean get(final Object o) {
         return (boolean) getPrimitiveJavaObject(o);
     }
 
@@ -54,7 +57,9 @@ public class IonBooleanToBooleanObjectInspector extends AbstractIonPrimitiveJava
      */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
-        if (isIonNull((IonValue) o)) return null;
+        if (isIonNull((IonValue) o)) {
+            return null;
+        }
 
         return getPrimitiveJavaObject((IonBool) o);
     }
