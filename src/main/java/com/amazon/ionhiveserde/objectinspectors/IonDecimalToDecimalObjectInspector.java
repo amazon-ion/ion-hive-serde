@@ -22,7 +22,7 @@ import software.amazon.ion.IonDecimal;
 import software.amazon.ion.IonValue;
 
 /**
- * Adapts an {@link IonDecimal} into a domain that Hives understands
+ * Adapts an {@link IonDecimal} for the decimal Hive type
  */
 public class IonDecimalToDecimalObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements HiveDecimalObjectInspector {
 
