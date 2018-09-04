@@ -33,6 +33,7 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 import org.apache.hadoop.io.ByteWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import software.amazon.ion.IonDatagram;
 import software.amazon.ion.IonReader;
 import software.amazon.ion.IonSystem;
 import software.amazon.ion.IonType;
@@ -134,10 +135,8 @@ public class IonHiveSerDe extends AbstractSerDe {
             case UNKNOWN:
                 throw new SerDeException("Unknown primitive");
             default:
-                IonValue ionValue = (IonValue) fieldData;
-                IonReader ionReader = ion.newReader(ionValue);
-                ionReader.next();
-                writer.writeValue(ionReader);
+                final IonValue ionValue = (IonValue) fieldData;
+                ionValue.writeTo(writer);
                 break;
         }
     }
@@ -162,8 +161,14 @@ public class IonHiveSerDe extends AbstractSerDe {
 
             stats.setRawDataSize(text.getBytes().length);
 
-            String rawText = text.toString().trim();
-            value = ion.getLoader().load(rawText).get(0);
+            final String rawText = text.toString().trim();
+            final IonDatagram datagram = ion.getLoader().load(rawText);
+
+            if(datagram.size() != 1) {
+                throw new IllegalStateException("There cannot be more than one ion value");
+            }
+
+            value = datagram.get(0);
         } else if (blob instanceof ByteWritable) {
             throw new UnsupportedOperationException("TODO not implemented");
         } else {

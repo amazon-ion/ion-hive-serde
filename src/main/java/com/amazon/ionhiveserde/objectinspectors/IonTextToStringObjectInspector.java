@@ -36,8 +36,7 @@ public class IonTextToStringObjectInspector extends AbstractIonPrimitiveJavaObje
     public String getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonText ionValue = (IonText) o;
-        return ionValue.stringValue();
+        return getPrimitiveWritableObject((IonText) o);
     }
 
     /**
@@ -47,7 +46,10 @@ public class IonTextToStringObjectInspector extends AbstractIonPrimitiveJavaObje
     public Text getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonText ionValue = (IonText) o;
-        return new Text(ionValue.stringValue());
+        return new Text(getPrimitiveWritableObject((IonText) o));
+    }
+
+    private String getPrimitiveWritableObject(final IonText ionValue) {
+        return ionValue.stringValue();
     }
 }

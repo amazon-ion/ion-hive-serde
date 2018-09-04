@@ -36,8 +36,7 @@ public class IonBooleanToBooleanObjectInspector extends AbstractIonPrimitiveJava
     public Object getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonBool ionValue = (IonBool) o;
-        return new BooleanWritable(ionValue.booleanValue());
+        return new BooleanWritable(getPrimitiveJavaObject((IonBool) o));
     }
 
     /**
@@ -55,8 +54,11 @@ public class IonBooleanToBooleanObjectInspector extends AbstractIonPrimitiveJava
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonBool ionValue = (IonBool) o;
-        return ionValue.booleanValue() ? Boolean.TRUE : Boolean.FALSE;
+        return getPrimitiveJavaObject((IonBool) o);
+    }
+
+    public boolean getPrimitiveJavaObject(final IonBool ionValue) {
+        return ionValue.booleanValue();
     }
 }
 

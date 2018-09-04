@@ -37,7 +37,7 @@ public class IonFloatToDoubleObjectInspector extends AbstractIonPrimitiveJavaObj
         if (isIonNull((IonValue) o)) return null;
 
         IonFloat ionValue = (IonFloat) o;
-        return new DoubleWritable(ionValue.doubleValue());
+        return new DoubleWritable(getPrimitiveJavaObject((IonFloat) o));
     }
 
     /**
@@ -55,7 +55,10 @@ public class IonFloatToDoubleObjectInspector extends AbstractIonPrimitiveJavaObj
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonFloat ionValue = (IonFloat) o;
+        return getPrimitiveJavaObject((IonFloat) o);
+    }
+
+    private double getPrimitiveJavaObject(final IonFloat ionValue) {
         return ionValue.doubleValue();
     }
 }

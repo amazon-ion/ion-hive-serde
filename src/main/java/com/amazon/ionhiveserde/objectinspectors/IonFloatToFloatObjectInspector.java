@@ -36,9 +36,7 @@ public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObje
     public Object getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonFloat ionValue = (IonFloat) o;
-        validateSize(ionValue);
-        return new FloatWritable(ionValue.floatValue());
+        return new FloatWritable(getPrimitiveJavaObject((IonFloat) o));
     }
 
     private void validateSize(final IonFloat ionFloat) {
@@ -65,7 +63,10 @@ public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObje
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonFloat ionValue = (IonFloat) o;
+        return getPrimitiveJavaObject((IonFloat) o);
+    }
+
+    public float getPrimitiveJavaObject(final IonFloat ionValue) {
         validateSize(ionValue);
         return ionValue.floatValue();
     }

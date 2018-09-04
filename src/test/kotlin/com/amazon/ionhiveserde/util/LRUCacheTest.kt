@@ -40,7 +40,7 @@ class LRUCacheTest {
     }
 
     @Test
-    fun removesLeastRecentlyUse() {
+    fun removesLeastRecentlyUsed() {
         subject[0] = "a"
         subject[1] = "b"
         subject[2] = "c"

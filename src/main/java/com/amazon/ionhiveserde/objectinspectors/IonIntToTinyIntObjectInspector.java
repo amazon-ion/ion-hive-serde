@@ -26,8 +26,8 @@ import software.amazon.ion.IonValue;
  */
 public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements ByteObjectInspector {
 
-    private static int MIN_VALUE = -128;
-    private static int MAX_VALUE = 127;
+    private final static int MIN_VALUE = -128;
+    private final static int MAX_VALUE = 127;
 
     public IonIntToTinyIntObjectInspector() {
         super(TypeInfoFactory.byteTypeInfo);
@@ -40,9 +40,7 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
     public Object getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonInt ionValue = (IonInt) o;
-        validateSize(ionValue);
-        return new ByteWritable((byte) ionValue.intValue());
+        return new ByteWritable(getPrimitiveJavaObject((IonInt) o));
     }
 
     private void validateSize(final IonInt ionValue) {
@@ -74,7 +72,10 @@ public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObje
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonInt ionValue = (IonInt) o;
+        return getPrimitiveJavaObject((IonInt) o);
+    }
+
+    private byte getPrimitiveJavaObject(final IonInt ionValue) {
         validateSize(ionValue);
         return (byte) ionValue.intValue();
     }

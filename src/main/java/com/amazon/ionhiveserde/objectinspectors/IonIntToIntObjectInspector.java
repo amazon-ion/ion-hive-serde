@@ -36,9 +36,7 @@ public class IonIntToIntObjectInspector extends AbstractIonPrimitiveJavaObjectIn
     public Object getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonInt ionValue = (IonInt) o;
-        validateSize(ionValue);
-        return new IntWritable(ionValue.intValue());
+        return new IntWritable(getPrimitiveJavaObject((IonInt) o));
     }
 
     private void validateSize(final IonInt ionValue) {
@@ -62,7 +60,10 @@ public class IonIntToIntObjectInspector extends AbstractIonPrimitiveJavaObjectIn
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonInt ionValue = (IonInt) o;
+        return getPrimitiveJavaObject((IonInt) o);
+    }
+
+    private int getPrimitiveJavaObject(final IonInt ionValue) {
         validateSize(ionValue);
         return ionValue.intValue();
     }

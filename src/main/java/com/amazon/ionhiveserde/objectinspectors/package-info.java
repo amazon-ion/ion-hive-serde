@@ -12,9 +12,9 @@
  * language governing permissions and limitations under the License.
  */
 
-package com.amazon.ionhiveserde.objectinspectors;
-
 /*
  * ObjectInspectors are adapters from Ion types into Hive types. This package contains one ObjectInspector per
  * valid Ion to Hive type combination
  */
+package com.amazon.ionhiveserde.objectinspectors;
+

@@ -47,11 +47,7 @@ public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObj
     public HiveVarcharWritable getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonText ionValue = (IonText) o;
-        String text = ionValue.stringValue();
-        validator.validate(text, length);
-        HiveVarchar hiveVarchar = new HiveVarchar(validator.validate(text, length), length);
-        return new HiveVarcharWritable(hiveVarchar);
+        return new HiveVarcharWritable(getPrimitiveJavaObject((IonText) o));
     }
 
     /**
@@ -61,9 +57,11 @@ public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObj
     public HiveVarchar getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonText ionValue = (IonText) o;
+        return getPrimitiveJavaObject((IonText) o);
+    }
+
+    private HiveVarchar getPrimitiveJavaObject(final IonText ionValue) {
         String text = ionValue.stringValue();
-        validator.validate(text, length);
         return new HiveVarchar(validator.validate(text, length), length);
     }
 }

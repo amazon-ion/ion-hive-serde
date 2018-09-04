@@ -42,8 +42,9 @@ public class IonStructObjectInspector extends StructObjectInspector {
         fieldsByName = new HashMap<>();
         fields = new ArrayList<>();
 
-        for (int i = 0; i < tableInfo.getAllStructFieldNames().size(); i++) {
-            String fieldName = tableInfo.getAllStructFieldNames().get(i);
+        ArrayList<String> allStructFieldNames = tableInfo.getAllStructFieldNames();
+        for (int i = 0; i < allStructFieldNames.size(); i++) {
+            String fieldName = allStructFieldNames.get(i);
             TypeInfo typeInfo = tableInfo.getAllStructFieldTypeInfos().get(i);
 
             ObjectInspector objectInspector = IonObjectInspectorFactory.objectInspectorFor(typeInfo);

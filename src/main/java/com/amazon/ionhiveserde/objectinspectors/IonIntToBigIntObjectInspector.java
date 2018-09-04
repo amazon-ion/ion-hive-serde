@@ -39,7 +39,7 @@ public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjec
 
         IonInt ionValue = (IonInt) o;
         validateSize(ionValue);
-        return new LongWritable(ionValue.longValue());
+        return new LongWritable(getPrimitiveJavaObject((IonInt) o));
     }
 
     private void validateSize(final IonInt ionValue) {
@@ -63,7 +63,10 @@ public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjec
     public Object getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonInt ionValue = (IonInt) o;
+        return getPrimitiveJavaObject((IonInt) o);
+    }
+
+    public long getPrimitiveJavaObject(final IonInt ionValue) {
         validateSize(ionValue);
         return ionValue.longValue();
     }

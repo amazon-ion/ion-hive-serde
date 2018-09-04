@@ -38,8 +38,7 @@ public class IonTimestampToDateObjectInspector extends AbstractIonPrimitiveJavaO
     public DateWritable getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonTimestamp ionValue = (IonTimestamp) o;
-        return new DateWritable(new Date(ionValue.getMillis()));
+        return new DateWritable(getPrimitiveJavaObject((IonTimestamp) o));
     }
 
     /**
@@ -49,7 +48,10 @@ public class IonTimestampToDateObjectInspector extends AbstractIonPrimitiveJavaO
     public Date getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonTimestamp ionValue = (IonTimestamp) o;
+        return getPrimitiveJavaObject((IonTimestamp) o);
+    }
+
+    private Date getPrimitiveJavaObject(final IonTimestamp ionValue) {
         return new Date(ionValue.getMillis());
     }
 }

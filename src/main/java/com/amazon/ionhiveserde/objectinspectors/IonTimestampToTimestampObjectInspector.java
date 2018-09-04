@@ -38,8 +38,7 @@ public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitive
     public TimestampWritable getPrimitiveWritableObject(Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonTimestamp ionValue = (IonTimestamp) o;
-        return new TimestampWritable(new Timestamp(ionValue.getMillis()));
+        return new TimestampWritable(getPrimitiveJavaObject((IonTimestamp) o));
     }
 
     /**
@@ -49,7 +48,12 @@ public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitive
     public Timestamp getPrimitiveJavaObject(Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonTimestamp ionValue = (IonTimestamp) o;
+        return getPrimitiveJavaObject((IonTimestamp) o);
+    }
+
+    private Timestamp getPrimitiveJavaObject(final IonTimestamp ionValue) {
+        // Hive timestamps don't have offset so we always map the ion timestamp to UTC
+        // IonTimestamp.getMillis() is milliseconds from 1970-01-01T00:00:00.000Z
         return new Timestamp(ionValue.getMillis());
     }
 }

@@ -36,8 +36,7 @@ public class IonLobToBinaryObjectInspector extends AbstractIonPrimitiveJavaObjec
     public BytesWritable getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonLob ionValue = (IonLob) o;
-        return new BytesWritable(ionValue.getBytes());
+        return new BytesWritable(getPrimitiveJavaObject((IonLob) o));
     }
 
     /**
@@ -47,7 +46,10 @@ public class IonLobToBinaryObjectInspector extends AbstractIonPrimitiveJavaObjec
     public byte[] getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) return null;
 
-        IonLob ionValue = (IonLob) o;
+        return getPrimitiveJavaObject((IonLob) o);
+    }
+
+    private byte[] getPrimitiveJavaObject(final IonLob ionValue) {
         return ionValue.getBytes();
     }
 }
