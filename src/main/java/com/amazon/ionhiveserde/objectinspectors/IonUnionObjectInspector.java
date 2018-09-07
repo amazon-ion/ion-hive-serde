@@ -81,17 +81,13 @@ public class IonUnionObjectInspector implements UnionObjectInspector {
                         primitiveObjectInspector.getPrimitiveJavaObject(o);
                         return i;
                     } catch (Exception ex) {
-                        continue;
+                        // goes to next ObjectInspector
                     }
                 }
-
-                default:
-                    throw new IllegalStateException(
-                        "Object Inspector " + objectInspector.toString() + " Not supported for object " + o.toString());
             }
         }
 
-        throw new IllegalStateException(
+        throw new IllegalArgumentException(
             "No suitable Object Inspector found for object  " + o.toString() + " of class " + o.getClass()
                 .getCanonicalName());
     }
