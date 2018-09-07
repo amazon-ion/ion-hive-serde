@@ -51,6 +51,33 @@ import org.apache.hadoop.hive.serde2.typeinfo.VarcharTypeInfo;
  */
 public class IonObjectInspectorFactory {
 
+    // Non configurable object inspectors
+    private static final IonBooleanToBooleanObjectInspector BOOLEAN_TO_BOOLEAN_OBJECT_INSPECTOR =
+        new IonBooleanToBooleanObjectInspector();
+    private static final IonIntToTinyIntObjectInspector INT_TO_TINYINT_OBJECT_INSPECTOR =
+        new IonIntToTinyIntObjectInspector();
+    private static final IonIntToSmallIntObjectInspector INT_TO_SMALLINT_OBJECT_INSPECTOR =
+        new IonIntToSmallIntObjectInspector();
+    private static final IonIntToIntObjectInspector INT_TO_INT_OBJECT_INSPECTOR =
+        new IonIntToIntObjectInspector();
+    private static final IonIntToBigIntObjectInspector INT_TO_BIGINT_OBJECT_INSPECTOR =
+        new IonIntToBigIntObjectInspector();
+    private static final IonDecimalToDecimalObjectInspector DECIMAL_TO_DECIMAL_OBJECT_INSPECTOR =
+        new IonDecimalToDecimalObjectInspector();
+    private static final IonFloatToFloatObjectInspector FLOAT_TO_FLOAT_OBJECT_INSPECTOR =
+        new IonFloatToFloatObjectInspector();
+    private static final IonFloatToDoubleObjectInspector FLOAT_TO_DOUBLE_OBJECT_INSPECTOR =
+        new IonFloatToDoubleObjectInspector();
+    private static final IonTextToStringObjectInspector TEXT_TO_STRING_OBJECT_INSPECTOR =
+        new IonTextToStringObjectInspector();
+    private static final IonLobToBinaryObjectInspector LOB_TO_BINARY_OBJECT_INSPECTOR =
+        new IonLobToBinaryObjectInspector();
+    private static final IonTimestampToDateObjectInspector TIMESTAMP_TO_DATE_OBJECT_INSPECTOR =
+        new IonTimestampToDateObjectInspector();
+    private static final IonTimestampToTimestampObjectInspector TIMESTAMP_TO_TIMESTAMP_OBJECT_INSPECTOR =
+        new IonTimestampToTimestampObjectInspector();
+
+
     // each SerDe instance use gets a new cache so the size is proportional to the table columns
     private final Map<TypeInfo, ObjectInspector> cache;
 
@@ -81,36 +108,36 @@ public class IonObjectInspectorFactory {
                 final PrimitiveTypeInfo primitiveTypeInfo = (PrimitiveTypeInfo) typeInfo;
                 switch (primitiveTypeInfo.getPrimitiveCategory()) {
                     case BOOLEAN:
-                        objectInspector = new IonBooleanToBooleanObjectInspector();
+                        objectInspector = BOOLEAN_TO_BOOLEAN_OBJECT_INSPECTOR;
                         break;
 
                     case BYTE:
-                        objectInspector = new IonIntToTinyIntObjectInspector();
+                        objectInspector = INT_TO_TINYINT_OBJECT_INSPECTOR;
                         break;
 
                     case SHORT:
-                        objectInspector = new IonIntToSmallIntObjectInspector();
+                        objectInspector = INT_TO_SMALLINT_OBJECT_INSPECTOR;
                         break;
 
                     case INT:
-                        objectInspector = new IonIntToIntObjectInspector();
+                        objectInspector = INT_TO_INT_OBJECT_INSPECTOR;
                         break;
 
                     case LONG:
-                        objectInspector = new IonIntToBigIntObjectInspector();
+                        objectInspector = INT_TO_BIGINT_OBJECT_INSPECTOR;
                         break;
 
                     case DECIMAL:
                         // TODO can be decimal or int, needs configuration. Fixing to decimal for now
-                        objectInspector = new IonDecimalToDecimalObjectInspector();
+                        objectInspector = DECIMAL_TO_DECIMAL_OBJECT_INSPECTOR;
                         break;
 
                     case FLOAT:
-                        objectInspector = new IonFloatToFloatObjectInspector();
+                        objectInspector = FLOAT_TO_FLOAT_OBJECT_INSPECTOR;
                         break;
 
                     case DOUBLE:
-                        objectInspector = new IonFloatToDoubleObjectInspector();
+                        objectInspector = FLOAT_TO_DOUBLE_OBJECT_INSPECTOR;
                         break;
 
                     case CHAR:
@@ -124,19 +151,19 @@ public class IonObjectInspectorFactory {
                         break;
 
                     case STRING:
-                        objectInspector = new IonTextToStringObjectInspector();
+                        objectInspector = TEXT_TO_STRING_OBJECT_INSPECTOR;
                         break;
 
                     case BINARY:
-                        objectInspector = new IonLobToBinaryObjectInspector();
+                        objectInspector = LOB_TO_BINARY_OBJECT_INSPECTOR;
                         break;
 
                     case DATE:
-                        objectInspector = new IonTimestampToDateObjectInspector();
+                        objectInspector = TIMESTAMP_TO_DATE_OBJECT_INSPECTOR;
                         break;
 
                     case TIMESTAMP:
-                        objectInspector = new IonTimestampToTimestampObjectInspector();
+                        objectInspector = TIMESTAMP_TO_TIMESTAMP_OBJECT_INSPECTOR;
                         break;
 
                     case VOID:
@@ -155,7 +182,7 @@ public class IonObjectInspectorFactory {
                 for (int i = 0; i < structFieldNames.size(); i++) {
                     final TypeInfo fieldTypeInfo = structFieldTypeInfo.get(i);
 
-                    fieldObjectInspectors.set(i, objectInspectorFor(fieldTypeInfo));
+                    fieldObjectInspectors.add(i, objectInspectorFor(fieldTypeInfo));
                 }
 
                 objectInspector = new IonStructToStructInspector(structTypeInfo, fieldObjectInspectors);
