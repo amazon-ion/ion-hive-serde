@@ -14,12 +14,9 @@
 
 <FindBugsFilter>
 
-  <!-- skip test files for non JUnit related rules -->
+  <!-- skip kotlin classes as findbugs support is not good -->
   <Match>
-    <Class name="~.*\.*Test"/>
-    <Not>
-      <Bug code="IJU"/>
-    </Not>
+    <Source name="~.*\.kt"/>
   </Match>
 
   <!-- There is a lot of unchecked cast required due to how Hive SerDe API is structured -->
@@ -28,5 +25,10 @@
   </Match>
   <Match>
     <Bug pattern="BC_BAD_CAST_TO_ABSTRACT_COLLECTION"/>
+  </Match>
+
+  <!-- Only databases are local test only that are re-created  -->
+  <Match>
+    <Bug pattern="DMI_EMPTY_DB_PASSWORD"/>
   </Match>
 </FindBugsFilter>

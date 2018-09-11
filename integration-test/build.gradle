@@ -11,3 +11,67 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
+
+task makeSharedDir {
+    mkdir './shared/serde'
+    mkdir './shared/input'
+    mkdir './shared/output'
+}
+
+task cleanUpShared {
+    delete './shared/serde'
+    delete './shared/input'
+    delete './shared/output'
+}
+
+task startDocker(type: Exec, dependsOn: 'makeSharedDir') {
+    workingDir './docker'
+    commandLine 'docker-compose', 'up', '-d'
+}
+
+task stopDocker(type: Exec) {
+    workingDir './docker'
+    commandLine 'docker-compose', 'down'
+}
+
+task copySerDeJar {
+    dependsOn 'makeSharedDir', ':serde:singleJar'
+
+    copy {
+        from file('../serde/build/libs/serde-all.jar')
+        into file('./shared/serde/')
+    }
+}
+
+task testSetUp {
+    dependsOn copySerDeJar
+    dependsOn startDocker
+}
+
+task testTearDown {
+    dependsOn stopDocker
+    dependsOn cleanUpShared
+}
+
+/**
+ * Tests will in order:
+ * - created shared directories
+ *
+ * - start docker containers
+ * - run all tests
+ * - stop docker containers
+ * - remove shared directories
+ */
+test {
+    dependsOn testSetUp
+    finalizedBy 'testTearDown'
+}
+
+dependencies {
+    // to force build order
+    compile project(":serde")
+
+    testCompile "org.apache.hive:hive-jdbc:${hive_version}"
+    testCompile "org.apache.hadoop:hadoop-common:${hadoop_version}"
+}
+

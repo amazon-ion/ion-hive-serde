@@ -15,6 +15,9 @@
 // sets up kotlin plugin
 buildscript {
     ext.kotlin_version = '1.2.61'
+    ext.ionjava_version = '1.0.+'
+    ext.hive_version = '1.1.+'
+    ext.hadoop_version = '2.6.+'
 
     repositories {
         mavenCentral()
@@ -74,4 +77,7 @@ allprojects {
             html.enabled = true
         }
     }
+
+    // disable findbugs for testing as it doesn't work well for Kotlin
+//    check.dependsOn.remove('findbugsTest')
 }
