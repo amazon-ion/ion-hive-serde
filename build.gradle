@@ -25,65 +25,53 @@ buildscript {
     }
 }
 
-apply plugin: "kotlin"
-apply plugin: 'java-library'
+allprojects {
+    repositories {
+        mavenCentral()
+    }
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+    apply plugin: "kotlin"
+    apply plugin: 'java-library'
 
-repositories {
-    mavenCentral()
-}
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
 
-configurations {
-    // to make compileOnly available to testing scope
-    testCompile.extendsFrom(compileOnly)
-}
+    configurations {
+        // to make compileOnly available to testing scope
+        testCompile.extendsFrom(compileOnly)
+    }
 
-dependencies {
-    // Included in the single-jar
-    compile "software.amazon.ion:ion-java:1.0.+"
+    dependencies {
+        // using kotlin to make tests less verbose
+        testCompile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+        testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
-    // Provided by the Hive installation
-    compileOnly "org.apache.hive:hive-serde:1.1.+"
-    compileOnly "org.apache.hadoop:hadoop-common:2.6.+"
-    compileOnly "org.apache.hadoop:hadoop-main:2.6.+"
+        testCompile "junit:junit:4.+"
+        testCompile "pl.pragmatists:JUnitParams:1.1.+"
+    }
 
-    // using kotlin to make tests less verbose
-    testCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    apply plugin: 'checkstyle'
+    checkstyle {
+        toolVersion = "8.12"
+        ignoreFailures = false
+        maxWarnings = 0
+        maxErrors = 0
+        configDir = file("$rootProject.projectDir/config/checkstyle")
+    }
+    tasks.withType(Checkstyle) {
+        reports {
+            xml.enabled = false
+            html.enabled = true
+        }
+    }
 
-    testCompile "junit:junit:4.+"
-    testCompile "pl.pragmatists:JUnitParams:1.1.+"
-}
+    apply plugin: 'findbugs'
+    tasks.withType(FindBugs) {
+        excludeFilter = file("$rootProject.projectDir/config/findbugs/excludeFilter.xml")
 
-task singleJar(type: Jar) {
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
-apply plugin: 'checkstyle'
-checkstyle {
-    toolVersion = "8.12"
-    ignoreFailures = false
-    maxWarnings = 0
-    maxErrors = 0
-}
-tasks.withType(Checkstyle) {
-    reports {
-        xml.enabled false
-        html.enabled true
+        reports {
+            xml.enabled = false
+            html.enabled = true
+        }
     }
 }
-
-apply plugin: 'findbugs'
-tasks.withType(FindBugs) {
-    excludeFilter = file("$rootProject.projectDir/config/findbugs/excludeFilter.xml")
-
-    reports {
-        xml.enabled false
-        html.enabled true
-    }
-}
-
