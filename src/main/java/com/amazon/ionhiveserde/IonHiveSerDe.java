@@ -14,6 +14,8 @@
 
 package com.amazon.ionhiveserde;
 
+import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category.STRUCT;
+
 import com.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,19 +29,16 @@ import org.apache.hadoop.hive.serde2.AbstractSerDe;
 import org.apache.hadoop.hive.serde2.SerDeException;
 import org.apache.hadoop.hive.serde2.SerDeStats;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
-import org.apache.hadoop.io.ByteWritable;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import software.amazon.ion.IonDatagram;
 import software.amazon.ion.IonSystem;
-import software.amazon.ion.IonType;
 import software.amazon.ion.IonValue;
 import software.amazon.ion.IonWriter;
 import software.amazon.ion.system.IonSystemBuilder;
@@ -93,55 +92,22 @@ public class IonHiveSerDe extends AbstractSerDe {
      * {@inheritDoc}
      */
     @Override
-    public Writable serialize(final Object obj, final ObjectInspector objectInspector) throws SerDeException {
-        final StringBuilder out = new StringBuilder();
-        final StructObjectInspector structObjectInspector = (StructObjectInspector) objectInspector;
-
-        try (IonWriter writer = ion.newTextWriter(out)) {
-            writer.stepIn(IonType.STRUCT);
-
-            for (StructField field : structObjectInspector.getAllStructFieldRefs()) {
-                writer.setFieldName(field.getFieldName());
-
-                final Object fieldData = structObjectInspector.getStructFieldData(obj, field);
-                serializeFieldData(writer, fieldData, field.getFieldObjectInspector());
-            }
-
-            writer.stepOut();
-        } catch (IOException e) {
-            throw new SerDeException(e);
+    public Writable serialize(final Object data, final ObjectInspector objectInspector) throws SerDeException {
+        if (objectInspector.getCategory() != STRUCT) {
+            throw new SerDeException("Can only serialize struct types, got: " + objectInspector.getTypeName());
         }
 
         // TODO binary or text from config
+
+        final StringBuilder out = new StringBuilder();
+
+        try (IonWriter writer = ion.newTextWriter(out)) {
+            Serializer.serializeStruct(writer, data, (StructObjectInspector) objectInspector);
+        } catch (IOException | IllegalArgumentException e) {
+            throw new SerDeException(e);
+        }
+
         return new Text(out.toString());
-    }
-
-    private void serializeFieldData(final IonWriter writer,
-                                    final Object fieldData,
-                                    final ObjectInspector objectInspector) throws IOException, SerDeException {
-        if (fieldData == null) {
-            return;
-        }
-
-        if (objectInspector.getCategory() == ObjectInspector.Category.PRIMITIVE) {
-            final PrimitiveObjectInspector primitiveObjectInspector = (PrimitiveObjectInspector) objectInspector;
-            switch (primitiveObjectInspector.getPrimitiveCategory()) {
-                case VOID:
-                case UNKNOWN:
-                    throw new SerDeException("Unknown primitive");
-            }
-        }
-
-        final IonValue ionValue = (IonValue) fieldData;
-        ionValue.writeTo(writer);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SerDeStats getSerDeStats() {
-        return stats;
     }
 
     /**
@@ -149,7 +115,7 @@ public class IonHiveSerDe extends AbstractSerDe {
      */
     @Override
     public Object deserialize(final Writable blob) throws SerDeException {
-        IonValue value;
+        final IonValue value;
 
         if (blob instanceof Text) {
             final Text text = (Text) blob;
@@ -164,13 +130,22 @@ public class IonHiveSerDe extends AbstractSerDe {
             }
 
             value = datagram.get(0);
-        } else if (blob instanceof ByteWritable) {
+        } else if (blob instanceof BytesWritable) {
             throw new UnsupportedOperationException("TODO not implemented");
         } else {
-            throw new UnsupportedOperationException("TODO not implemented");
+            throw new SerDeException("Invalid Writable instance, must be either Text or BytesWritable, was "
+                + blob.getClass());
         }
 
         return value;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SerDeStats getSerDeStats() {
+        return stats;
     }
 
     /**
