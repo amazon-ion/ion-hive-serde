@@ -26,9 +26,4 @@
   <Match>
     <Bug pattern="BC_BAD_CAST_TO_ABSTRACT_COLLECTION"/>
   </Match>
-
-  <!-- Only databases are local test only that are re-created  -->
-  <Match>
-    <Bug pattern="DMI_EMPTY_DB_PASSWORD"/>
-  </Match>
 </FindBugsFilter>

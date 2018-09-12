@@ -1,8 +1,5 @@
 FROM bde2020/hadoop-base:2.0.0-hadoop2.7.4-java8
 
-MAINTAINER Yiannis Mouchakis <gmouchakis@iit.demokritos.gr>
-MAINTAINER Ivan Ermilov <ivan.s.ermilov@gmail.com>
-
 ENV HIVE_VERSION 2.3.2
 
 ENV HIVE_HOME /opt/hive

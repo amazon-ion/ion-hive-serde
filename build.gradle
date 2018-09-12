@@ -77,7 +77,4 @@ allprojects {
             html.enabled = true
         }
     }
-
-    // disable findbugs for testing as it doesn't work well for Kotlin
-//    check.dependsOn.remove('findbugsTest')
 }
