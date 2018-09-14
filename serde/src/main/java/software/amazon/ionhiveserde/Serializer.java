@@ -197,7 +197,7 @@ class Serializer {
                 final HiveChar hiveChar =
                     ((HiveCharObjectInspector) primitiveObjectInspector).getPrimitiveJavaObject(fieldData);
 
-                writer.writeString(hiveChar.getValue());
+                writer.writeString(hiveChar.getStrippedValue());
                 break;
 
             case STRING:

@@ -2,17 +2,16 @@ package software.amazon.ionhiveserde.integrationtest.docker
 
 import software.amazon.ionhiveserde.integrationtest.hive.Hive
 import java.net.ConnectException
-import java.net.InetSocketAddress
-import java.net.Socket
 
-private const val WAIT_INTERVAL: Long = 1000 // 1 second
+private const val WAIT_INTERVAL: Long = 2_000 // 2 seconds
 
 /**
  * waits for hive server container to be up and responding to jdbc connections
  *
  * @param waitFor seconds to wait for before throwing an error
  */
-fun waitForHiveServer(waitFor: Int = 60) {
+@JvmOverloads
+fun waitForHiveServer(waitFor: Int = 120) {
     var waitTimeInMillis = waitFor * 1_000L
     var connected = false
 

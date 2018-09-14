@@ -44,7 +44,9 @@ services:
     container_name: hive-server
     image: bde2020/hive:2.3.2-postgresql-metastore
     volumes:
-      - ../shared:/shared
+      - ../docker-tmp:/docker-tmp
+      - ../test-data:/test-data
+
     env_file:
       - ./hadoop-hive.env
     environment:

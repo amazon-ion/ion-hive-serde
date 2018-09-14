@@ -1,0 +1,2 @@
+docker-compose exec hive-server /opt/hive/bin/beeline -u jdbc:hive2://localhost:10000
+

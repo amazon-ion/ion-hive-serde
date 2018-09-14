@@ -30,6 +30,7 @@ public class IonDecimalToDecimalObjectInspector extends AbstractIonPrimitiveJava
     HiveDecimalObjectInspector {
 
     public IonDecimalToDecimalObjectInspector() {
+
         super(TypeInfoFactory.decimalTypeInfo);
     }
 

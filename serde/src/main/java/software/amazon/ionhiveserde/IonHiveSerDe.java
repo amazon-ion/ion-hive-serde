@@ -36,7 +36,10 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import software.amazon.ion.IonDatagram;
+import org.apache.logging.slf4j.Log4jLogger;
+import org.apache.logging.slf4j.Log4jLoggerFactory;
+import org.slf4j.Logger;
+import software.amazon.ion.IonReader;
 import software.amazon.ion.IonSystem;
 import software.amazon.ion.IonValue;
 import software.amazon.ion.IonWriter;
@@ -115,21 +118,10 @@ public class IonHiveSerDe extends AbstractSerDe {
      */
     @Override
     public Object deserialize(final Writable blob) throws SerDeException {
-        final IonValue value;
+        final byte[] bytes;
 
         if (blob instanceof Text) {
-            final Text text = (Text) blob;
-
-            stats.setRawDataSize(text.getBytes().length);
-
-            final String rawText = text.toString().trim();
-            final IonDatagram datagram = ion.getLoader().load(rawText);
-
-            if (datagram.size() != 1) {
-                throw new IllegalStateException("There cannot be more than one ion value");
-            }
-
-            value = datagram.get(0);
+            bytes = ((Text) blob).getBytes();
         } else if (blob instanceof BytesWritable) {
             throw new UnsupportedOperationException("TODO not implemented");
         } else {
@@ -137,7 +129,9 @@ public class IonHiveSerDe extends AbstractSerDe {
                 + blob.getClass());
         }
 
-        return value;
+        stats.setRawDataSize(bytes.length);
+
+        return Deserializer.deserialize(ion, bytes);
     }
 
     /**

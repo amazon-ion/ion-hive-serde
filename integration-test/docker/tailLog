@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker-compose exec hive-server tail -f /tmp/root/hive.log
+
