@@ -26,6 +26,9 @@ import software.amazon.ion.IonValue;
  */
 public class IonIntToIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements IntObjectInspector {
 
+    public static final int MIN_VALUE = Integer.MIN_VALUE;
+    public static final int MAX_VALUE = Integer.MAX_VALUE;
+
     public IonIntToIntObjectInspector() {
         super(TypeInfoFactory.intTypeInfo);
     }

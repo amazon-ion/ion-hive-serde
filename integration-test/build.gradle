@@ -12,19 +12,20 @@
  * language governing permissions and limitations under the License.
  */
 
-task makeSharedDir {
-    mkdir './shared/serde'
-    mkdir './shared/input'
-    mkdir './shared/output'
+task createTmpDir {
+    doLast {
+        mkdir 'docker-tmp/input'
+        mkdir 'docker-tmp/output'
+    }
 }
 
-task cleanUpShared {
-    delete './shared/serde'
-    delete './shared/input'
-    delete './shared/output'
+task removeTmpDir {
+    doLast {
+        delete 'docker-tmp'
+    }
 }
 
-task startDocker(type: Exec, dependsOn: 'makeSharedDir') {
+task startDocker(type: Exec, dependsOn: 'copySerDeJar') {
     workingDir './docker'
     commandLine 'docker-compose', 'up', '-d'
 }
@@ -35,22 +36,30 @@ task stopDocker(type: Exec) {
 }
 
 task copySerDeJar {
-    dependsOn 'makeSharedDir', ':serde:singleJar'
+    dependsOn ':serde:singleJar'
 
-    copy {
-        from file('../serde/build/libs/serde-all.jar')
-        into file('./shared/serde/')
+    doLast {
+        copy {
+            from file('../serde/build/libs/serde-all.jar')
+            into file('./docker-tmp/serde/')
+        }
     }
 }
 
+task tailHiveLog(type: Exec, dependsOn: 'testSetUp') {
+    workingDir './docker'
+    commandLine 'docker-compose',  'exec',  'hive-server',  'tail -f /tmp/root/'
+}
+
 task testSetUp {
-    dependsOn copySerDeJar
+    dependsOn createTmpDir
     dependsOn startDocker
+    dependsOn copySerDeJar
 }
 
 task testTearDown {
     dependsOn stopDocker
-    dependsOn cleanUpShared
+    dependsOn removeTmpDir
 }
 
 /**

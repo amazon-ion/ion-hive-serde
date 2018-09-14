@@ -15,6 +15,10 @@
 package software.amazon.ionhiveserde.objectinspectors;
 
 import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import org.apache.hadoop.hive.serde2.io.TimestampWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.TimestampObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
@@ -58,6 +62,7 @@ public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitive
     private Timestamp getPrimitiveJavaObject(final IonTimestamp ionValue) {
         // Hive timestamps don't have offset so we always map the ion timestamp to UTC
         // IonTimestamp.getMillis() is milliseconds from 1970-01-01T00:00:00.000Z
+
         return new Timestamp(ionValue.getMillis());
     }
 }

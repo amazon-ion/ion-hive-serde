@@ -27,8 +27,8 @@ import software.amazon.ion.IonValue;
 public class IonIntToTinyIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
     ByteObjectInspector {
 
-    private static final int MIN_VALUE = -128;
-    private static final int MAX_VALUE = 127;
+    public static final int MIN_VALUE = -128;
+    public static final int MAX_VALUE = 127;
 
     public IonIntToTinyIntObjectInspector() {
         super(TypeInfoFactory.byteTypeInfo);

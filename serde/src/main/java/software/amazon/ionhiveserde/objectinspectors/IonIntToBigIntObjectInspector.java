@@ -27,6 +27,9 @@ import software.amazon.ion.IonValue;
 public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
     LongObjectInspector {
 
+    public static final long MIN_VALUE = Long.MIN_VALUE;
+    public static final long MAX_VALUE = Long.MAX_VALUE;
+
     public IonIntToBigIntObjectInspector() {
         super(TypeInfoFactory.longTypeInfo);
     }
