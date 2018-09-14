@@ -14,15 +14,15 @@
 
 dependencies {
     // Included in the single-jar
-    compile "software.amazon.ion:ion-java:1.0.+"
+    compile "software.amazon.ion:ion-java:${ionjava_version}"
 
     // Provided by the Hive installation
-    compileOnly "org.apache.hive:hive-serde:1.1.+"
-    compileOnly "org.apache.hadoop:hadoop-common:2.6.+"
-    compileOnly "org.apache.hadoop:hadoop-main:2.6.+"
+    compileOnly "org.apache.hive:hive-serde:${hive_version}"
+    compileOnly "org.apache.hadoop:hadoop-common:${hadoop_version}"
+    compileOnly "org.apache.hadoop:hadoop-main:${hadoop_version}"
 }
 
-task singleJar(type: Jar) {
+task singleJar(dependsOn: 'build', type: Jar) {
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar

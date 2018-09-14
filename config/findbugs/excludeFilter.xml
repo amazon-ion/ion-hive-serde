@@ -14,12 +14,9 @@
 
 <FindBugsFilter>
 
-  <!-- skip test files for non JUnit related rules -->
+  <!-- skip kotlin classes as findbugs support is not good -->
   <Match>
-    <Class name="~.*\.*Test"/>
-    <Not>
-      <Bug code="IJU"/>
-    </Not>
+    <Source name="~.*\.kt"/>
   </Match>
 
   <!-- There is a lot of unchecked cast required due to how Hive SerDe API is structured -->
