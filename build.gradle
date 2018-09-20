@@ -14,10 +14,10 @@
 
 // sets up kotlin plugin
 buildscript {
-    ext.kotlin_version = '1.2.61'
+    ext.kotlin_version = '1.2.70'
     ext.ionjava_version = '1.0.+'
-    ext.hive_version = '2.3.2'
-    ext.hadoop_version = '2.7.4'
+    ext.hive_version = '2.3.+'
+    ext.hadoop_version = '2.7.+'
 
     repositories {
         mavenCentral()
@@ -64,16 +64,6 @@ allprojects {
             html.enabled = true
         }
     }
-
-//    apply plugin: 'findbugs'
-//    tasks.withType(FindBugs) {
-//        excludeFilter = file("$rootProject.projectDir/config/findbugs/excludeFilter.xml")
-//
-//        reports {
-//            xml.enabled = false
-//            html.enabled = true
-//        }
-//    }
 }
 
 // clean all subprojects
