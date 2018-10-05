@@ -4,7 +4,7 @@
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at:
  *
- *     http://aws.amazon.com/apache2.0/
+ *      http://aws.amazon.com/apache2.0/
  *
  * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
@@ -14,13 +14,17 @@
 
 package software.amazon.ionhiveserde.integrationtest.tests
 
+import junitparams.JUnitParamsRunner
+import junitparams.Parameters
+import junitparams.naming.TestCaseName
 import org.junit.Test
+import org.junit.runner.RunWith
 import software.amazon.ion.IonSequence
 import software.amazon.ion.IonStruct
 import software.amazon.ion.IonType
 import software.amazon.ion.IonWriter
+import software.amazon.ionhiveserde.IonEncoding
 import software.amazon.ionhiveserde.integrationtest.*
-import software.amazon.ionhiveserde.integrationtest.docker.Hive
 import software.amazon.ionhiveserde.integrationtest.docker.SHARED_DIR
 import software.amazon.ionhiveserde.integrationtest.setup.TestData
 import java.sql.ResultSet
@@ -30,10 +34,10 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * Test the mapping of null values between valid ion <-> hive type mapping
+ * Test the mapping of null values between valid ion <-> hive type mapping.
  */
+@RunWith(JUnitParamsRunner::class)
 class NullMappingTest : Base() {
-
     /** Called by [Lifecycle] to setup test data */
     companion object : TestLifecycle {
         private const val nullDir = "$SHARED_DIR/input/type-mapping/null"
@@ -84,14 +88,12 @@ class NullMappingTest : Base() {
     /**
      * Creates a table with one column per hive type
      */
-    private fun createTable(tableName: String) {
-        val fields = types.mapIndexed { index, hiveType -> "${tableColumnName(index)} $hiveType" }
-                .joinToString(", ")
+    private fun createTable(tableName: String, serDeProperties: Map<String, String> = emptyMap()) {
+        val columns = types.asSequence()
+                .mapIndexed { index, hiveType -> tableColumnName(index) to hiveType }
+                .toMap()
 
-        hive().execute("""
-            CREATE EXTERNAL TABLE $tableName ($fields) ${Hive.STORAGE_HANDLER_STATEMENT}
-            LOCATION '$HDFS_PATH'
-        """)
+        hive().createExternalTable(tableName, columns, HDFS_PATH, serDeProperties)
     }
 
     @Test
@@ -123,13 +125,17 @@ class NullMappingTest : Base() {
         }
     }
 
-    @Test
-    fun toFile() {
-        val tableName = "nullToFile"
-        createTable(tableName)
+    fun encodings() = IonEncoding.values()
 
-        val rawText = hive().queryToFileAndRead("SELECT * FROM $tableName")
-        val datagram = ION.loader.load(rawText)
+    @Test
+    @Parameters(method = "encodings")
+    @TestCaseName("[{index}] {method}: {0}")
+    fun toFile(encoding: IonEncoding) {
+        val tableName = "nullToFile"
+        createTable(tableName, mapOf("encoding" to encoding.name))
+
+        val rawBytes = hive().queryToFileAndRead("SELECT * FROM $tableName")
+        val datagram = ION.loader.load(rawBytes)
 
         assertEquals(6, datagram.size)
 

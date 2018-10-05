@@ -4,7 +4,7 @@
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at:
  *
- *     http://aws.amazon.com/apache2.0/
+ *      http://aws.amazon.com/apache2.0/
  *
  * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
@@ -23,12 +23,23 @@ package software.amazon.ionhiveserde.integrationtest.docker
  * See https://github.com/amzn/ion-hive-serde/issues/37 for more info
  */
 object HDFS {
+
+    /**
+     * Puts all data in path to HDFS /data directory
+     *
+     * @param path path relative to the shared directory
+     */
     @JvmStatic
     fun put(path: String) {
         runInDocker("hadoop fs -mkdir -p /data")
         runInDocker("hadoop fs -put -f /$SHARED_DIR/$path /data")
     }
 
+    /**
+     * Removes data from HDFS
+     *
+     * @param path HDFS absolute path
+     */
     @JvmStatic
     fun rm(path: String) = runInDocker("hadoop fs -rm -r -f $path")
 }
