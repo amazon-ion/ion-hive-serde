@@ -1,15 +1,15 @@
 /*
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at:
  *
- *      http://aws.amazon.com/apache2.0/
+ *     http://aws.amazon.com/apache2.0/
  *
  * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
+ *
  */
 
 package software.amazon.ionhiveserde;
@@ -36,12 +36,7 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.logging.slf4j.Log4jLogger;
-import org.apache.logging.slf4j.Log4jLoggerFactory;
-import org.slf4j.Logger;
-import software.amazon.ion.IonReader;
 import software.amazon.ion.IonSystem;
-import software.amazon.ion.IonValue;
 import software.amazon.ion.IonWriter;
 import software.amazon.ion.system.IonSystemBuilder;
 import software.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
@@ -72,8 +67,9 @@ public class IonHiveSerDe extends AbstractSerDe {
     @SuppressWarnings("deprecation") // we are forced to override this constructor even though it's deprecated
     public void initialize(final @Nullable Configuration conf, final Properties tbl) throws SerDeException {
         stats = new SerDeStats();
-        final StructTypeInfo tableInfo = (StructTypeInfo) TypeInfoFactory
-            .getStructTypeInfo(readColumnNames(tbl), readColumnTypes(tbl));
+        final StructTypeInfo tableInfo = (StructTypeInfo) TypeInfoFactory.getStructTypeInfo(
+            readColumnNames(tbl),
+            readColumnTypes(tbl));
 
         ion = buildIonSystem(conf);
 
@@ -119,19 +115,25 @@ public class IonHiveSerDe extends AbstractSerDe {
     @Override
     public Object deserialize(final Writable blob) throws SerDeException {
         final byte[] bytes;
+        final int length;
 
+        // getBytes returns a reference to the current buffer which is only valid up to length
         if (blob instanceof Text) {
-            bytes = ((Text) blob).getBytes();
+            Text text = (Text) blob;
+            bytes = text.getBytes();
+            length = text.getLength();
+
         } else if (blob instanceof BytesWritable) {
-            throw new UnsupportedOperationException("TODO not implemented");
+            BytesWritable bytesWritable = (BytesWritable) blob;
+            bytes = bytesWritable.getBytes();
+            length = bytesWritable.getLength();
+
         } else {
             throw new SerDeException("Invalid Writable instance, must be either Text or BytesWritable, was "
                 + blob.getClass());
         }
 
-        stats.setRawDataSize(bytes.length);
-
-        return Deserializer.deserialize(ion, bytes);
+        return Deserializer.deserialize(ion, bytes, length);
     }
 
     /**

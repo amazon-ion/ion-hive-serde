@@ -1,15 +1,15 @@
 /*
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at:
  *
- *      http://aws.amazon.com/apache2.0/
+ *     http://aws.amazon.com/apache2.0/
  *
  * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
+ *
  */
 
 package software.amazon.ionhiveserde;
@@ -46,8 +46,18 @@ import software.amazon.ion.IonType;
 import software.amazon.ion.IonWriter;
 import software.amazon.ion.Timestamp;
 
+/**
+ * Serializes an object to Ion using Hive ObjectInspectors to extract information.
+ */
 class Serializer {
 
+    /**
+     * Serializes a single Ion struct.
+     *
+     * @param writer writer used to serialize the data
+     * @param data hive provided object
+     * @param objectInspector object inspector used to inspect the data parameter
+     */
     static void serializeStruct(final IonWriter writer,
                                 final Object data,
                                 final StructObjectInspector objectInspector) throws IOException, SerDeException {
@@ -63,6 +73,7 @@ class Serializer {
                                        final String fieldName,
                                        final Object fieldData,
                                        final ObjectInspector objectInspector) throws SerDeException, IOException {
+        // skips null fields instead of writing explicit nulls
         if (fieldData == null) {
             return;
         }
