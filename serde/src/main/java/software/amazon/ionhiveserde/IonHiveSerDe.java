@@ -4,7 +4,7 @@
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at:
  *
- *     http://aws.amazon.com/apache2.0/
+ *      http://aws.amazon.com/apache2.0/
  *
  * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
@@ -16,7 +16,9 @@ package software.amazon.ionhiveserde;
 
 import static org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category.STRUCT;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,7 +58,7 @@ public class IonHiveSerDe extends AbstractSerDe {
     private ObjectInspector objectInspector;
     private IonObjectInspectorFactory objectInspectorFactory;
 
-    private Class<? extends Writable> serializedClass;
+    private SerDeProperties serDeProperties;
 
     private SerDeStats stats;
 
@@ -65,18 +67,18 @@ public class IonHiveSerDe extends AbstractSerDe {
      */
     @Override
     @SuppressWarnings("deprecation") // we are forced to override this constructor even though it's deprecated
-    public void initialize(final @Nullable Configuration conf, final Properties tbl) throws SerDeException {
+    public void initialize(final @Nullable Configuration conf, final Properties properties) throws SerDeException {
         stats = new SerDeStats();
         final StructTypeInfo tableInfo = (StructTypeInfo) TypeInfoFactory.getStructTypeInfo(
-            readColumnNames(tbl),
-            readColumnTypes(tbl));
+            readColumnNames(properties),
+            readColumnTypes(properties));
 
         ion = buildIonSystem(conf);
 
         objectInspectorFactory = new IonObjectInspectorFactory(tableInfo);
         objectInspector = objectInspectorFactory.objectInspectorFor(tableInfo);
 
-        serializedClass = Text.class; // TODO pick from config
+        serDeProperties = new SerDeProperties(properties);
     }
 
     /**
@@ -84,7 +86,11 @@ public class IonHiveSerDe extends AbstractSerDe {
      */
     @Override
     public Class<? extends Writable> getSerializedClass() {
-        return serializedClass;
+        if (serDeProperties.getEncoding() == IonEncoding.BINARY) {
+            return BytesWritable.class;
+        }
+
+        return Text.class;
     }
 
     /**
@@ -96,17 +102,23 @@ public class IonHiveSerDe extends AbstractSerDe {
             throw new SerDeException("Can only serialize struct types, got: " + objectInspector.getTypeName());
         }
 
-        // TODO binary or text from config
+        final Writable writable;
 
-        final StringBuilder out = new StringBuilder();
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        try (IonWriter writer = ion.newTextWriter(out)) {
+        try (final IonWriter writer = newWriter(out)) {
             Serializer.serializeStruct(writer, data, (StructObjectInspector) objectInspector);
         } catch (IOException | IllegalArgumentException e) {
             throw new SerDeException(e);
         }
 
-        return new Text(out.toString());
+        if (serDeProperties.getEncoding() == IonEncoding.BINARY) {
+            writable = new BytesWritable(out.toByteArray());
+        } else {
+            writable = new Text(out.toByteArray());
+        }
+
+        return writable;
     }
 
     /**
@@ -117,14 +129,17 @@ public class IonHiveSerDe extends AbstractSerDe {
         final byte[] bytes;
         final int length;
 
-        // getBytes returns a reference to the current buffer which is only valid up to length
+        // even though IonInputFormat only generates BytesWritable it's possible to use this SerDe with the default
+        // TextFormat which produces Text
         if (blob instanceof Text) {
             Text text = (Text) blob;
+            // getBytes returns a reference to the current buffer which is only valid up to length
             bytes = text.getBytes();
             length = text.getLength();
 
         } else if (blob instanceof BytesWritable) {
             BytesWritable bytesWritable = (BytesWritable) blob;
+            // getBytes returns a reference to the current buffer which is only valid up to length
             bytes = bytesWritable.getBytes();
             length = bytesWritable.getLength();
 
@@ -150,6 +165,14 @@ public class IonHiveSerDe extends AbstractSerDe {
     @Override
     public ObjectInspector getObjectInspector() throws SerDeException {
         return objectInspector;
+    }
+
+    private IonWriter newWriter(final OutputStream out) {
+        if (serDeProperties.getEncoding() == IonEncoding.BINARY) {
+            return ion.newBinaryWriter(out);
+        }
+
+        return ion.newTextWriter(out);
     }
 
     private List<String> readColumnNames(final Properties tbl) {

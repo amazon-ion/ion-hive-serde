@@ -4,7 +4,7 @@
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at:
  *
- *     http://aws.amazon.com/apache2.0/
+ *      http://aws.amazon.com/apache2.0/
  *
  * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
@@ -16,14 +16,11 @@ package software.amazon.ionhiveserde.formats;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.InputSplit;
@@ -41,7 +38,6 @@ import software.amazon.ion.util.IonStreamUtils;
  */
 public class IonInputFormat extends FileInputFormat {
 
-    // TODO create from job config https://github.com/amzn/ion-hive-serde/issues/15
     private static IonSystem ion = IonSystemBuilder.standard()
         .withStreamCopyOptimized(true) // use stream copy optimized to copy raw data when possible
         .build();
@@ -53,39 +49,37 @@ public class IonInputFormat extends FileInputFormat {
 
         reporter.setStatus(fileSplit.toString());
 
-        // Keep original file type to avoid converting from text <-> binary and allow the opportunity to use of stream
-        // copy optimized writers
-        if (isBinary(fileSplit, job)) {
-            return new IonBinaryRecordReader(ion, fileSplit, job);
-        }
-
-        return new IonTextRecordReader(ion, fileSplit, job);
+        return new IonRecordReader(ion, fileSplit, job);
     }
 
-    // FIXME avoid opening the file twice
-    private boolean isBinary(final FileSplit fileSplit, final JobConf job) throws IOException {
-        final Path path = fileSplit.getPath();
-        final FileSystem fs = path.getFileSystem(job);
+    private static class IonRecordReader implements RecordReader<LongWritable, BytesWritable> {
+        private boolean isBinary(final FileSplit fileSplit, final JobConf job) throws IOException {
+            final Path path = fileSplit.getPath();
+            final FileSystem fs = path.getFileSystem(job);
 
-        try (FSDataInputStream inputStream = fs.open(path)) {
-            byte[] bytes = new byte[4];
+            try (FSDataInputStream inputStream = fs.open(path)) {
+                byte[] bytes = new byte[4];
 
-            inputStream.readFully(bytes, 0, 4);
+                inputStream.readFully(bytes, 0, 4);
 
-            return IonStreamUtils.isIonBinary(bytes);
+                return IonStreamUtils.isIonBinary(bytes);
+            }
         }
-    }
-
-    private abstract static class IonRecordReaderBase<T extends Writable> implements RecordReader<LongWritable, T> {
 
         private final FSDataInputStream fsDataInputStream;
         private final IonReader reader;
         private final ByteArrayOutputStream out;
+        private final boolean isBinary;
+        private final long start;
 
-        IonRecordReaderBase(final IonSystem ion, final FileSplit fileSplit, final JobConf job)
+        IonRecordReader(final IonSystem ion, final FileSplit fileSplit, final JobConf job)
                 throws IOException {
             final Path path = fileSplit.getPath();
             final FileSystem fs = path.getFileSystem(job);
+
+            isBinary = isBinary(fileSplit, job);
+
+            start = fileSplit.getStart();
 
             fsDataInputStream = fs.open(path);
             fsDataInputStream.seek(fileSplit.getStart());
@@ -100,6 +94,11 @@ public class IonInputFormat extends FileInputFormat {
         }
 
         @Override
+        public BytesWritable createValue() {
+            return new BytesWritable();
+        }
+
+        @Override
         public final long getPos() throws IOException {
             return fsDataInputStream.getPos();
         }
@@ -111,11 +110,11 @@ public class IonInputFormat extends FileInputFormat {
 
         @Override
         public final float getProgress() throws IOException {
-            return 0;
+            return fsDataInputStream.getPos() - start;
         }
 
         @Override
-        public final boolean next(final LongWritable key, final T value) throws IOException {
+        public final boolean next(final LongWritable key, final BytesWritable value) throws IOException {
             if (reader.next() == null) {
                 return false;
             }
@@ -126,57 +125,18 @@ public class IonInputFormat extends FileInputFormat {
                 writer.writeValue(reader);
             }
 
-            writeValue(out.toByteArray(), value);
+            byte[] newData = out.toByteArray();
+            value.set(newData, 0, newData.length);
 
             return true;
         }
 
-        abstract IonWriter newWriter(final OutputStream out);
+        private IonWriter newWriter(final ByteArrayOutputStream out) {
+            if (isBinary) {
+                return ion.newBinaryWriter(out);
+            }
 
-        abstract void writeValue(final byte[] bytes, final T value);
-    }
-
-    private static class IonTextRecordReader extends IonRecordReaderBase<Text> {
-
-        IonTextRecordReader(final IonSystem ion, final FileSplit fileSplit, final JobConf job) throws IOException {
-            super(ion, fileSplit, job);
-        }
-
-        @Override
-        public IonWriter newWriter(final OutputStream out) {
             return ion.newTextWriter(out);
-        }
-
-        @Override
-        public void writeValue(final byte[] bytes, final Text value) {
-            value.set(bytes);
-        }
-
-        @Override
-        public Text createValue() {
-            return new Text();
-        }
-    }
-
-    private static class IonBinaryRecordReader extends IonRecordReaderBase<BytesWritable> {
-
-        IonBinaryRecordReader(final IonSystem ion, final FileSplit fileSplit, final JobConf job) throws IOException {
-            super(ion, fileSplit, job);
-        }
-
-        @Override
-        public void writeValue(final byte[] bytes, final BytesWritable value) {
-            value.set(bytes, 0, bytes.length);
-        }
-
-        @Override
-        public BytesWritable createValue() {
-            return new BytesWritable();
-        }
-
-        @Override
-        public IonWriter newWriter(final OutputStream out) {
-            return ion.newBinaryWriter(out);
         }
     }
 }

@@ -4,7 +4,7 @@
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at:
  *
- *     http://aws.amazon.com/apache2.0/
+ *      http://aws.amazon.com/apache2.0/
  *
  * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
@@ -20,8 +20,8 @@ import junitparams.naming.TestCaseName
 import org.junit.Test
 import org.junit.runner.RunWith
 import software.amazon.ion.*
+import software.amazon.ionhiveserde.IonEncoding
 import software.amazon.ionhiveserde.integrationtest.*
-import software.amazon.ionhiveserde.integrationtest.docker.Hive
 import software.amazon.ionhiveserde.integrationtest.docker.SHARED_DIR
 import software.amazon.ionhiveserde.integrationtest.setup.TestData
 import java.sql.ResultSet
@@ -32,7 +32,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Test mapping between Ion and Hive types
+ * Test mapping between Ion and Hive types.
  */
 @RunWith(JUnitParamsRunner::class)
 class TypeMappingTest : Base() {
@@ -86,16 +86,13 @@ class TypeMappingTest : Base() {
                 TestCase(it.fieldName, hdfsPath(it.fieldName), expectedValues)
             }
 
+    private fun createTable(tableName: String, testCase: TestCase, serdeProperties: Map<String, String> = emptyMap()) {
+        hive().createExternalTable(tableName, mapOf("field" to testCase.hiveType), testCase.hdfsPath, serdeProperties)
+    }
+
     private fun testCaseFor(hiveType: String) = testCases.find { it.hiveType == hiveType }!!
     private val timestampTestCase by lazy { testCaseFor("TIMESTAMP") }
     private val dateTestCase by lazy { testCaseFor("DATE") }
-
-    private fun createTable(tableName: String, testCase: TestCase) {
-        hive().execute("""
-            CREATE EXTERNAL TABLE $tableName (field ${testCase.hiveType}) ${Hive.STORAGE_HANDLER_STATEMENT}
-            LOCATION '${testCase.hdfsPath}'
-        """)
-    }
 
     private fun jdbcTestTemplate(tableName: String,
                                  testCase: TestCase,
@@ -179,11 +176,12 @@ class TypeMappingTest : Base() {
 
     private fun fileTestTemplate(tableName: String,
                                  testCase: TestCase,
+                                 encoding: IonEncoding,
                                  assertions: (expected: IonValue, actual: IonValue) -> Unit) {
-        createTable(tableName, testCase)
+        createTable(tableName, testCase, mapOf("encoding" to encoding.name))
 
-        val rawText = hive().queryToFileAndRead("SELECT * FROM $tableName")
-        val datagram = ION.loader.load(rawText)
+        val rawBytes = hive().queryToFileAndRead("SELECT * FROM $tableName")
+        val datagram = ION.loader.load(rawBytes)
 
         assertEquals(testCase.expectedIonValues.size, datagram.size)
         testCase.expectedIonValues.forEachIndexed { index, expected ->
@@ -192,17 +190,25 @@ class TypeMappingTest : Base() {
         }
     }
 
-    @Test
-    @Parameters(method = "losslessTypes")
-    @TestCaseName("[{index}] {method}: {0}")
-    fun losslessTypesToFile(hiveType: String, testCase: TestCase) {
-        val tableName = "jdbcTypeMapping_${hiveType.sanitize()}"
-        fileTestTemplate(tableName, testCase) { expected, actual -> assertEquals(expected, actual) }
+    fun losslessTypesAndEncoding(): List<List<Any>> = IonEncoding.values().flatMap { encoding ->
+        losslessTypes().map { it + listOf(encoding) }
     }
 
     @Test
-    fun timestampToFile() {
-        fileTestTemplate("toFileTypeMapping_timestamp", timestampTestCase) { expected, actual ->
+    @Parameters(method = "losslessTypesAndEncoding")
+    @TestCaseName("[{index}] {method}: {0} - {2}")
+    fun losslessTypesToFile(hiveType: String, testCase: TestCase, encoding: IonEncoding) {
+        val tableName = "jdbcTypeMapping_${hiveType.sanitize()}"
+        fileTestTemplate(tableName, testCase, encoding) { expected, actual -> assertEquals(expected, actual) }
+    }
+
+    fun encodings() = IonEncoding.values()
+
+    @Test
+    @Parameters(method = "encodings")
+    @TestCaseName("[{index}] {method}: {0}")
+    fun timestampToFile(encoding: IonEncoding) {
+        fileTestTemplate("toFileTypeMapping_timestamp", timestampTestCase, encoding) { expected, actual ->
             val expectedTimestamp = (expected as IonTimestamp).timestampValue()
             val actualTimestamp = (actual as IonTimestamp).timestampValue()
 
@@ -216,8 +222,10 @@ class TypeMappingTest : Base() {
     }
 
     @Test
-    fun dateToFile() {
-        fileTestTemplate("toFileTypeMapping_date", dateTestCase) { expected, actual ->
+    @Parameters(method = "encodings")
+    @TestCaseName("[{index}] {method}: {0}")
+    fun dateToFile(encoding: IonEncoding) {
+        fileTestTemplate("toFileTypeMapping_date", dateTestCase, encoding) { expected, actual ->
             val expectedTimestamp = (expected as IonTimestamp).timestampValue()
             val actualTimestamp = (actual as IonTimestamp).timestampValue()
 
