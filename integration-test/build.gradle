@@ -1,15 +1,15 @@
 /*
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at:
  *
- *      http://aws.amazon.com/apache2.0/
+ *     http://aws.amazon.com/apache2.0/
  *
  * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
+ *
  */
 
 task createTmpDir {
@@ -47,8 +47,7 @@ task copySerDeJar {
 }
 
 task tailHiveLog(type: Exec, dependsOn: 'testSetUp') {
-    workingDir './docker'
-    commandLine 'docker-compose',  'exec',  'hive-server',  'tail -f /tmp/root/'
+    commandLine 'docker', 'exec', 'hive-server', 'tail', '-f', '/tmp/root/hive.log'
 }
 
 task testSetUp {
@@ -74,13 +73,18 @@ task testTearDown {
 test {
     dependsOn testSetUp
     finalizedBy 'testTearDown'
+
+    // only run tests through Suite classes to speed it up
+    scanForTestClasses = false
+    include "**/*Suite.class"
 }
 
 dependencies {
-    // to force build order
-    compile project(":serde")
+    testCompile project(":serde")
 
     testCompile "org.apache.hive:hive-jdbc:${hive_version}"
+
+    // compile only dependencies are not transitive so we need to redeclare some here
+    testCompile "org.apache.hive:hive-exec:${hive_version}", { transitive = false }
     testCompile "org.apache.hadoop:hadoop-common:${hadoop_version}"
 }
-

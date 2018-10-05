@@ -1,8 +1,23 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at:
+ *
+ *     http://aws.amazon.com/apache2.0/
+ *
+ * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
+ *
+ */
+
 package software.amazon.ionhiveserde;
 
 import java.io.IOException;
 import org.apache.hadoop.hive.serde2.SerDeException;
 import software.amazon.ion.IonDatagram;
+import software.amazon.ion.IonNull;
 import software.amazon.ion.IonReader;
 import software.amazon.ion.IonSystem;
 import software.amazon.ion.IonType;
@@ -11,17 +26,27 @@ import software.amazon.ion.IonWriter;
 import software.amazon.ion.SymbolToken;
 
 /**
- * Reads an Ion stream into the DOM model skipping null values instead of creating IonNull objects. This is necessary
- * for primitives since Hive handles the null check on their side and will not consider IonNull as java null
+ * Reads an Ion stream into the DOM model skipping null values instead of creating {@link IonNull} objects. This is
+ * necessary for primitives since Hive handles the null check on their side and will not consider {@link IonNull}
+ * as a Java null
  */
 class Deserializer {
+
     private static final String ERROR_MESSAGE = "There must be a single ion value";
 
-    static IonValue deserialize(final IonSystem ion, final byte[] bytes) throws SerDeException {
+    /**
+     * Deserialize a byte array containing a single Ion value encoded in either Ion binary or Ion text.
+     *
+     * @param ion Ion system used to create readers and writers
+     * @param bytes byte array containing the single Ion value
+     * @param length number of bytes to deserialize
+     * @return the Ion value that was encoded in the bytes array
+     */
+    static IonValue deserialize(final IonSystem ion, final byte[] bytes, final int length) throws SerDeException {
         final IonDatagram datagram = ion.newDatagram();
 
         try (
-            final IonReader reader = ion.newReader(bytes);
+            final IonReader reader = ion.newReader(bytes, 0, length);
             final IonWriter writer = ion.newWriter(datagram)
         ) {
 

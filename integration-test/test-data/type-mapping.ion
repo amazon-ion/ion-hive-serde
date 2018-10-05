@@ -1,0 +1,150 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at:
+ *
+ *     http://aws.amazon.com/apache2.0/
+ *
+ * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
+ *
+ */
+
+/*
+  Valid type mapping examples from Ion to Hive. Each field is a hive type and the value is a sequence of Ion values
+  that can be mapped to that type.
+
+  This file is used to create the HDFS test data. The test data is created as follows:
+  * One directory created for each Hive type.
+  * A directory is mapped to a Hive table. The test table has a single column and we have one table per hive type
+  * Each ion value will be written as a struct to represent a single hive table row
+  * Two files per type, one binary and one text, both with the same Ion values
+
+  Example:
+    mapping
+      { BOOLEAN: [true, false] }
+    HDFS
+      type-mapping/BOOLEAN/BOOLEAN.ion -> {field: true} {field: false}
+      type-mapping/BOOLEAN/BOOLEAN.10n -> same as above, but in binary format
+*/
+{
+  BOOLEAN: [
+    true,
+    false,
+  ],
+
+  TINYINT: [
+    -128,
+    -1,
+    0,
+    1,
+    127,
+  ],
+
+  INT: [
+    -2147483648,
+    -1,
+    0,
+    1,
+    2147483647,
+  ],
+
+  BIGINT: [
+    -9223372036854775808,
+    -1,
+    0,
+    1,
+    9223372036854775807,
+  ],
+
+  FLOAT: [
+    -inf,
+    -1e0,
+    0e0,
+    1e0,
+    +inf,
+    nan,
+  ],
+
+  DOUBLE: [
+    -inf,
+    -1e0,
+    0e0,
+    1e0,
+    +inf,
+    nan,
+  ],
+
+  DECIMAL: [
+    -1.,
+    0.,
+    1.,
+  ],
+
+  BINARY: [
+    {{ VG8gaW5maW5pdHkuLi4gYW5kIGJleW9uZCE= }},
+  ],
+
+  'CHAR(20)': [
+    "char",
+    "0123456789",
+    "💩",
+    '''mul
+    ti''',
+  ],
+
+  'VARCHAR(20)': [
+    "varchar",
+    "0123456789",
+    "💩",
+    '''mul
+    ti''',
+  ],
+
+  STRING: [
+    "string",
+    "longer string",
+    "💩💩💩💩💩",
+    '''triple quoted
+    and
+    multi line''',
+  ],
+
+  TIMESTAMP: [
+    2018T,
+    2018-09T,
+    2018-09-14T,
+    2018-09-14T10:55Z,
+    2018-09-14T10:55:10Z,
+    2018-09-14T10:55:10.001Z,
+    2018-09-14T10:55:10+10:00,
+  ],
+
+  DATE: [
+    2018T,
+    2018-09T,
+    2018-09-14T,
+    2018-09-14T10:55Z,
+    2018-09-14T10:55:10Z,
+    2018-09-14T10:55:10.001Z,
+    2018-09-14T10:55:10+10:00,
+  ],
+
+  'ARRAY<INT>': [
+    [1,2,3,4],
+    [],
+  ],
+
+  'MAP<STRING,INT>': [
+    {foo: 1, bar: 2},
+    {},
+  ],
+
+  'STRUCT<foo:INT,bar:BOOLEAN>': [
+    {foo: 1, bar: true},
+    {foo: 2, bar: false},
+  ],
+
+}

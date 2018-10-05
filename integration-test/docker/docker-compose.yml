@@ -42,7 +42,8 @@ services:
 
   hive-server:
     container_name: hive-server
-    image: bde2020/hive:2.3.2-postgresql-metastore
+    build:
+      context: ./
     volumes:
       - ../docker-tmp:/docker-tmp
       - ../test-data:/test-data
