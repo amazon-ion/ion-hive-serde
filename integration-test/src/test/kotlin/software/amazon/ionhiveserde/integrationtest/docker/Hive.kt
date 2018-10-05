@@ -4,7 +4,7 @@
  * You may not use this file except in compliance with the License.
  * A copy of the License is located at:
  *
- *     http://aws.amazon.com/apache2.0/
+ *      http://aws.amazon.com/apache2.0/
  *
  * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
@@ -15,7 +15,9 @@
 package software.amazon.ionhiveserde.integrationtest.docker
 
 import software.amazon.ionhiveserde.IonHiveSerDe
-import software.amazon.ionhiveserde.storagehandlers.IonStorageHandler
+import software.amazon.ionhiveserde.formats.IonInputFormat
+import software.amazon.ionhiveserde.formats.IonOutputFormat
+import java.io.ByteArrayOutputStream
 import java.io.Closeable
 import java.io.File
 import java.sql.DriverManager
@@ -34,9 +36,6 @@ private const val JDBC_CONNECTION_STRING = "jdbc:hive2://0.0.0.0:10000/"
  */
 class Hive : Closeable {
     companion object {
-        val ROW_FORMAT_SERDE_STATEMENT = "ROW FORMAT SERDE '${IonHiveSerDe::class.java.name}'"
-        val STORAGE_HANDLER_STATEMENT = "STORED BY '${IonStorageHandler::class.java.name}'"
-
         init {
             Class.forName("org.apache.hive.jdbc.HiveDriver");
         }
@@ -44,11 +43,8 @@ class Hive : Closeable {
 
     private val connection by lazy { DriverManager.getConnection(JDBC_CONNECTION_STRING) }
     private val statement by lazy {
-        val stmt = connection.createStatement()
         // Adds the SerDe on creation to ensure we'll have access to it
-        stmt.execute("ADD JAR $SERDE_PATH")
-
-        stmt
+        connection.createStatement().apply { execute("ADD JAR $SERDE_PATH") }
     }
 
     override fun close() {
@@ -57,12 +53,24 @@ class Hive : Closeable {
     }
 
     /**
-     * Execute a single statement. Useful for statements that don't expect a return such as `CREATE TABLE`.
+     * Creates an external table using the Ion Hive SerDe.
      *
-     * @param sql sql statement.
+     * @param tableName Table name, must not exist.
+     * @param columns table columns represented as a column name to hive type map.
+     * @param location HDFS path where the table data is stored.
+     * @param serdeProperties SerDe properties represented as a property name to property value map.
      */
-    fun execute(sql: String) {
-        statement.execute(sql)
+    fun createExternalTable(tableName: String,
+                            columns: Map<String, String>,
+                            location: String,
+                            serdeProperties: Map<String, String> = emptyMap()) {
+        val columnsAsString = columns.entries.joinToString(",") { "${it.key} ${it.value}" }
+
+        execute("""
+            CREATE EXTERNAL TABLE $tableName ($columnsAsString)
+            ${serDeStatement(serdeProperties)}
+            LOCATION '$location'
+        """)
     }
 
     /**
@@ -81,13 +89,13 @@ class Hive : Closeable {
      * @param sql sql statement.
      * @return query output read as text.
      */
-    fun queryToFileAndRead(sql: String): String {
+    fun queryToFileAndRead(sql: String): ByteArray {
         val fileName = UUID.randomUUID().toString()
         val path = "docker-tmp/output/$fileName"
 
         val queryString = """
             INSERT OVERWRITE LOCAL DIRECTORY '/$path'
-            $ROW_FORMAT_SERDE_STATEMENT
+            ${serDeStatement()}
             $sql
         """
 
@@ -95,20 +103,27 @@ class Hive : Closeable {
 
         val dir = File(path)
 
-        // TODO add support for binary, maybe return an InputStream instead of raw text
-        return dir.listFiles().filterNot { it.isHidden }.fold("") { acc, file ->
-            acc + file.readText(Charsets.UTF_8)
-        }
+        return dir.listFiles()
+                .filterNot { it.isHidden }
+                .fold(ByteArrayOutputStream()) { acc, file -> acc.apply { write(file.readBytes()) } }
+                .toByteArray()
     }
 
+    /**
+     * Checks if the hive connection is closed.
+     *
+     * @return true if the connection is closed, false otherwise.
+     */
     fun isClosed() = connection.isClosed
 
     /**
      * Drops all hive tables in the current database.
+     *
+     * **Note**: External tables don't their data destroyed.
      */
     fun dropAllTables() {
         // Table drop is done in two steps as dropping a table while having the SHOW TABLES result set open resulted
-        // in an exception
+        // in an exception.
         val tableNames = mutableListOf<String>()
         query("SHOW TABLES") { rs ->
             while (rs.next()) {
@@ -118,5 +133,34 @@ class Hive : Closeable {
 
         tableNames.forEach { execute("DROP TABLE $it") }
     }
-}
 
+    /**
+     * Execute a single statement. Useful for statements that don't expect a return such as `CREATE TABLE`.
+     *
+     * @param sql sql statement.
+     */
+    private fun execute(sql: String) {
+        this.statement.execute(sql)
+    }
+
+    /**
+     * Builds a SerDe statement including SerDe properties, input and output format.
+     *
+     * @param properties property name to property value map
+     */
+    private fun serDeStatement(properties: Map<String, String> = emptyMap()): String {
+        val serdeProperties = if (properties.isEmpty()) {
+            ""
+        } else {
+            """WITH SERDEPROPERTIES (${properties.entries.joinToString(",") { """ "${it.key}" = "${it.value}" """ }})"""
+        }
+
+        return """
+            ROW FORMAT SERDE '${IonHiveSerDe::class.java.name}'
+            $serdeProperties
+            STORED AS
+                INPUTFORMAT '${IonInputFormat::class.java.name}'
+                OUTPUTFORMAT '${IonOutputFormat::class.java.name}'
+        """
+    }
+}
