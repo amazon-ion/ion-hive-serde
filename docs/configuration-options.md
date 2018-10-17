@@ -29,11 +29,11 @@ WITH SERDEPROPERTIES (
 as `00:00`), see [timestamp](http://amzn.github.io/ion-docs/docs/spec.html#timestamp) specification
 for more details.
 
-# Fail on overflow 
+## Fail on overflow 
 **TODO** see: https://github.com/amzn/ion-hive-serde/issues/14
 
-# Decimal rounding 
+## Decimal rounding 
 **TODO** see: https://github.com/amzn/ion-hive-serde/issues/9
 
-# Serialize As
+## Serialize As
 **TODO** see: https://github.com/amzn/ion-hive-serde/issues/8
