@@ -45,4 +45,23 @@ class SerDePropertiesTest {
     fun invalidEncoding() {
         SerDeProperties(Properties().apply { setProperty("encoding", "not an encoding") })
     }
+
+    @Test
+    fun timestampOffsetInMinutes() {
+        val subject = SerDeProperties(Properties().apply { setProperty("timestamp.serialization_offset", "01:00") })
+
+        assertEquals(60, subject.timestampOffsetInMinutes)
+    }
+
+    @Test
+    fun defaultTimestampOffsetInMinutes() {
+        val subject = SerDeProperties(Properties())
+
+        assertEquals(0, subject.timestampOffsetInMinutes)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun invalidTimestampOffsetInMinutes() {
+        SerDeProperties(Properties().apply { setProperty("timestamp.serialization_offset", "not an offset") })
+    }
 }

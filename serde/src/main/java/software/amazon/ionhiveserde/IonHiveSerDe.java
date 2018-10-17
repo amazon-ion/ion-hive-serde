@@ -73,7 +73,7 @@ public class IonHiveSerDe extends AbstractSerDe {
             readColumnNames(properties),
             readColumnTypes(properties));
 
-        ion = buildIonSystem(conf);
+        ion = buildIonSystem();
 
         objectInspectorFactory = new IonObjectInspectorFactory(tableInfo);
         objectInspector = objectInspectorFactory.objectInspectorFor(tableInfo);
@@ -101,7 +101,7 @@ public class IonHiveSerDe extends AbstractSerDe {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try (final IonWriter writer = newWriter(out)) {
-            Serializer.serializeStruct(writer, data, (StructObjectInspector) objectInspector);
+            Serializer.serializeStruct(writer, data, (StructObjectInspector) objectInspector, serDeProperties);
         } catch (IOException | IllegalArgumentException e) {
             throw new SerDeException(e);
         }
@@ -181,7 +181,7 @@ public class IonHiveSerDe extends AbstractSerDe {
         return TypeInfoUtils.getTypeInfosFromTypeString(columnTypeProperty);
     }
 
-    private IonSystem buildIonSystem(final @Nullable Configuration conf) {
+    private IonSystem buildIonSystem() {
         // TODO configure it from SERDEPROPERTIES
 
         return IonSystemBuilder.standard().build();

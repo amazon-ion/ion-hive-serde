@@ -14,24 +14,31 @@
 
 package software.amazon.ionhiveserde;
 
+import static software.amazon.ionhiveserde.util.TimestampOffsetParser.parseOffset;
+
 import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
 
 /**
  * Encapsulates all SerDe properties.
  */
-class SerDeProperties {
+public class SerDeProperties {
 
     private static final String ENCODING_KEY = "encoding";
     private final IonEncoding encoding;
 
+    private static final String DEFAULT_OFFSET_KEY = "timestamp.serialization_offset";
+    private static final String DEFAULT_OFFSET = "Z";
+    private final int timestampOffsetInMinutes;
+
     /**
      * Constructor.
      *
-     * @param properties {@link Properties} passed to {@link IonHiveSerDe#initialize(Configuration, Properties)}
+     * @param properties {@link Properties} passed to {@link IonHiveSerDe#initialize(Configuration, Properties)}.
      */
     SerDeProperties(final Properties properties) {
         encoding = IonEncoding.valueOf(properties.getProperty(ENCODING_KEY, IonEncoding.BINARY.name()));
+        timestampOffsetInMinutes = parseOffset(properties.getProperty(DEFAULT_OFFSET_KEY, DEFAULT_OFFSET));
     }
 
     /**
@@ -42,4 +49,15 @@ class SerDeProperties {
     IonEncoding getEncoding() {
         return encoding;
     }
+
+    /**
+     * Returns the timestamp timestampOffsetInMinutes in minutes to use when serializing and deserializing Ion
+     * timestamps.
+     *
+     * @return timestamp timestampOffsetInMinutes in minutes to be used.
+     */
+    public int getTimestampOffsetInMinutes() {
+        return timestampOffsetInMinutes;
+    }
 }
+

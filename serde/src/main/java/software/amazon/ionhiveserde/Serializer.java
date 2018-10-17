@@ -60,11 +60,12 @@ class Serializer {
      */
     static void serializeStruct(final IonWriter writer,
                                 final Object data,
-                                final StructObjectInspector objectInspector) throws IOException, SerDeException {
+                                final StructObjectInspector objectInspector,
+                                final SerDeProperties properties) throws IOException, SerDeException {
         writer.stepIn(IonType.STRUCT);
         for (StructField field : objectInspector.getAllStructFieldRefs()) {
             final Object fieldData = objectInspector.getStructFieldData(data, field);
-            serializeField(writer, field.getFieldName(), fieldData, field.getFieldObjectInspector());
+            serializeField(writer, field.getFieldName(), fieldData, field.getFieldObjectInspector(), properties);
         }
         writer.stepOut();
     }
@@ -72,7 +73,8 @@ class Serializer {
     private static void serializeField(final IonWriter writer,
                                        final String fieldName,
                                        final Object fieldData,
-                                       final ObjectInspector objectInspector) throws SerDeException, IOException {
+                                       final ObjectInspector objectInspector,
+                                       final SerDeProperties properties) throws SerDeException, IOException {
         // skips null fields instead of writing explicit nulls
         if (fieldData == null) {
             return;
@@ -80,34 +82,35 @@ class Serializer {
 
         writer.setFieldName(fieldName);
 
-        serializeValue(writer, fieldData, objectInspector);
+        serializeValue(writer, fieldData, objectInspector, properties);
     }
 
     private static void serializeValue(final IonWriter writer,
                                        final Object data,
-                                       final ObjectInspector objectInspector) throws IOException, SerDeException {
+                                       final ObjectInspector objectInspector,
+                                       final SerDeProperties properties) throws IOException, SerDeException {
         if (data == null) {
             writer.writeNull();
         } else {
             switch (objectInspector.getCategory()) {
                 case PRIMITIVE:
-                    serializePrimitive(writer, data, (PrimitiveObjectInspector) objectInspector);
+                    serializePrimitive(writer, data, (PrimitiveObjectInspector) objectInspector, properties);
                     break;
 
                 case MAP:
-                    serializeMap(writer, data, (MapObjectInspector) objectInspector);
+                    serializeMap(writer, data, (MapObjectInspector) objectInspector, properties);
                     break;
 
                 case UNION:
-                    serializeUnion(writer, data, (UnionObjectInspector) objectInspector);
+                    serializeUnion(writer, data, (UnionObjectInspector) objectInspector, properties);
                     break;
 
                 case STRUCT:
-                    serializeStruct(writer, data, (StructObjectInspector) objectInspector);
+                    serializeStruct(writer, data, (StructObjectInspector) objectInspector, properties);
                     break;
 
                 case LIST:
-                    serializeList(writer, data, (ListObjectInspector) objectInspector);
+                    serializeList(writer, data, (ListObjectInspector) objectInspector, properties);
                     break;
             }
         }
@@ -115,28 +118,31 @@ class Serializer {
 
     private static void serializeUnion(final IonWriter writer,
                                        final Object data,
-                                       final UnionObjectInspector objectInspector) throws IOException, SerDeException {
+                                       final UnionObjectInspector objectInspector,
+                                       final SerDeProperties properties) throws IOException, SerDeException {
         final byte tag = objectInspector.getTag(data);
         final ObjectInspector fieldObjectInspector = objectInspector.getObjectInspectors().get(tag);
 
-        serializeValue(writer, data, fieldObjectInspector);
+        serializeValue(writer, data, fieldObjectInspector, properties);
     }
 
     private static void serializeList(final IonWriter writer,
                                       final Object data,
-                                      final ListObjectInspector objectInspector) throws IOException, SerDeException {
+                                      final ListObjectInspector objectInspector,
+                                      final SerDeProperties properties) throws IOException, SerDeException {
         final ObjectInspector listElementObjectInspector = objectInspector.getListElementObjectInspector();
 
         writer.stepIn(IonType.LIST);
         for (int i = 0; i < objectInspector.getListLength(data); i++) {
-            serializeValue(writer, objectInspector.getListElement(data, i), listElementObjectInspector);
+            serializeValue(writer, objectInspector.getListElement(data, i), listElementObjectInspector, properties);
         }
         writer.stepOut();
     }
 
     private static void serializeMap(final IonWriter writer,
                                      final Object data,
-                                     final MapObjectInspector mapObjectInspector) throws IOException, SerDeException {
+                                     final MapObjectInspector mapObjectInspector,
+                                     final SerDeProperties properties) throws IOException, SerDeException {
         final StringObjectInspector keyObjectInspector =
             (StringObjectInspector) mapObjectInspector.getMapKeyObjectInspector();
         final ObjectInspector valueObjectInspector = mapObjectInspector.getMapValueObjectInspector();
@@ -144,7 +150,7 @@ class Serializer {
         writer.stepIn(IonType.STRUCT);
         for (Map.Entry entry : mapObjectInspector.getMap(data).entrySet()) {
             final String key = keyObjectInspector.getPrimitiveJavaObject(entry.getKey());
-            serializeField(writer, key, entry.getValue(), valueObjectInspector);
+            serializeField(writer, key, entry.getValue(), valueObjectInspector, properties);
         }
         writer.stepOut();
     }
@@ -152,7 +158,8 @@ class Serializer {
 
     private static void serializePrimitive(final IonWriter writer,
                                            final Object fieldData,
-                                           final PrimitiveObjectInspector primitiveObjectInspector)
+                                           final PrimitiveObjectInspector primitiveObjectInspector,
+                                           final SerDeProperties properties)
         throws SerDeException,
         IOException {
         switch (primitiveObjectInspector.getPrimitiveCategory()) {
@@ -201,7 +208,9 @@ class Serializer {
                 final java.sql.Timestamp hiveTimestamp =
                     ((TimestampObjectInspector) primitiveObjectInspector).getPrimitiveJavaObject(fieldData);
 
-                writer.writeTimestamp(Timestamp.forSqlTimestampZ(hiveTimestamp));
+                final Timestamp value = Timestamp.forSqlTimestampZ(hiveTimestamp);
+                value.withLocalOffset(properties.getTimestampOffsetInMinutes());
+                writer.writeTimestamp(value);
                 break;
 
             case CHAR:
