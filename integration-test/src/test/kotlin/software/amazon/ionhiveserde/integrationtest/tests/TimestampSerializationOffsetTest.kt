@@ -16,6 +16,7 @@ package software.amazon.ionhiveserde.integrationtest.tests
 
 import org.junit.Test
 import software.amazon.ion.IonDatagram
+import software.amazon.ion.IonStruct
 import software.amazon.ion.IonTimestamp
 import software.amazon.ionhiveserde.integrationtest.*
 import software.amazon.ionhiveserde.integrationtest.docker.SHARED_DIR
@@ -25,20 +26,18 @@ class TimestampSerializationOffsetTest : Base() {
     companion object : TestLifecycle {
         private const val TEST_DIR = "$SHARED_DIR/input/TimestampSerializationOffsetTest/"
         private const val INPUT_TIMESTAMPS = """
-            2018-01-01T10:10Z
-            2018-01-01T10:10-00:00
-            2018-01-01T10:10+00:00
-
-            2018-01-01T10:10-01:00
-            2018-01-01T10:10+01:00
-            2018-01-01T10:10+12:34
-            2018-01-01T10:10-12:34
-
-            2018-01-01T10:10-23:59
-            2018-01-01T10:10+23:59
+            { field: 2018-01-01T10:10Z }
+            { field: 2018-01-01T10:10-00:00 }
+            { field: 2018-01-01T10:10+00:00 }
+            { field: 2018-01-01T10:10-01:00 }
+            { field: 2018-01-01T10:10+01:00 }
+            { field: 2018-01-01T10:10+12:34 }
+            { field: 2018-01-01T10:10-12:34 }
+            { field: 2018-01-01T10:10-23:59 }
+            { field: 2018-01-01T10:10+23:59 }
         """
-
         private val tableName = TimestampSerializationOffsetTest::javaClass.name
+        private val serdeProperties = mapOf("timestamp.serialization_offset" to "-08:00")
 
         override fun setup() {
             mkdir(TEST_DIR)
@@ -58,30 +57,34 @@ class TimestampSerializationOffsetTest : Base() {
                 tableName,
                 mapOf("field" to "TIMESTAMP"),
                 "/data/input/TimestampSerializationOffsetTest/",
-                mapOf(
-                        "timestamp.serialization_offset" to "-08:00"
-                ))
+                serdeProperties)
     }
 
-    private fun IonDatagram.toTimestampList() = this.map { it as IonTimestamp }
+    private fun IonDatagram.toTimestampList() = this.map { it as IonStruct }
+            .map { it.first() as IonTimestamp }
             .map { it.timestampValue() }
 
     @Test
-    fun name() {
+    fun timestampSerializedToConfiguredOffset() {
         createTable()
 
-        val rawBytes = Base.hive().queryToFileAndRead("SELECT * FROM $tableName")
+        val rawBytes = Base.hive().queryToFileAndRead("SELECT * FROM $tableName", serdeProperties)
         val datagram = ION.loader.load(rawBytes)
 
         val expectedOffset = -8 * 60
 
         val actualTimestamps = ION.loader.load(INPUT_TIMESTAMPS).toTimestampList()
 
+        assertEquals(actualTimestamps.size, datagram.size)
         datagram.toTimestampList().forEachIndexed { index, timestamp ->
             assertEquals(expectedOffset, timestamp.localOffset)
 
             val expectedTimestamp = actualTimestamps[index].withLocalOffset(expectedOffset)
-            assertEquals(expectedTimestamp, timestamp)
+            val assertErrorMessage = """|Expected: $expectedTimestamp
+                                        |Actual:   $timestamp
+                                        |""".trimMargin()
+
+            assertEquals(expectedTimestamp.millis, timestamp.millis, message = assertErrorMessage)
         }
     }
 }

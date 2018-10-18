@@ -209,8 +209,8 @@ class Serializer {
                     ((TimestampObjectInspector) primitiveObjectInspector).getPrimitiveJavaObject(fieldData);
 
                 final Timestamp value = Timestamp.forSqlTimestampZ(hiveTimestamp);
-                value.withLocalOffset(properties.getTimestampOffsetInMinutes());
-                writer.writeTimestamp(value);
+                final Timestamp timestampWithOffset = value.withLocalOffset(properties.getTimestampOffsetInMinutes());
+                writer.writeTimestamp(timestampWithOffset);
                 break;
 
             case CHAR:
