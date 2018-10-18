@@ -24,6 +24,8 @@ import kotlin.test.assertEquals
 @RunWith(JUnitParamsRunner::class)
 class SerDePropertiesTest {
 
+    // encoding ------------------------------------------------------------------------------------------------------
+
     private fun encodings() = IonEncoding.values()
 
     @Test
@@ -46,6 +48,8 @@ class SerDePropertiesTest {
         SerDeProperties(Properties().apply { setProperty("encoding", "not an encoding") })
     }
 
+    // timestampOffsetInMinutes ---------------------------------------------------------------------------------------
+
     @Test
     fun timestampOffsetInMinutes() {
         val subject = SerDeProperties(Properties().apply { setProperty("timestamp.serialization_offset", "01:00") })
@@ -63,5 +67,29 @@ class SerDePropertiesTest {
     @Test(expected = IllegalArgumentException::class)
     fun invalidTimestampOffsetInMinutes() {
         SerDeProperties(Properties().apply { setProperty("timestamp.serialization_offset", "not an offset") })
+    }
+
+    // serializeNull --------------------------------------------------------------------------------------------------
+
+    private fun serializeNullOptions() = SerializeNullOption.values()
+
+    @Test
+    @Parameters(method = "serializeNullOptions")
+    fun serializeNull(serializeNullOption: SerializeNullOption) {
+        val subject = SerDeProperties(Properties().apply { setProperty("serialize_null", serializeNullOption.name) })
+
+        assertEquals(serializeNullOption, subject.serializeNull)
+    }
+
+    @Test
+    fun defaultSerializeNull() {
+        val subject = SerDeProperties(Properties())
+
+        assertEquals(SerializeNullOption.NO, subject.serializeNull)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun invalidSerializeNull() {
+        SerDeProperties(Properties().apply { setProperty("serialize_null", "not a boolean") })
     }
 }

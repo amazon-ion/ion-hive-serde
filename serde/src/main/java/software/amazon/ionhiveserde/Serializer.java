@@ -75,8 +75,9 @@ class Serializer {
                                        final Object fieldData,
                                        final ObjectInspector objectInspector,
                                        final SerDeProperties properties) throws SerDeException, IOException {
-        // skips null fields instead of writing explicit nulls
-        if (fieldData == null) {
+
+        // skips null fields when not configured to serialize nulls
+        if (fieldData == null && properties.getSerializeNull() == SerializeNullOption.NO) {
             return;
         }
 
@@ -90,7 +91,18 @@ class Serializer {
                                        final ObjectInspector objectInspector,
                                        final SerDeProperties properties) throws IOException, SerDeException {
         if (data == null) {
-            writer.writeNull();
+            switch (properties.getSerializeNull()) {
+                case TYPED:
+                    writer.writeNull(ionTypeFrom(objectInspector));
+                    break;
+                case UNTYPED:
+                    writer.writeNull();
+                    break;
+                default:
+                    throw new IllegalStateException(
+                        "trying to serialize null field with invalid serialize_null option");
+            }
+
         } else {
             switch (objectInspector.getCategory()) {
                 case PRIMITIVE:
@@ -114,6 +126,51 @@ class Serializer {
                     break;
             }
         }
+    }
+
+    private static IonType ionTypeFrom(final ObjectInspector objectInspector) {
+        switch (objectInspector.getCategory()) {
+            case PRIMITIVE:
+                final PrimitiveObjectInspector primitiveObjectInspector = (PrimitiveObjectInspector) objectInspector;
+
+                switch (primitiveObjectInspector.getPrimitiveCategory()) {
+                    case BOOLEAN:
+                        return IonType.BOOL;
+
+                    case BYTE:
+                    case SHORT:
+                    case INT:
+                    case LONG:
+                        return IonType.INT;
+
+                    case FLOAT:
+                    case DOUBLE:
+                        return IonType.FLOAT;
+
+                    case DECIMAL:
+                        return IonType.DECIMAL;
+                    case DATE:
+                    case TIMESTAMP:
+                        return IonType.TIMESTAMP;
+
+                    case CHAR:
+                    case STRING:
+                    case VARCHAR:
+                        return IonType.STRING;
+
+                    case BINARY:
+                        return IonType.BLOB;
+                }
+
+            case MAP:
+            case STRUCT:
+                return IonType.STRUCT;
+
+            case LIST:
+                return IonType.LIST;
+        }
+
+        return IonType.NULL;
     }
 
     private static void serializeUnion(final IonWriter writer,
@@ -154,7 +211,6 @@ class Serializer {
         }
         writer.stepOut();
     }
-
 
     private static void serializePrimitive(final IonWriter writer,
                                            final Object fieldData,
@@ -199,7 +255,8 @@ class Serializer {
                 break;
 
             case DATE:
-                final Date date = ((DateObjectInspector) primitiveObjectInspector).getPrimitiveJavaObject(fieldData);
+                final Date date = ((DateObjectInspector) primitiveObjectInspector)
+                    .getPrimitiveJavaObject(fieldData);
 
                 writer.writeTimestamp(Timestamp.forDateZ(date));
                 break;
@@ -209,7 +266,8 @@ class Serializer {
                     ((TimestampObjectInspector) primitiveObjectInspector).getPrimitiveJavaObject(fieldData);
 
                 final Timestamp value = Timestamp.forSqlTimestampZ(hiveTimestamp);
-                final Timestamp timestampWithOffset = value.withLocalOffset(properties.getTimestampOffsetInMinutes());
+                final Timestamp timestampWithOffset = value
+                    .withLocalOffset(properties.getTimestampOffsetInMinutes());
                 writer.writeTimestamp(timestampWithOffset);
                 break;
 

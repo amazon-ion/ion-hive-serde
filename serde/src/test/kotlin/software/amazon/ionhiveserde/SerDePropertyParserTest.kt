@@ -18,11 +18,13 @@ import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.junit.Test
 import org.junit.runner.RunWith
-import software.amazon.ionhiveserde.util.TimestampOffsetParser.parseOffset
+import software.amazon.ionhiveserde.util.SerDePropertyParser.parseOffset
 import kotlin.test.assertEquals
 
 @RunWith(JUnitParamsRunner::class)
-class TimestampOffsetParserTest {
+class SerDePropertyParserTest {
+
+    // parseOffset ----------------------------------------------------------------------------------------------------
 
     fun parseOffsetValidTestCases(): List<List<Any>> = listOf(
             listOf("Z", 0),
@@ -71,5 +73,10 @@ class TimestampOffsetParserTest {
     @Parameters(method = "parseOffsetInvalidTestCases")
     fun parseInvalidOffset(offsetText: String) {
          parseOffset(offsetText)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun parseNullOffset() {
+        parseOffset(null)
     }
 }

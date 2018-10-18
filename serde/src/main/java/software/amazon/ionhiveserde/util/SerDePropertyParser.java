@@ -17,7 +17,7 @@ package software.amazon.ionhiveserde.util;
 /**
  * Offset parser for the timestamp.serialization_offset property.
  */
-public class TimestampOffsetParser {
+public class SerDePropertyParser {
 
     /**
      * Parses the string representation of an offset.
@@ -27,6 +27,10 @@ public class TimestampOffsetParser {
      * @throws IllegalArgumentException if it cannot correctly parse offsetText.
      */
     public static int parseOffset(final String offsetText) {
+        if (offsetText == null) {
+            throw new IllegalArgumentException("offset text cannot be null");
+        }
+
         int length = offsetText.length();
 
         if (length < 1) {

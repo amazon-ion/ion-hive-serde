@@ -29,6 +29,38 @@ WITH SERDEPROPERTIES (
 as `00:00`), see [timestamp](http://amzn.github.io/ion-docs/docs/spec.html#timestamp) specification
 for more details.
 
+## Serialize null columns:
+The SerDe can be configured to serialize or skip columns with null values. User can choose to write out strongly typed 
+nulls or untyped nulls. Strongly typed nulls type will be determined based on the default Ion to Hive type mapping
+
+Specification: 
+```
+WITH SERDEPROPERTIES (
+   "serialize_null" = "<NO | UNTYPED | TYPED>" -- default: NO 
+)  
+```
+
+Example:
+```
+-- Table
+| id | name    |
+|----|---------|
+| 1  | Foo Bar |
+| 2  | null    |
+
+-- Serialized with "serialize.null" = "TYPED"
+{id: 1, name: "Foo Bar"}
+{id: 2, name: null.string}
+
+-- Serialized with "serialize.null" = "UNTYPED"
+{id: 1, name: "Foo Bar"}
+{id: 2, name: null}
+
+-- Serialized with "serialize.null" = "NO" 
+{id: 1, name: "Foo Bar"}
+{id: 2}
+```
+
 ## Fail on overflow 
 **TODO** see: https://github.com/amzn/ion-hive-serde/issues/14
 
