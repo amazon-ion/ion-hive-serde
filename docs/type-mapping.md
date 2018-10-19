@@ -1,9 +1,9 @@
 # Type mapping
 [Hive type system](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Types) and the
 [Ion type system](http://amzn.github.io/ion-docs/docs/spec.html) don't always map one to one so
-some conversions must be made. For those SerDe properties can be used for fine tuning.
+some conversions must be made. For those [SerDe properties](./configuration-options.md) can be used for fine tuning.
 
- **Type mapping from Ion to Hive during deserialization:**
+ **Type mapping from Ion types to Hive types during deserialization:**
 | Ion Type  | Hive Type                               | Notes |
 | --------- | --------------------------------------- | ----- |
 | bool      | BOOLEAN                                 | |
@@ -19,7 +19,7 @@ some conversions must be made. For those SerDe properties can be used for fine t
 | list      | ARRAY<>                                 | see union types below |
 | sexp      | ARRAY<>                                 | see union types below |
 
-**Type mapping from Hive to Ion during serialization:**
+**Type mapping from Hive types to Ion types during serialization:**
 | Hive      | Ion            | Default |
 | --------- | ---------------| ------- |
 | BOOLEAN   | bool           | |
@@ -55,11 +55,11 @@ collections can be nested and you can not define union types recursively.
 **Warning**: Hive support for union types is not complete and some operations, e.g. `JOIN` and
 `GROUP BY` on union types do not work. See Hive's
 [documentation](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Types#LanguageManualTypes-UnionTypesunionUnionTypes)
-for more details.
+for more details. Current Hive version: 2.3.*, JIRA issue: https://issues.apache.org/jira/browse/HIVE-2508 
 
 ## Ion structs
-When deserializing a duplicated field from an Ion struct a single value will be chosen non
-deterministically and the others will be ignored. This is done as Ion structs do have an order and
+When deserializing a duplicated field from an Ion struct a single value will be chosen nondeterministically 
+and the others will be ignored. This is done as Ion structs do have an order and
 support duplicated fields while Hive's STRUCT<> and MAP<> do not.
 
 ## Ion timestamps
@@ -73,4 +73,4 @@ be changed by the `timestamp.serialization_offset` property.
 Hive DATEs are serialized to an Ion timestamp at date precision. When deserializing an Ion
 timestamp to a Hive date any precision higher than date **is dropped resulting in a potential data
 loss**. Examples: `2017-02-01T13:24Z` and `2017-02-01T20:20Z` will map to the same Hive `Date` and
-when serializing will map back to `2017-02-01T` which is **not** equivalent to the original values.
+when serializing will map back to `2017-02-01T` which is **not** equivalent to the original value.

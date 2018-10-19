@@ -28,3 +28,12 @@ WITH SERDEPROPERTIES (
 `OFFSET` is represented as `<signal>hh:mm`, examples: `01:00`, `+01:00`, `-09:30`, `Z` (UTC, same
 as `00:00`), see [timestamp](http://amzn.github.io/ion-docs/docs/spec.html#timestamp) specification
 for more details.
+
+# Fail on overflow 
+**TODO** see: https://github.com/amzn/ion-hive-serde/issues/14
+
+# Decimal rounding 
+**TODO** see: https://github.com/amzn/ion-hive-serde/issues/9
+
+# Serialize As
+**TODO** see: https://github.com/amzn/ion-hive-serde/issues/8
