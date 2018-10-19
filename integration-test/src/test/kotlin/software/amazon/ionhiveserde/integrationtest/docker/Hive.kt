@@ -87,15 +87,16 @@ class Hive : Closeable {
      * Executes the query storing the output on the file system using the SerDe. Reads the output back as text.
      *
      * @param sql sql statement.
+     * @param serdeProperties SerDe properties represented as a property name to property value map.
      * @return query output read as text.
      */
-    fun queryToFileAndRead(sql: String): ByteArray {
+    fun queryToFileAndRead(sql: String, serdeProperties: Map<String, String> = emptyMap()): ByteArray {
         val fileName = UUID.randomUUID().toString()
         val path = "docker-tmp/output/$fileName"
 
         val queryString = """
             INSERT OVERWRITE LOCAL DIRECTORY '/$path'
-            ${serDeStatement()}
+            ${serDeStatement(serdeProperties)}
             $sql
         """
 
