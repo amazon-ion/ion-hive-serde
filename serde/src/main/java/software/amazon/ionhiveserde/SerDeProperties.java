@@ -14,7 +14,7 @@
 
 package software.amazon.ionhiveserde;
 
-import static software.amazon.ionhiveserde.util.TimestampOffsetParser.parseOffset;
+import static software.amazon.ionhiveserde.util.SerDePropertyParser.parseOffset;
 
 import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
@@ -25,11 +25,16 @@ import org.apache.hadoop.conf.Configuration;
 public class SerDeProperties {
 
     private static final String ENCODING_KEY = "encoding";
+    private static final String DEFAULT_ENCODING = IonEncoding.BINARY.name();
     private final IonEncoding encoding;
 
     private static final String DEFAULT_OFFSET_KEY = "timestamp.serialization_offset";
     private static final String DEFAULT_OFFSET = "Z";
     private final int timestampOffsetInMinutes;
+
+    private static final String DEFAULT_SERIALIZE_NULL_KEY = "serialize_null";
+    private static final String DEFAULT_SERIALIZE_NULL = SerializeNullStrategy.OMIT.name();
+    private final SerializeNullStrategy serializeNull;
 
     /**
      * Constructor.
@@ -37,8 +42,10 @@ public class SerDeProperties {
      * @param properties {@link Properties} passed to {@link IonHiveSerDe#initialize(Configuration, Properties)}.
      */
     SerDeProperties(final Properties properties) {
-        encoding = IonEncoding.valueOf(properties.getProperty(ENCODING_KEY, IonEncoding.BINARY.name()));
+        encoding = IonEncoding.valueOf(properties.getProperty(ENCODING_KEY, DEFAULT_ENCODING));
         timestampOffsetInMinutes = parseOffset(properties.getProperty(DEFAULT_OFFSET_KEY, DEFAULT_OFFSET));
+        serializeNull = SerializeNullStrategy.valueOf(
+            properties.getProperty(DEFAULT_SERIALIZE_NULL_KEY, DEFAULT_SERIALIZE_NULL));
     }
 
     /**
@@ -58,6 +65,15 @@ public class SerDeProperties {
      */
     public int getTimestampOffsetInMinutes() {
         return timestampOffsetInMinutes;
+    }
+
+    /**
+     * Returns how the serializer should write out null values.
+     *
+     * @return option to be used
+     */
+    public SerializeNullStrategy getSerializeNull() {
+        return serializeNull;
     }
 }
 
