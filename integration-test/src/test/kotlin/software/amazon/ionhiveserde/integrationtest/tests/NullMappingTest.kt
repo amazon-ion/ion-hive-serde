@@ -22,7 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import software.amazon.ion.*
 import software.amazon.ionhiveserde.IonEncoding
-import software.amazon.ionhiveserde.SerializeNullOption
+import software.amazon.ionhiveserde.SerializeNullStrategy
 import software.amazon.ionhiveserde.integrationtest.*
 import software.amazon.ionhiveserde.integrationtest.docker.SHARED_DIR
 import software.amazon.ionhiveserde.integrationtest.setup.TestData
@@ -153,7 +153,7 @@ class NullMappingTest : Base() {
     @Parameters(method = "encodings")
     @TestCaseName("[{index}] {method}: {0}")
     fun toFileDoNotSerializeNull(encoding: IonEncoding) {
-        val serdeProperties = mapOf("encoding" to encoding.name, "serialize_null" to SerializeNullOption.NO.name)
+        val serdeProperties = mapOf("encoding" to encoding.name, "serialize_null" to SerializeNullStrategy.OMIT.name)
         toFileTestTemplate(serdeProperties) { assertTrue(it.isEmpty) }
     }
 
@@ -161,7 +161,7 @@ class NullMappingTest : Base() {
     @Parameters(method = "encodings")
     @TestCaseName("[{index}] {method}: {0}")
     fun toFileSerializeUntypedNull(encoding: IonEncoding) {
-        val serdeProperties = mapOf("encoding" to encoding.name, "serialize_null" to SerializeNullOption.UNTYPED.name)
+        val serdeProperties = mapOf("encoding" to encoding.name, "serialize_null" to SerializeNullStrategy.UNTYPED.name)
         toFileTestTemplate(serdeProperties) { struct ->
             assertEquals(types.size, struct.size())
             struct.forEach { value -> assertIonNull(IonType.NULL, value) }
@@ -172,7 +172,7 @@ class NullMappingTest : Base() {
     @Parameters(method = "encodings")
     @TestCaseName("[{index}] {method}: {0}")
     fun toFileSerializeTypedNull(encoding: IonEncoding) {
-        val serdeProperties = mapOf("encoding" to encoding.name, "serialize_null" to SerializeNullOption.TYPED.name)
+        val serdeProperties = mapOf("encoding" to encoding.name, "serialize_null" to SerializeNullStrategy.TYPED.name)
         toFileTestTemplate(serdeProperties) { struct ->
             assertEquals(types.size, struct.size())
             struct.forEachIndexed { index, value ->

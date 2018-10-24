@@ -77,7 +77,7 @@ class Serializer {
                                        final SerDeProperties properties) throws SerDeException, IOException {
 
         // skips null fields when not configured to serialize nulls
-        if (fieldData == null && properties.getSerializeNull() == SerializeNullOption.NO) {
+        if (fieldData == null && properties.getSerializeNull() == SerializeNullStrategy.OMIT) {
             return;
         }
 

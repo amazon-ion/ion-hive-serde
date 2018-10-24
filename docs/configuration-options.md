@@ -48,15 +48,15 @@ Example:
 | 1  | Foo Bar |
 | 2  | null    |
 
--- Serialized with "serialize.null" = "TYPED"
+-- Serialized with "serialize_null" = "TYPED"
 {id: 1, name: "Foo Bar"}
 {id: 2, name: null.string}
 
--- Serialized with "serialize.null" = "UNTYPED"
+-- Serialized with "serialize_null" = "UNTYPED"
 {id: 1, name: "Foo Bar"}
 {id: 2, name: null}
 
--- Serialized with "serialize.null" = "NO" 
+-- Serialized with "serialize_null" = "NO" 
 {id: 1, name: "Foo Bar"}
 {id: 2}
 ```

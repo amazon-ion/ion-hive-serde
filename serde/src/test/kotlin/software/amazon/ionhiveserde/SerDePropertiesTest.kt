@@ -71,21 +71,21 @@ class SerDePropertiesTest {
 
     // serializeNull --------------------------------------------------------------------------------------------------
 
-    private fun serializeNullOptions() = SerializeNullOption.values()
+    private fun serializeNullOptions() = SerializeNullStrategy.values()
 
     @Test
     @Parameters(method = "serializeNullOptions")
-    fun serializeNull(serializeNullOption: SerializeNullOption) {
-        val subject = SerDeProperties(Properties().apply { setProperty("serialize_null", serializeNullOption.name) })
+    fun serializeNull(serializeNullStrategy: SerializeNullStrategy) {
+        val subject = SerDeProperties(Properties().apply { setProperty("serialize_null", serializeNullStrategy.name) })
 
-        assertEquals(serializeNullOption, subject.serializeNull)
+        assertEquals(serializeNullStrategy, subject.serializeNull)
     }
 
     @Test
     fun defaultSerializeNull() {
         val subject = SerDeProperties(Properties())
 
-        assertEquals(SerializeNullOption.NO, subject.serializeNull)
+        assertEquals(SerializeNullStrategy.OMIT, subject.serializeNull)
     }
 
     @Test(expected = IllegalArgumentException::class)

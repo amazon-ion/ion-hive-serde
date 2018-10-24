@@ -15,13 +15,13 @@
 package software.amazon.ionhiveserde;
 
 /**
- * Possible options for the serialize_null property.
+ * Possible strategies for the serialize_null property.
  */
-public enum SerializeNullOption {
+public enum SerializeNullStrategy {
     /**
      * Omit nulls.
      */
-    NO,
+    OMIT,
 
     /**
      * Serialize strongly typed nulls.

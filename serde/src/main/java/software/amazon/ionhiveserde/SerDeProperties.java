@@ -33,8 +33,8 @@ public class SerDeProperties {
     private final int timestampOffsetInMinutes;
 
     private static final String DEFAULT_SERIALIZE_NULL_KEY = "serialize_null";
-    private static final String DEFAULT_SERIALIZE_NULL = SerializeNullOption.NO.name();
-    private final SerializeNullOption serializeNull;
+    private static final String DEFAULT_SERIALIZE_NULL = SerializeNullStrategy.OMIT.name();
+    private final SerializeNullStrategy serializeNull;
 
     /**
      * Constructor.
@@ -44,7 +44,7 @@ public class SerDeProperties {
     SerDeProperties(final Properties properties) {
         encoding = IonEncoding.valueOf(properties.getProperty(ENCODING_KEY, DEFAULT_ENCODING));
         timestampOffsetInMinutes = parseOffset(properties.getProperty(DEFAULT_OFFSET_KEY, DEFAULT_OFFSET));
-        serializeNull = SerializeNullOption.valueOf(
+        serializeNull = SerializeNullStrategy.valueOf(
             properties.getProperty(DEFAULT_SERIALIZE_NULL_KEY, DEFAULT_SERIALIZE_NULL));
     }
 
@@ -72,7 +72,7 @@ public class SerDeProperties {
      *
      * @return option to be used
      */
-    public SerializeNullOption getSerializeNull() {
+    public SerializeNullStrategy getSerializeNull() {
         return serializeNull;
     }
 }
