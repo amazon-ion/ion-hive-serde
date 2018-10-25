@@ -24,14 +24,15 @@ import software.amazon.ion.IonValue;
 /**
  * Adapts an {@link IonInt} for the smallint Hive type.
  */
-public class IonIntToSmallIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+public class IonIntToSmallIntObjectInspector extends
+    AbstractOverflowablePrimitiveObjectInspector<IonInt, Short> implements
     ShortObjectInspector {
 
     public static final int MIN_VALUE = Short.MIN_VALUE;
     public static final int MAX_VALUE = Short.MAX_VALUE;
 
-    public IonIntToSmallIntObjectInspector() {
-        super(TypeInfoFactory.shortTypeInfo);
+    public IonIntToSmallIntObjectInspector(final boolean failOnOverflow) {
+        super(TypeInfoFactory.shortTypeInfo, failOnOverflow);
     }
 
     /**
@@ -43,10 +44,22 @@ public class IonIntToSmallIntObjectInspector extends AbstractIonPrimitiveJavaObj
             return null;
         }
 
-        return new ShortWritable(getPrimitiveJavaObject((IonInt) o));
+        return new ShortWritable(getPrimitiveJavaObjectFromIonValue((IonInt) o));
     }
 
-    private void validateSize(final IonInt ionValue) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Short getValidatedPrimitiveJavaObject(final IonInt ionValue) {
+        return (short) ionValue.intValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void validateSize(final IonInt ionValue) {
         boolean correctIntSize = ionValue.getIntegerSize() == IntegerSize.INT;
 
         if (!correctIntSize || !validRange(ionValue)) {
@@ -78,11 +91,6 @@ public class IonIntToSmallIntObjectInspector extends AbstractIonPrimitiveJavaObj
             return null;
         }
 
-        return getPrimitiveJavaObject((IonInt) o);
-    }
-
-    private short getPrimitiveJavaObject(final IonInt ionValue) {
-        validateSize(ionValue);
-        return (short) ionValue.intValue();
+        return getPrimitiveJavaObjectFromIonValue((IonInt) o);
     }
 }

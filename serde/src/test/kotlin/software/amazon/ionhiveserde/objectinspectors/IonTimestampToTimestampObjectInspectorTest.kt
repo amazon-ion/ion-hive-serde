@@ -15,37 +15,22 @@
 package software.amazon.ionhiveserde.objectinspectors
 
 import junitparams.JUnitParamsRunner
-import junitparams.NamedParameters
-import junitparams.Parameters
 import org.apache.hadoop.hive.serde2.io.TimestampWritable
-import org.junit.Test
 import org.junit.runner.RunWith
+import software.amazon.ion.IonTimestamp
 import software.amazon.ion.Timestamp
 import software.amazon.ionhiveserde.ION
-import kotlin.test.assertEquals
 
 @RunWith(JUnitParamsRunner::class)
-class IonTimestampToTimestampObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspectorTest() {
+class IonTimestampToTimestampObjectInspectorTest
+    : AbstractIonPrimitiveJavaObjectInspectorTest<IonTimestamp, TimestampWritable, java.sql.Timestamp>() {
 
     override val subject = IonTimestampToTimestampObjectInspector()
-
-    @NamedParameters("parameters")
-    fun parameters(): Array<Array<Any>> {
-        return arrayOf(
-                arrayOf(java.sql.Timestamp(1514764800000L), Timestamp.valueOf("2018T")),
-                arrayOf(java.sql.Timestamp(1533081600000L), Timestamp.valueOf("2018-08T")),
-                arrayOf(java.sql.Timestamp(1534291200000L), Timestamp.valueOf("2018-08-15T")),
-                arrayOf(java.sql.Timestamp(1534294860000L), Timestamp.valueOf("2018-08-15T01:01Z")),
-                arrayOf(java.sql.Timestamp(1534294861000L), Timestamp.valueOf("2018-08-15T01:01:01Z"))
-        )
-    }
-
-    @Test
-    @Parameters(named = "parameters")
-    fun getPrimitiveWritableObject(sqlTimestamp: java.sql.Timestamp, ionTimestamp: Timestamp) {
-        val ionValue = ION.newTimestamp(ionTimestamp)
-
-        val actual = subject.getPrimitiveWritableObject(ionValue)
-        assertEquals(TimestampWritable(sqlTimestamp), actual, message = "for $ionValue")
-    }
+    override fun validTestCases() = listOf(
+            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018T")), java.sql.Timestamp(1514764800000L), TimestampWritable(java.sql.Timestamp(1514764800000L))),
+            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08T")), java.sql.Timestamp(1533081600000L), TimestampWritable(java.sql.Timestamp(1533081600000L))),
+            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08-15T")), java.sql.Timestamp(1534291200000L), TimestampWritable(java.sql.Timestamp(1534291200000L))),
+            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08-15T01:01Z")), java.sql.Timestamp(1534294860000L), TimestampWritable(java.sql.Timestamp(1534294860000L))),
+            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08-15T01:01:01Z")), java.sql.Timestamp(1534294861000L), TimestampWritable(java.sql.Timestamp(1534294861000L)))
+    )
 }

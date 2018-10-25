@@ -23,7 +23,7 @@ import kotlin.test.assertNull
 
 class IonUnionObjectInspectorTest {
 
-    private val objectInspectors = listOf(IonIntToIntObjectInspector(), IonBooleanToBooleanObjectInspector())
+    private val objectInspectors = listOf(IonIntToIntObjectInspector(true), IonBooleanToBooleanObjectInspector())
     private val subject = IonUnionObjectInspector(objectInspectors)
 
     @Test

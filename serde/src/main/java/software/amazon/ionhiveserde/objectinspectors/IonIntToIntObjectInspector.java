@@ -24,13 +24,14 @@ import software.amazon.ion.IonValue;
 /**
  * Adapts an {@link IonInt} for the int Hive type.
  */
-public class IonIntToIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements IntObjectInspector {
+public class IonIntToIntObjectInspector extends AbstractOverflowablePrimitiveObjectInspector<IonInt, Integer> implements
+    IntObjectInspector {
 
     public static final int MIN_VALUE = Integer.MIN_VALUE;
     public static final int MAX_VALUE = Integer.MAX_VALUE;
 
-    public IonIntToIntObjectInspector() {
-        super(TypeInfoFactory.intTypeInfo);
+    public IonIntToIntObjectInspector(final boolean failOnOverflow) {
+        super(TypeInfoFactory.intTypeInfo, failOnOverflow);
     }
 
     /**
@@ -42,10 +43,22 @@ public class IonIntToIntObjectInspector extends AbstractIonPrimitiveJavaObjectIn
             return null;
         }
 
-        return new IntWritable(getPrimitiveJavaObject((IonInt) o));
+        return new IntWritable(getPrimitiveJavaObjectFromIonValue((IonInt) o));
     }
 
-    private void validateSize(final IonInt ionValue) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Integer getValidatedPrimitiveJavaObject(final IonInt ionValue) {
+        return ionValue.intValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void validateSize(final IonInt ionValue) {
         if (ionValue.getIntegerSize() != IntegerSize.INT) {
             throw new IllegalArgumentException(
                 "insufficient precision for " + ionValue.toString() + " as " + this.typeInfo.getTypeName());
@@ -69,11 +82,6 @@ public class IonIntToIntObjectInspector extends AbstractIonPrimitiveJavaObjectIn
             return null;
         }
 
-        return getPrimitiveJavaObject((IonInt) o);
-    }
-
-    private int getPrimitiveJavaObject(final IonInt ionValue) {
-        validateSize(ionValue);
-        return ionValue.intValue();
+        return getPrimitiveJavaObjectFromIonValue((IonInt) o);
     }
 }

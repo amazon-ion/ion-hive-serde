@@ -22,37 +22,33 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import software.amazon.ion.IonLob
 import software.amazon.ionhiveserde.ION
+import software.amazon.ionhiveserde.ionNull
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @RunWith(JUnitParamsRunner::class)
-class IonLobToBinaryObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspectorTest() {
-
-    override val subject = IonLobToBinaryObjectInspector()
+class IonLobToBinaryObjectInspectorTest
+    : AbstractIonPrimitiveJavaObjectInspectorTest<IonLob, BytesWritable, ByteArray>() {
 
     // CLOBs are encoded as 7 bit ASCII, see http://amzn.github.io/ion-docs/docs/spec.html#clob
     private val raw = "12345678".toByteArray(charset = Charsets.US_ASCII)
 
-    @NamedParameters("lobs")
-    fun lobs(): Array<IonLob> = arrayOf(ION.newClob(raw), ION.newBlob(raw))
+    override val subject = IonLobToBinaryObjectInspector()
+    override fun validTestCases() = listOf(
+            ValidTestCase(ION.newClob(raw), raw, BytesWritable(raw)),
+            ValidTestCase(ION.newBlob(raw), raw, BytesWritable(raw))
+    )
 
     @Test
-    @Parameters(named = "lobs")
-    fun getPrimitiveWritableObject(value: IonLob) {
-        val actual = subject.getPrimitiveWritableObject(value)
-
-        assertEquals(BytesWritable(raw), actual)
-    }
-
-    @Test
-    @Parameters(named = "lobs")
-    fun getPrimitiveJavaObject(value: IonLob) {
-        val actual = subject.getPrimitiveJavaObject(value) as ByteArray
+    @Parameters(method = "validTestCases")
+    override fun getPrimitiveJavaObject(testCase: ValidTestCase<out IonLob, BytesWritable, ByteArray>) {
+        val actual = subject.getPrimitiveJavaObject(testCase.ionValue) as ByteArray
 
         assertTrue(byteArrayEquals(raw, actual))
     }
 
     private fun byteArrayEquals(lhs: ByteArray, rhs: ByteArray): Boolean {
-        return lhs.size == rhs.size && lhs.foldIndexed(true, { index, acc, b -> acc && rhs[index] == b })
+        return lhs.size == rhs.size && lhs.foldIndexed(true) { index, acc, b -> acc && rhs[index] == b }
     }
 }

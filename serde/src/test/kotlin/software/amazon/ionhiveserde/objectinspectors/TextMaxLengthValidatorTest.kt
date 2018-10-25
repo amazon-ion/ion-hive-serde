@@ -22,10 +22,7 @@ class TextMaxLengthValidatorTest {
 
     @Test
     fun validateForValidString() {
-        val expected = "1234567"
-        val actual = subject.validate(expected, 7)
-
-        assertEquals(expected, actual)
+        subject.validate("1234567", 7)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -35,10 +32,7 @@ class TextMaxLengthValidatorTest {
 
     @Test
     fun validateForSizeZero() {
-        val expected = ""
-        val actual = subject.validate(expected, 0)
-
-        assertEquals(expected, actual)
+        subject.validate("", 0)
     }
 
     @Test(expected = IllegalArgumentException::class)

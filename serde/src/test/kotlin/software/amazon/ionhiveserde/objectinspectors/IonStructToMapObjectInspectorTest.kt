@@ -24,7 +24,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class IonStructToMapObjectInspectorTest {
-    private val valueElementInspector = IonIntToIntObjectInspector()
+    private val valueElementInspector = IonIntToIntObjectInspector(true)
     private val subject = IonStructToMapObjectInspector(valueElementInspector)
 
     @Test

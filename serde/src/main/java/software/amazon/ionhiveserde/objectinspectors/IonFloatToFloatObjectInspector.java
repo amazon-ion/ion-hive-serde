@@ -23,11 +23,12 @@ import software.amazon.ion.IonValue;
 /**
  * Adapts an {@link IonFloat} for the float Hive type.
  */
-public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+public class IonFloatToFloatObjectInspector extends
+    AbstractOverflowablePrimitiveObjectInspector<IonFloat, Float> implements
     FloatObjectInspector {
 
-    public IonFloatToFloatObjectInspector() {
-        super(TypeInfoFactory.floatTypeInfo);
+    public IonFloatToFloatObjectInspector(final boolean failOnOverflow) {
+        super(TypeInfoFactory.floatTypeInfo, failOnOverflow);
     }
 
     /**
@@ -39,10 +40,22 @@ public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObje
             return null;
         }
 
-        return new FloatWritable(getPrimitiveJavaObject((IonFloat) o));
+        return new FloatWritable(getPrimitiveJavaObjectFromIonValue((IonFloat) o));
     }
 
-    private void validateSize(final IonFloat ionFloat) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Float getValidatedPrimitiveJavaObject(final IonFloat ionValue) {
+        return ionValue.floatValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void validateSize(final IonFloat ionFloat) {
         final float f = ionFloat.floatValue();
         final double d = ionFloat.doubleValue();
 
@@ -69,11 +82,6 @@ public class IonFloatToFloatObjectInspector extends AbstractIonPrimitiveJavaObje
             return null;
         }
 
-        return getPrimitiveJavaObject((IonFloat) o);
-    }
-
-    public float getPrimitiveJavaObject(final IonFloat ionValue) {
-        validateSize(ionValue);
-        return ionValue.floatValue();
+        return getPrimitiveJavaObjectFromIonValue((IonFloat) o);
     }
 }

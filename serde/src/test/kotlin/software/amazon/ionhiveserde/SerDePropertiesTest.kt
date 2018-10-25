@@ -20,6 +20,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @RunWith(JUnitParamsRunner::class)
 class SerDePropertiesTest {
@@ -31,42 +33,46 @@ class SerDePropertiesTest {
     @Test
     @Parameters(method = "encodings")
     fun encoding(encoding: IonEncoding) {
-        val subject = SerDeProperties(Properties().apply { setProperty("encoding", encoding.name) })
+        val subject = SerDeProperties(Properties().apply { setProperty("encoding", encoding.name) }, listOf())
 
         assertEquals(encoding, subject.encoding)
     }
 
     @Test
     fun defaultEncoding() {
-        val subject = SerDeProperties(Properties())
+        val subject = SerDeProperties(Properties(), listOf())
 
         assertEquals(IonEncoding.BINARY, subject.encoding)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun invalidEncoding() {
-        SerDeProperties(Properties().apply { setProperty("encoding", "not an encoding") })
+        SerDeProperties(Properties().apply { setProperty("encoding", "not an encoding") }, listOf())
     }
 
     // timestampOffsetInMinutes ---------------------------------------------------------------------------------------
 
     @Test
     fun timestampOffsetInMinutes() {
-        val subject = SerDeProperties(Properties().apply { setProperty("timestamp.serialization_offset", "01:00") })
+        val subject = SerDeProperties(
+                Properties().apply { setProperty("timestamp.serialization_offset", "01:00") },
+                listOf())
 
         assertEquals(60, subject.timestampOffsetInMinutes)
     }
 
     @Test
     fun defaultTimestampOffsetInMinutes() {
-        val subject = SerDeProperties(Properties())
+        val subject = SerDeProperties(Properties(), listOf())
 
         assertEquals(0, subject.timestampOffsetInMinutes)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun invalidTimestampOffsetInMinutes() {
-        SerDeProperties(Properties().apply { setProperty("timestamp.serialization_offset", "not an offset") })
+        SerDeProperties(
+                Properties().apply { setProperty("timestamp.serialization_offset", "not an offset") },
+                listOf())
     }
 
     // serializeNull --------------------------------------------------------------------------------------------------
@@ -76,20 +82,57 @@ class SerDePropertiesTest {
     @Test
     @Parameters(method = "serializeNullOptions")
     fun serializeNull(serializeNullStrategy: SerializeNullStrategy) {
-        val subject = SerDeProperties(Properties().apply { setProperty("serialize_null", serializeNullStrategy.name) })
+        val subject = SerDeProperties(
+                Properties().apply { setProperty("serialize_null", serializeNullStrategy.name) },
+                listOf())
 
         assertEquals(serializeNullStrategy, subject.serializeNull)
     }
 
     @Test
     fun defaultSerializeNull() {
-        val subject = SerDeProperties(Properties())
+        val subject = SerDeProperties(Properties(), listOf())
 
         assertEquals(SerializeNullStrategy.OMIT, subject.serializeNull)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun invalidSerializeNull() {
-        SerDeProperties(Properties().apply { setProperty("serialize_null", "not a boolean") })
+        SerDeProperties(Properties().apply { setProperty("serialize_null", "invalid option") }, listOf())
+    }
+
+    // failOnOverflow -------------------------------------------------------------------------------------------------
+
+    @Test
+    fun failOnOverflow() {
+        val subject = SerDeProperties(
+                Properties().apply {
+                    setProperty("fail_on_overflow", "false") // sets default
+                    setProperty("column_1.fail_on_overflow", "true")
+                    setProperty("not_a_column.fail_on_overflow", "true")
+                },
+                listOf("column_1"))
+
+        assertTrue(subject.failOnOverflowFor("column_1"))
+        assertFalse(subject.failOnOverflowFor("not_a_column")) // not a column
+        assertFalse(subject.failOnOverflowFor("not even in the config"))
+    }
+
+    @Test
+    fun failOnOverflowDefault() {
+        val subject = SerDeProperties(Properties(), listOf("column_1"))
+
+        assertTrue(subject.failOnOverflowFor("column_1"))
+        assertTrue(subject.failOnOverflowFor("not_a_column"))
+    }
+
+    @Test
+    fun failOnOverflowNotBoolean() {
+        val subject = SerDeProperties(
+                Properties().apply { setProperty("fail_on_overflow", "not a boolean") },
+                listOf("column_1"))
+
+        assertFalse(subject.failOnOverflowFor("column_1"))
+        assertFalse(subject.failOnOverflowFor("not_a_column")) // not a column
     }
 }

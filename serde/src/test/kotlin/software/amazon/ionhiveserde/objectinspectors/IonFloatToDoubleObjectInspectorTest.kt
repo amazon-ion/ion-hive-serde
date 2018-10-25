@@ -14,31 +14,26 @@
 
 package software.amazon.ionhiveserde.objectinspectors
 
+import junitparams.Parameters
 import org.apache.hadoop.io.DoubleWritable
 import org.junit.Test
+import software.amazon.ion.IonFloat
 import software.amazon.ionhiveserde.ION
 import kotlin.test.assertEquals
 
-class IonFloatToDoubleObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspectorTest() {
-    companion object {
-        private const val d = 1.123456789
-    }
+class IonFloatToDoubleObjectInspectorTest
+    : AbstractIonPrimitiveJavaObjectInspectorTest<IonFloat, DoubleWritable, Double>() {
 
     override val subject = IonFloatToDoubleObjectInspector()
 
-    @Test
-    fun getPrimitiveJavaObject() {
-        val ionValue = ION.newFloat(d)
-        val actual = subject.getPrimitiveJavaObject(ionValue)
-
-        assertEquals(d, actual)
-    }
+    override fun validTestCases() = listOf(
+            ValidTestCase(ION.newFloat(1.123456789), 1.123456789, DoubleWritable(1.123456789)),
+            ValidTestCase(ION.newFloat(1.0), 1.0, DoubleWritable(1.0))
+    )
 
     @Test
-    fun getPrimitiveWritableObject() {
-        val ionValue = ION.newFloat(d)
-        val actual = subject.getPrimitiveWritableObject(ionValue)
-
-        assertEquals(DoubleWritable(d), actual)
+    @Parameters(method = "validTestCases")
+    fun get(testCase: ValidTestCase<IonFloat, DoubleWritable, Double>) {
+        assertEquals(testCase.expectedPrimitive, subject.getPrimitiveJavaObject(testCase.ionValue))
     }
 }

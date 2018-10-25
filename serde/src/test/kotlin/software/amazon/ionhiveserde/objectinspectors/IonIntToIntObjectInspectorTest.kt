@@ -16,27 +16,42 @@ package software.amazon.ionhiveserde.objectinspectors
 
 import org.apache.hadoop.io.IntWritable
 import org.junit.Test
+import software.amazon.ion.IonInt
 import software.amazon.ionhiveserde.ION
 import kotlin.test.assertEquals
 
-class IonIntToIntObjectInspectorTest : AbstractIonIntObjectInspectorTest() {
+class IonIntToIntObjectInspectorTest
+    : AbstractOverflowablePrimitiveObjectInspectorTest<IonInt, IntWritable, Int>() {
 
-    protected override val subject = IonIntToIntObjectInspector()
-    override val overflowValue = ION.newInt(Long.MAX_VALUE)!!
+    override val subjectOverflow = IonIntToIntObjectInspector(false)
+    override fun overflowTestCases() = listOf(
+            OverflowTestCase(
+                    ION.newInt(IonIntToIntObjectInspector.MAX_VALUE.toLong() + 1L),
+                    IonIntToIntObjectInspector.MIN_VALUE,
+                    IntWritable(IonIntToIntObjectInspector.MIN_VALUE)
+            )
+    )
+
+    override val subject = IonIntToIntObjectInspector(true)
+    override fun validTestCases() = listOf(ValidTestCase(ION.newInt(10), 10, IntWritable(10)))
 
     @Test
-    fun getPrimitiveWritableObject() {
-        val ionValue = ION.newInt(10)
-        val actual = subject.getPrimitiveWritableObject(ionValue)
+    fun get() {
+        val testCase = validTestCases().first() // has only one
+        assertEquals(testCase.expectedPrimitive, subject.get(testCase.ionValue))
+    }
 
-        assertEquals(IntWritable(10), actual)
+
+    @Test(expected = IllegalArgumentException::class)
+    fun getOverflow() {
+        val testCase = overflowTestCases().first() // has only one
+        subject.get(testCase.ionValue)
     }
 
     @Test
-    fun getPrimitiveJavaObject() {
-        val ionValue = ION.newInt(10)
-        val actual = subject.getPrimitiveJavaObject(ionValue)
-
-        assertEquals(10, actual)
+    fun getOverflowWithoutFailOnOverflow() {
+        val testCase = overflowTestCases().first() // has only one
+        val actual = subjectOverflow.get(testCase.ionValue)
+        assertEquals(testCase.expectedPrimitive, actual)
     }
 }

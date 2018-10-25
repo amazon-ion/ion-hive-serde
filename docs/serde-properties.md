@@ -29,7 +29,8 @@ WITH SERDEPROPERTIES (
 as `00:00`), see [timestamp](http://amzn.github.io/ion-docs/docs/spec.html#timestamp) specification
 for more details.
 
-## Serialize null columns:
+## Serialize null columns
+
 The SerDe can be configured to serialize or skip columns with null values. User can choose to write out strongly typed
 nulls or untyped nulls. Strongly typed nulls type will be determined based on the default Ion to Hive type mapping
 
@@ -61,10 +62,46 @@ Example:
 {id: 2}
 ```
 
-## Fail on overflow
-**TODO** see: https://github.com/amzn/ion-hive-serde/issues/14
+## Fail on overflow 
+Ion allows for arbitrarily large numerical types while Hive does not. By default the SerDe will fail if the Ion value
+will not fit the Hive column but this configuration option can be used to let the value overflow instead of failing.
 
-## Decimal rounding
+Specification: 
+```
+WITH SERDEPROPERTIES (
+   "fail_on_overflow" = "<Boolean>" -- default: true. Sets the default behavior for all columns
+   "<colum.name>.fail_on_overflow" = "<Boolean>"  -- default: true. Sets the behavior for specific columns  
+)  
+```
+
+Example:
+```
+-- Ion Document
+{
+    n: 40000       // smallint range is [-32768, 32767]
+    s: "123456789" // 9 character string
+    st: {f1: 40000, f2: "123456789" } // struct with the values above
+}
+
+CREATE TABLE people (
+  n  SMALLINT,
+  s  VARCHAR(5),
+  st STRUCT<f1: SMALLINT, f2: VARCHAR(5)> 
+)
+ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
+WITH SERDEPROPERTIES (
+  "n.fail_on_overflow" = "false",   
+  "s.fail_on_overflow" = "false", 
+  "st.fail_on_overflow" = "false" // sets it for all values in the struct 
+);
+
+Hive table
+| n      | s       | st                          |
+|--------| ------- | ----------------------------|
+| -25536 | "12345" | { f1: -25536, f2: "12345" } |
+```
+
+## Decimal rounding 
 **TODO** see: https://github.com/amzn/ion-hive-serde/issues/9
 
 ## Serialize As

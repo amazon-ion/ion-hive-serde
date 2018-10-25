@@ -14,30 +14,51 @@
 
 package software.amazon.ionhiveserde.objectinspectors
 
+import junitparams.Parameters
 import org.apache.hadoop.io.LongWritable
 import org.junit.Test
+import software.amazon.ion.IonInt
 import software.amazon.ionhiveserde.ION
 import java.math.BigInteger
 import kotlin.test.assertEquals
 
-class IonIntToBigIntObjectInspectorTest : AbstractIonIntObjectInspectorTest() {
+class IonIntToBigIntObjectInspectorTest
+    : AbstractOverflowablePrimitiveObjectInspectorTest<IonInt, LongWritable, Long>() {
 
-    protected override val subject = IonIntToBigIntObjectInspector()
-    override val overflowValue = ION.newInt(BigInteger.valueOf(Long.MAX_VALUE).inc())!!
+    override val subjectOverflow = IonIntToBigIntObjectInspector(false)
+    override fun overflowTestCases() = listOf(
+            OverflowTestCase(
+                    ION.newInt(BigInteger.valueOf(IonIntToBigIntObjectInspector.MAX_VALUE).inc()),
+                    IonIntToBigIntObjectInspector.MIN_VALUE,
+                    LongWritable(IonIntToBigIntObjectInspector.MIN_VALUE)
+            )
+    )
+
+    override val subject = IonIntToBigIntObjectInspector(true)
+    override fun validTestCases() = listOf(
+            IonIntToBigIntObjectInspector.MIN_VALUE,
+            10L,
+            1L,
+            IonIntToBigIntObjectInspector.MAX_VALUE)
+            .map {ValidTestCase(ION.newInt(it), it, LongWritable(it))}
 
     @Test
-    fun getPrimitiveWritableObject() {
-        val ionValue = ION.newInt(10)
-        val actual = subject.getPrimitiveWritableObject(ionValue)
+    @Parameters(method = "validTestCases")
+    fun get(testCase: ValidTestCase<IonInt, LongWritable, Long>) {
+        assertEquals(testCase.expectedPrimitive, subject.get(testCase.ionValue))
+    }
 
-        assertEquals(LongWritable(10), actual)
+
+    @Test(expected = IllegalArgumentException::class)
+    @Parameters(method = "overflowTestCases")
+    fun getOverflow(testCase: OverflowTestCase<IonInt, LongWritable, Long>) {
+        subject.get(testCase.ionValue)
     }
 
     @Test
-    fun getPrimitiveJavaObject() {
-        val ionValue = ION.newInt(10)
-        val actual = subject.getPrimitiveJavaObject(ionValue)
-
-        assertEquals(10.toLong(), actual)
+    @Parameters(method = "overflowTestCases")
+    fun getOverflowWithoutFailOnOverflow(testCase: OverflowTestCase<IonInt, LongWritable, Long>) {
+        val actual = subjectOverflow.get(testCase.ionValue)
+        assertEquals(testCase.expectedPrimitive, actual)
     }
 }
