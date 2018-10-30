@@ -11,4 +11,4 @@ formats.
 This library enables Apache Hive to read and write Ion data in both text and binary.
 
 * [Type Mapping](./type-mapping.md)
-* [Configuration Options](./configuration-options.md)
+* [Configuration Options](serde-properties.md)

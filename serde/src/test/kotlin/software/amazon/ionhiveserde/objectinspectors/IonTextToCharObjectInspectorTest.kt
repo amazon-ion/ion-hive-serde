@@ -16,43 +16,24 @@ package software.amazon.ionhiveserde.objectinspectors
 
 import org.apache.hadoop.hive.common.type.HiveChar
 import org.apache.hadoop.hive.serde2.io.HiveCharWritable
+import org.apache.hadoop.io.Text
 import org.junit.Test
+import software.amazon.ion.IonText
 import software.amazon.ionhiveserde.ION
 import kotlin.test.assertEquals
 
-class IonTextToCharObjectInspectorTest : AbstractIonTextToMaxLengthObjectInspectorTest() {
+class IonTextToCharObjectInspectorTest
+    : AbstractOverflowablePrimitiveObjectInspectorTest<IonText, HiveCharWritable, HiveChar>() {
 
-    protected override val subject = IonTextToCharObjectInspector(maxLength)
+    override val subject = IonTextToCharObjectInspector(5, true)
+    override fun validTestCases() = listOf(
+            ValidTestCase(ION.newString("1234"), HiveChar("1234", 5), HiveCharWritable(HiveChar("1234", 5))),
+            ValidTestCase(ION.newSymbol("1234"), HiveChar("1234", 5), HiveCharWritable(HiveChar("1234", 5)))
+    )
 
-    @Test
-    fun getPrimitiveWritableObjectWithString() {
-        val string = ION.newString(valid)
-
-        val actual = subject.getPrimitiveWritableObject(string)
-        assertEquals(HiveCharWritable(HiveChar(valid, maxLength)), actual)
-    }
-
-    @Test
-    fun getPrimitiveWritableObjectWithSymbol() {
-        val symbol = ION.newSymbol(valid)
-
-        val actual = subject.getPrimitiveWritableObject(symbol)
-        assertEquals(HiveCharWritable(HiveChar(valid, maxLength)), actual)
-    }
-
-    @Test
-    fun getPrimitiveJavaObjectWithString() {
-        val string = ION.newString(valid)
-
-        val actual = subject.getPrimitiveJavaObject(string)
-        assertEquals(HiveChar(valid, maxLength), actual)
-    }
-
-    @Test
-    fun getPrimitiveJavaObjectWithSymbol() {
-        val symbol = ION.newSymbol(valid)
-
-        val actual = subject.getPrimitiveJavaObject(symbol)
-        assertEquals(HiveChar(valid, maxLength), actual)
-    }
+    override val subjectOverflow = IonTextToCharObjectInspector(5, false)
+    override fun overflowTestCases() = listOf(
+        OverflowTestCase(ION.newString("1234567"), HiveChar("12345", 5), HiveCharWritable(HiveChar("12345", 5))),
+        OverflowTestCase(ION.newSymbol("1234567"), HiveChar("12345", 5), HiveCharWritable(HiveChar("12345", 5)))
+    )
 }

@@ -24,14 +24,14 @@ import software.amazon.ion.IonValue;
 /**
  * Adapts an {@link IonInt} for the bigint Hive type.
  */
-public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+public class IonIntToBigIntObjectInspector extends AbstractOverflowablePrimitiveObjectInspector<IonInt, Long> implements
     LongObjectInspector {
 
     public static final long MIN_VALUE = Long.MIN_VALUE;
     public static final long MAX_VALUE = Long.MAX_VALUE;
 
-    public IonIntToBigIntObjectInspector() {
-        super(TypeInfoFactory.longTypeInfo);
+    public IonIntToBigIntObjectInspector(final boolean failOnOverflow) {
+        super(TypeInfoFactory.longTypeInfo, failOnOverflow);
     }
 
     /**
@@ -43,12 +43,22 @@ public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjec
             return null;
         }
 
-        IonInt ionValue = (IonInt) o;
-        validateSize(ionValue);
-        return new LongWritable(getPrimitiveJavaObject((IonInt) o));
+        return new LongWritable(getPrimitiveJavaObjectFromIonValue((IonInt) o));
     }
 
-    private void validateSize(final IonInt ionValue) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Long getValidatedPrimitiveJavaObject(final IonInt ionValue) {
+        return ionValue.longValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void validateSize(final IonInt ionValue) {
         if (ionValue.getIntegerSize() == IntegerSize.BIG_INTEGER) {
             throw new IllegalArgumentException(
                 "insufficient precision for " + ionValue.toString() + " as " + this.typeInfo.getTypeName());
@@ -72,11 +82,6 @@ public class IonIntToBigIntObjectInspector extends AbstractIonPrimitiveJavaObjec
             return null;
         }
 
-        return getPrimitiveJavaObject((IonInt) o);
-    }
-
-    public long getPrimitiveJavaObject(final IonInt ionValue) {
-        validateSize(ionValue);
-        return ionValue.longValue();
+        return getPrimitiveJavaObjectFromIonValue((IonInt) o);
     }
 }

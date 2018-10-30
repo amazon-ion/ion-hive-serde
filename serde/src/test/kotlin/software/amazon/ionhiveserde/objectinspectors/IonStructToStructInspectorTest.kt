@@ -101,7 +101,7 @@ class IonStructToStructInspectorTest {
         return typeInfo as StructTypeInfo
     }
 
-    private fun makeStructObjectInspectors(): List<ObjectInspector> = listOf(IonBooleanToBooleanObjectInspector(), IonIntToIntObjectInspector())
+    private fun makeStructObjectInspectors(): List<ObjectInspector> = listOf(IonBooleanToBooleanObjectInspector(), IonIntToIntObjectInspector(true))
 
     private fun makeStruct(): IonStruct {
         val struct = ION.newEmptyStruct()

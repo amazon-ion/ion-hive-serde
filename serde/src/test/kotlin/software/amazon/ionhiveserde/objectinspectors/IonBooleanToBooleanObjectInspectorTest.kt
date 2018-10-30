@@ -14,28 +14,27 @@
 
 package software.amazon.ionhiveserde.objectinspectors
 
+import junitparams.Parameters
 import org.apache.hadoop.io.BooleanWritable
 import org.junit.Test
+import software.amazon.ion.IonBool
 import software.amazon.ionhiveserde.ION
 import kotlin.test.assertEquals
 
-class IonBooleanToBooleanObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspectorTest() {
+class IonBooleanToBooleanObjectInspectorTest
+    : AbstractIonPrimitiveJavaObjectInspectorTest<IonBool, BooleanWritable, Boolean>() {
+
+    override fun validTestCases() = listOf(
+            true,
+            false)
+            .map { ValidTestCase(ION.newBool(it), it, BooleanWritable(it)) }
+
 
     override val subject = IonBooleanToBooleanObjectInspector()
 
     @Test
-    fun getPrimitiveWritableObject() {
-        val ionValue = ION.newBool(true)
-        val actual = subject.getPrimitiveWritableObject(ionValue)
-
-        assertEquals(BooleanWritable(true), actual)
-    }
-
-    @Test
-    fun getPrimitiveJavaObject() {
-        val ionValue = ION.newBool(true)
-        val actual = subject.getPrimitiveJavaObject(ionValue)
-
-        assertEquals(true, actual)
+    @Parameters(method = "validTestCases")
+    fun get(testCase: ValidTestCase<IonBool, BooleanWritable, Boolean>) {
+        assertEquals(testCase.expectedPrimitive, subject.get(testCase.ionValue))
     }
 }

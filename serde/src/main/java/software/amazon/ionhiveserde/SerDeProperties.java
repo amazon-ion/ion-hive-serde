@@ -16,6 +16,9 @@ package software.amazon.ionhiveserde;
 
 import static software.amazon.ionhiveserde.util.SerDePropertyParser.parseOffset;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
 
@@ -36,16 +39,22 @@ public class SerDeProperties {
     private static final String DEFAULT_SERIALIZE_NULL = SerializeNullStrategy.OMIT.name();
     private final SerializeNullStrategy serializeNull;
 
+    private static final String FAIL_ON_OVERFLOW_KEY = "fail_on_overflow";
+    private static final String FAIL_ON_OVERFLOW = "true";
+    private final FailOnOverflowConfig failOnOverflowConfig;
+
     /**
      * Constructor.
      *
      * @param properties {@link Properties} passed to {@link IonHiveSerDe#initialize(Configuration, Properties)}.
+     * @param columnNames table column names
      */
-    SerDeProperties(final Properties properties) {
+    SerDeProperties(final Properties properties, final List<String> columnNames) {
         encoding = IonEncoding.valueOf(properties.getProperty(ENCODING_KEY, DEFAULT_ENCODING));
         timestampOffsetInMinutes = parseOffset(properties.getProperty(DEFAULT_OFFSET_KEY, DEFAULT_OFFSET));
         serializeNull = SerializeNullStrategy.valueOf(
             properties.getProperty(DEFAULT_SERIALIZE_NULL_KEY, DEFAULT_SERIALIZE_NULL));
+        failOnOverflowConfig = parseFailOnOverflow(properties, columnNames);
     }
 
     /**
@@ -74,6 +83,31 @@ public class SerDeProperties {
      */
     public SerializeNullStrategy getSerializeNull() {
         return serializeNull;
+    }
+
+    /**
+     * Return if the column is configured to fail when detecting an overflow.
+     *
+     * @return true if the column is configured to fail on overflow, false otherwise.
+     */
+    public boolean failOnOverflowFor(final String columnName) {
+        return failOnOverflowConfig.failOnOverflowFor(columnName);
+    }
+
+    private FailOnOverflowConfig parseFailOnOverflow(final Properties properties,
+                                                     final List<String> columnNames) {
+        final String defaultValue = properties.getProperty(FAIL_ON_OVERFLOW_KEY, FAIL_ON_OVERFLOW);
+        final Map<String, Boolean> configByColumnName = new HashMap<>();
+
+        for (String columnName : columnNames) {
+            final String columnPropertyKey = columnName + "." + FAIL_ON_OVERFLOW_KEY;
+            final boolean columnFailOnOverflowValue = Boolean.parseBoolean(
+                properties.getProperty(columnPropertyKey, defaultValue));
+
+            configByColumnName.put(columnName, columnFailOnOverflowValue);
+        }
+
+        return new FailOnOverflowConfig(configByColumnName, Boolean.valueOf(defaultValue));
     }
 }
 

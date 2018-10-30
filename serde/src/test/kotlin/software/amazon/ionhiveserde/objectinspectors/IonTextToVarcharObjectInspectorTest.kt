@@ -17,43 +17,24 @@ package software.amazon.ionhiveserde.objectinspectors
 import org.apache.hadoop.hive.common.type.HiveVarchar
 import org.apache.hadoop.hive.serde2.io.HiveVarcharWritable
 import org.junit.Test
+import software.amazon.ion.IonText
 import software.amazon.ionhiveserde.ION
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class IonTextToVarcharObjectInspectorTest : AbstractIonTextToMaxLengthObjectInspectorTest() {
+class IonTextToVarcharObjectInspectorTest
+    : AbstractOverflowablePrimitiveObjectInspectorTest<IonText, HiveVarcharWritable, HiveVarchar>() {
 
-    protected override val subject = IonTextToVarcharObjectInspector(maxLength)
+    override val subject = IonTextToVarcharObjectInspector(5, true)
+    override fun validTestCases() = listOf(
+            ValidTestCase(ION.newString("1234"), HiveVarchar("1234", 5), HiveVarcharWritable(HiveVarchar("1234", 5))),
+            ValidTestCase(ION.newSymbol("1234"), HiveVarchar("1234", 5), HiveVarcharWritable(HiveVarchar("1234", 5)))
+    )
 
-    @Test
-    fun getPrimitiveWritableObjectWithString() {
-        val string = ION.newString(valid)
+    override val subjectOverflow = IonTextToVarcharObjectInspector(5, false)
 
-        val actual = subject.getPrimitiveWritableObject(string)
-        assertEquals(HiveVarcharWritable(HiveVarchar(valid, maxLength)), actual)
-    }
-
-    @Test
-    fun getPrimitiveWritableObjectWithSymbol() {
-        val symbol = ION.newSymbol(valid)
-
-        val actual = subject.getPrimitiveWritableObject(symbol)
-        assertEquals(HiveVarcharWritable(HiveVarchar(valid, maxLength)), actual)
-    }
-
-    @Test
-    fun getPrimitiveJavaObjectWithString() {
-        val string = ION.newString(valid)
-
-        val actual = subject.getPrimitiveJavaObject(string)
-        assertTrue(HiveVarchar(valid, maxLength).equals(actual))
-    }
-
-    @Test
-    fun getPrimitiveJavaObjectWithSymbol() {
-        val symbol = ION.newSymbol(valid)
-
-        val actual = subject.getPrimitiveJavaObject(symbol)
-        assertTrue(HiveVarchar(valid, maxLength).equals(actual))
-    }
+    override fun overflowTestCases() = listOf(
+            OverflowTestCase(ION.newString("1234567"), HiveVarchar("12345", 5), HiveVarcharWritable(HiveVarchar("12345", 5))),
+            OverflowTestCase(ION.newSymbol("1234567"), HiveVarchar("12345", 5), HiveVarcharWritable(HiveVarchar("12345", 5)))
+    )
 }

@@ -24,27 +24,23 @@ import software.amazon.ion.IonValue;
 /**
  * Adapts an {@link IonText} for the varchar Hive type.
  */
-public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+public class IonTextToVarcharObjectInspector extends
+    AbstractOverflowablePrimitiveObjectInspector<IonText, HiveVarchar> implements
     HiveVarcharObjectInspector {
 
-    private static final int DEFAULT_LENGTH = HiveVarchar.MAX_VARCHAR_LENGTH;
-
-    private final int length;
+    private final int maxLength;
     private final TextMaxLengthValidator validator = new TextMaxLengthValidator();
 
-    public IonTextToVarcharObjectInspector() {
-        this(DEFAULT_LENGTH);
-    }
-
     /**
-     * Creates an IonText to varchar with a maximum length.
+     * Creates an IonText to varchar with a maximum maxLength.
      *
-     * @param length max length
+     * @param maxLength max maxLength
+     * @param failOnOverflow if fails or truncates on overflow
      */
-    public IonTextToVarcharObjectInspector(final int length) {
-        super(TypeInfoFactory.getVarcharTypeInfo(length));
+    public IonTextToVarcharObjectInspector(final int maxLength, final boolean failOnOverflow) {
+        super(TypeInfoFactory.getVarcharTypeInfo(maxLength), failOnOverflow);
 
-        this.length = length;
+        this.maxLength = maxLength;
     }
 
     /**
@@ -56,7 +52,7 @@ public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObj
             return null;
         }
 
-        return new HiveVarcharWritable(getPrimitiveJavaObject((IonText) o));
+        return new HiveVarcharWritable(getPrimitiveJavaObjectFromIonValue((IonText) o));
     }
 
     /**
@@ -68,11 +64,22 @@ public class IonTextToVarcharObjectInspector extends AbstractIonPrimitiveJavaObj
             return null;
         }
 
-        return getPrimitiveJavaObject((IonText) o);
+        return getPrimitiveJavaObjectFromIonValue((IonText) o);
     }
 
-    private HiveVarchar getPrimitiveJavaObject(final IonText ionValue) {
-        String text = ionValue.stringValue();
-        return new HiveVarchar(validator.validate(text, length), length);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected HiveVarchar getValidatedPrimitiveJavaObject(final IonText ionValue) {
+        return new HiveVarchar(ionValue.stringValue(), maxLength);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void validateSize(final IonText ionValue) {
+        validator.validate(ionValue.stringValue(), maxLength);
     }
 }

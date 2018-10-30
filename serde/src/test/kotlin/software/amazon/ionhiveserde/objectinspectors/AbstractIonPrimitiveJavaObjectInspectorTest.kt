@@ -14,33 +14,62 @@
 
 package software.amazon.ionhiveserde.objectinspectors
 
+import junitparams.JUnitParamsRunner
+import junitparams.Parameters
+import org.apache.hadoop.io.Writable
 import org.junit.Test
+import org.junit.runner.RunWith
+import software.amazon.ion.IonValue
 import software.amazon.ionhiveserde.ionNull
+import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 /**
- * Base class for ObjectInspector unit tests with common helper methods
+ * Base class for primitive ObjectInspector test cases.
+ *
+ * Included tests
+ * - null values
+ * - getPrimitiveWritableObject using validTestCases values
+ * - getPrimitiveJavaObject using validTestCases values
  */
-abstract class AbstractIonPrimitiveJavaObjectInspectorTest {
+@RunWith(JUnitParamsRunner::class)
+abstract class AbstractIonPrimitiveJavaObjectInspectorTest<I : IonValue, W : Writable, P> {
+
+    data class ValidTestCase<I : IonValue, W : Writable, P>(val ionValue: I,
+                                                            val expectedPrimitive: P,
+                                                            val expectedWritable: W)
+
     protected abstract val subject: AbstractIonPrimitiveJavaObjectInspector
 
+    abstract fun validTestCases(): List<ValidTestCase<out I, W, P>>
+
     @Test
-    fun getPrimitiveWritableObjectForNull() {
+    @Parameters(method = "validTestCases")
+    open fun getPrimitiveWritableObject(testCase: ValidTestCase<out I, W, P>) =
+            assertEquals(testCase.expectedWritable, subject.getPrimitiveWritableObject(testCase.ionValue))
+
+    @Test
+    @Parameters(method = "validTestCases")
+    open fun getPrimitiveJavaObject(testCase: ValidTestCase<out I, W, P>) =
+            assertEquals(testCase.expectedPrimitive, subject.getPrimitiveJavaObject(testCase.ionValue))
+
+    @Test
+    open fun getPrimitiveWritableObjectForNull() {
         assertNull(subject.getPrimitiveWritableObject(null))
     }
 
     @Test
-    fun getPrimitiveWritableObjectForIonNull() {
+    open fun getPrimitiveWritableObjectForIonNull() {
         assertNull(subject.getPrimitiveWritableObject(ionNull))
     }
 
     @Test
-    fun getPrimitiveJavaObjectForNull() {
+    open fun getPrimitiveJavaObjectForNull() {
         assertNull(subject.getPrimitiveJavaObject(null))
     }
 
     @Test
-    fun getPrimitiveJavaObjectForIonNull() {
+    open fun getPrimitiveJavaObjectForIonNull() {
         assertNull(subject.getPrimitiveJavaObject(ionNull))
     }
 }

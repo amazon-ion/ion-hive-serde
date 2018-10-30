@@ -54,12 +54,8 @@ import software.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspecto
 public class IonHiveSerDe extends AbstractSerDe {
 
     private IonSystem ion;
-
     private ObjectInspector objectInspector;
-    private IonObjectInspectorFactory objectInspectorFactory;
-
     private SerDeProperties serDeProperties;
-
     private SerDeStats stats;
 
     /**
@@ -69,16 +65,16 @@ public class IonHiveSerDe extends AbstractSerDe {
     @SuppressWarnings("deprecation") // we are forced to override this constructor even though it's deprecated
     public void initialize(final @Nullable Configuration conf, final Properties properties) throws SerDeException {
         stats = new SerDeStats();
+        final List<String> columnNames = readColumnNames(properties);
         final StructTypeInfo tableInfo = (StructTypeInfo) TypeInfoFactory.getStructTypeInfo(
-            readColumnNames(properties),
+            columnNames,
             readColumnTypes(properties));
 
         ion = buildIonSystem();
 
-        objectInspectorFactory = new IonObjectInspectorFactory(tableInfo);
-        objectInspector = objectInspectorFactory.objectInspectorFor(tableInfo);
+        serDeProperties = new SerDeProperties(properties, columnNames);
 
-        serDeProperties = new SerDeProperties(properties);
+        objectInspector = IonObjectInspectorFactory.objectInspectorForTable(tableInfo, serDeProperties);
     }
 
     /**

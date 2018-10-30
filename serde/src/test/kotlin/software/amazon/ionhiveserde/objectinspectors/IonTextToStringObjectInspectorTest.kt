@@ -14,43 +14,19 @@
 
 package software.amazon.ionhiveserde.objectinspectors
 
+import org.apache.hadoop.io.Text
 import org.junit.Test
+import software.amazon.ion.IonString
+import software.amazon.ion.IonText
 import software.amazon.ionhiveserde.ION
 import kotlin.test.assertEquals
 
-class IonTextToStringObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspectorTest() {
+class IonTextToStringObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspectorTest<IonText, Text, String>() {
 
     override val subject = IonTextToStringObjectInspector()
+    override fun validTestCases() = listOf(
+            ValidTestCase(ION.newString("some string"), "some string", Text("some string")),
+            ValidTestCase(ION.newSymbol("some string"), "some string", Text("some string"))
+    )
 
-    @Test
-    fun getPrimitiveWritableObjectWithString() {
-        val string = ION.newString("some string")
-
-        val actual = subject.getPrimitiveWritableObject(string)
-        assertEquals("some string", actual.toString())
-    }
-
-    @Test
-    fun getPrimitiveWritableObjectWithSymbol() {
-        val symbol = ION.newSymbol("some string")
-
-        val actual = subject.getPrimitiveWritableObject(symbol)
-        assertEquals("some string", actual.toString())
-    }
-
-    @Test
-    fun getPrimitiveJavaObjectWithString() {
-        val string = ION.newString("some string")
-
-        val actual = subject.getPrimitiveJavaObject(string)
-        assertEquals("some string", actual)
-    }
-
-    @Test
-    fun getPrimitiveJavaObjectWithSymbol() {
-        val symbol = ION.newSymbol("some string")
-
-        val actual = subject.getPrimitiveJavaObject(symbol)
-        assertEquals("some string", actual)
-    }
 }

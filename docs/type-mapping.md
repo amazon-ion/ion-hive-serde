@@ -1,7 +1,7 @@
 # Type mapping
 [Hive type system](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Types) and the
 [Ion type system](http://amzn.github.io/ion-docs/docs/spec.html) don't always map one to one so
-some conversions must be made. For those [SerDe properties](./configuration-options.md) can be used for fine tuning.
+some conversions must be made. For those [SerDe properties](serde-properties.md) can be used for fine tuning.
 
  **Type mapping from Ion types to Hive types during deserialization:**
 | Ion Type  | Hive Type                               | Notes |

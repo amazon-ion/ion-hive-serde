@@ -19,7 +19,9 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import software.amazon.ionhiveserde.integrationtest.tests.FailOnOverflowTest;
 import software.amazon.ionhiveserde.integrationtest.tests.NullMappingTest;
+import software.amazon.ionhiveserde.integrationtest.tests.TimestampSerializationOffsetTest;
 import software.amazon.ionhiveserde.integrationtest.tests.TypeMappingTest;
 
 /**
@@ -28,7 +30,9 @@ import software.amazon.ionhiveserde.integrationtest.tests.TypeMappingTest;
 @RunWith(Suite.class)
 @SuiteClasses({
     NullMappingTest.class,
-    TypeMappingTest.class
+    TypeMappingTest.class,
+    TimestampSerializationOffsetTest.class,
+    FailOnOverflowTest.class
 })
 public class AllTestsSuite {
 

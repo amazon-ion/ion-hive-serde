@@ -29,7 +29,7 @@ import kotlin.test.assertNull
 @RunWith(JUnitParamsRunner::class)
 class IonSequenceToListObjectInspectorTest {
 
-    private val elementObjectInspector = IonIntToIntObjectInspector()
+    private val elementObjectInspector = IonIntToIntObjectInspector(true)
     private val subject = IonSequenceToListObjectInspector(elementObjectInspector)
 
     @Test

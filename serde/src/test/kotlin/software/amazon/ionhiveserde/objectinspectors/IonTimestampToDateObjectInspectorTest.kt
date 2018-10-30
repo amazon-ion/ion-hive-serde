@@ -15,38 +15,34 @@
 package software.amazon.ionhiveserde.objectinspectors
 
 import junitparams.JUnitParamsRunner
-import junitparams.NamedParameters
 import junitparams.Parameters
 import org.apache.hadoop.hive.serde2.io.DateWritable
 import org.junit.Test
 import org.junit.runner.RunWith
+import software.amazon.ion.IonTimestamp
 import software.amazon.ion.Timestamp
 import software.amazon.ionhiveserde.ION
 import java.sql.Date
 import kotlin.test.assertEquals
 
 @RunWith(JUnitParamsRunner::class)
-class IonTimestampToDateObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspectorTest() {
+class IonTimestampToDateObjectInspectorTest
+    : AbstractIonPrimitiveJavaObjectInspectorTest<IonTimestamp, DateWritable, Date>() {
 
     override val subject = IonTimestampToDateObjectInspector()
-
-    @NamedParameters("parameters")
-    fun parameters(): Array<Array<Any>> {
-        return arrayOf(
-                arrayOf(Date(1514764800000L), Timestamp.valueOf("2018T")),
-                arrayOf(Date(1533081600000L), Timestamp.valueOf("2018-08T")),
-                arrayOf(Date(1534291200000L), Timestamp.valueOf("2018-08-15T")),
-                arrayOf(Date(1534291200000L), Timestamp.valueOf("2018-08-15T01:01Z")),
-                arrayOf(Date(1534291200000L), Timestamp.valueOf("2018-08-15T01:01:01Z"))
-        )
-    }
+    override fun validTestCases() = listOf(
+            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018T")), Date(1514764800000L), DateWritable(Date(1514764800000L))),
+            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08T")), Date(1533081600000L), DateWritable(Date(1533081600000L))),
+            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08-15T")), Date(1534291200000L), DateWritable(Date(1534291200000L))),
+            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08-15T01:01Z")), Date(1534291200000L), DateWritable(Date(1534291200000L))),
+            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08-15T01:01:01Z")), Date(1534291200000L), DateWritable(Date(1534291200000L)))
+    )
 
     @Test
-    @Parameters(named = "parameters")
-    fun getPrimitiveWritableObject(date: Date, timestamp: Timestamp) {
-        val ionTimestamp = ION.newTimestamp(timestamp)
-
-        val actual = subject.getPrimitiveWritableObject(ionTimestamp)
-        assertEquals(DateWritable(date), actual, message = "for $timestamp")
+    @Parameters(method = "validTestCases")
+    override fun getPrimitiveJavaObject(testCase: ValidTestCase<out IonTimestamp, DateWritable, Date>) {
+        val actualDate = subject.getPrimitiveJavaObject(testCase.ionValue) as Date
+        // assert on LocalDate because Date keeps the time component internally...
+        assertEquals(testCase.expectedPrimitive.toLocalDate(), actualDate.toLocalDate())
     }
 }

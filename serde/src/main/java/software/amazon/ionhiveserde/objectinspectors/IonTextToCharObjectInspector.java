@@ -24,27 +24,23 @@ import software.amazon.ion.IonValue;
 /**
  * Adapts an {@link IonText} for the char Hive type.
  */
-public class IonTextToCharObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+public class IonTextToCharObjectInspector extends
+    AbstractOverflowablePrimitiveObjectInspector<IonText, HiveChar> implements
     HiveCharObjectInspector {
 
-    private static final int DEFAULT_LENGTH = HiveChar.MAX_CHAR_LENGTH;
-
-    private final int length;
+    private final int maxLength;
     private final TextMaxLengthValidator validator = new TextMaxLengthValidator();
 
-    public IonTextToCharObjectInspector() {
-        this(DEFAULT_LENGTH);
-    }
-
     /**
-     * Creates an IonText to char with a maximum length.
+     * Creates an IonText to char with a maximum maxLength.
      *
-     * @param length max length
+     * @param maxLength value maxLength
+     * @param failOnOverflow if fails or truncates on overflow
      */
-    public IonTextToCharObjectInspector(final int length) {
-        super(TypeInfoFactory.getCharTypeInfo(length));
+    public IonTextToCharObjectInspector(final int maxLength, final boolean failOnOverflow) {
+        super(TypeInfoFactory.getCharTypeInfo(maxLength), failOnOverflow);
 
-        this.length = length;
+        this.maxLength = maxLength;
     }
 
     /**
@@ -56,7 +52,7 @@ public class IonTextToCharObjectInspector extends AbstractIonPrimitiveJavaObject
             return null;
         }
 
-        return new HiveCharWritable(getPrimitiveJavaObject((IonText) o));
+        return new HiveCharWritable(getPrimitiveJavaObjectFromIonValue((IonText) o));
     }
 
     /**
@@ -68,11 +64,23 @@ public class IonTextToCharObjectInspector extends AbstractIonPrimitiveJavaObject
             return null;
         }
 
-        return getPrimitiveJavaObject((IonText) o);
+        return getPrimitiveJavaObjectFromIonValue((IonText) o);
     }
 
-    private HiveChar getPrimitiveJavaObject(final IonText ionValue) {
-        final String text = ionValue.stringValue();
-        return new HiveChar(validator.validate(text, length), length);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected HiveChar getValidatedPrimitiveJavaObject(final IonText ionValue) {
+        // HiveChar truncates if necessary
+        return new HiveChar(ionValue.stringValue(), maxLength);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void validateSize(final IonText ionValue) {
+        validator.validate(ionValue.stringValue(), maxLength);
     }
 }

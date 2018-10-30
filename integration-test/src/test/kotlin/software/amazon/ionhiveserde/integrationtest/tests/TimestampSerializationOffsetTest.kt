@@ -36,7 +36,7 @@ class TimestampSerializationOffsetTest : Base() {
             { field: 2018-01-01T10:10-23:59 }
             { field: 2018-01-01T10:10+23:59 }
         """
-        private val tableName = TimestampSerializationOffsetTest::javaClass.name
+        private const val tableName = "TimestampSerializationOffsetTest"
         private val serdeProperties = mapOf("timestamp.serialization_offset" to "-08:00")
 
         override fun setup() {

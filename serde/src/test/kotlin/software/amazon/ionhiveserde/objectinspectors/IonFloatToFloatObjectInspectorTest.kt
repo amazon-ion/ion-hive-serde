@@ -14,39 +14,43 @@
 
 package software.amazon.ionhiveserde.objectinspectors
 
+import junitparams.Parameters
 import org.apache.hadoop.io.FloatWritable
 import org.junit.Test
+import software.amazon.ion.IonFloat
 import software.amazon.ionhiveserde.ION
 import kotlin.test.assertEquals
 
-class IonFloatToFloatObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspectorTest() {
+class IonFloatToFloatObjectInspectorTest
+    : AbstractOverflowablePrimitiveObjectInspectorTest<IonFloat, FloatWritable, Float>() {
 
-    override val subject = IonFloatToFloatObjectInspector()
+
+    override val subject = IonFloatToFloatObjectInspector(true)
+    override fun validTestCases() = listOf(10.0, 1.0)
+            .map { ValidTestCase(ION.newFloat(it), it.toFloat(), FloatWritable(it.toFloat())) }
+
+    override val subjectOverflow = IonFloatToFloatObjectInspector(false)
+    override fun overflowTestCases() = listOf(
+            OverflowTestCase(ION.newFloat(1.123456789), 1.1234568.toFloat(), FloatWritable(1.1234568.toFloat())),
+            OverflowTestCase(ION.newFloat(1.999999999), 2.0.toFloat(), FloatWritable(2.0.toFloat()))
+    )
 
     @Test
-    fun getPrimitiveJavaObject() {
-        val ionValue = ION.newFloat(10)
-        val actual = subject.getPrimitiveJavaObject(ionValue)
-
-        assertEquals(10.toFloat(), actual)
+    @Parameters(method = "validTestCases")
+    fun get(testCase: ValidTestCase<IonFloat, FloatWritable, Float>) {
+        assertEquals(testCase.expectedPrimitive, subject.getPrimitiveJavaObject(testCase.ionValue))
     }
 
     @Test(expected = IllegalArgumentException::class)
-    fun getPrimitiveJavaObjectOverflow() {
-        subject.getPrimitiveJavaObject(ION.newFloat(1.123456789))
+    @Parameters(method = "overflowTestCases")
+    fun getOverflow(testCase: OverflowTestCase<IonFloat, FloatWritable, Float>) {
+        subject.get(testCase.ionValue)
     }
 
     @Test
-    fun getPrimitiveWritableObject() {
-        val ionValue = ION.newFloat(10)
-        val actual = subject.getPrimitiveWritableObject(ionValue)
-
-        assertEquals(FloatWritable(10.toFloat()), actual)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun getPrimitiveWritableObjectOverflow() {
-        subject.getPrimitiveWritableObject(ION.newFloat(1.123456789))
+    @Parameters(method = "overflowTestCases")
+    fun getOverflowWithoutFailOnOverflow(testCase: OverflowTestCase<IonFloat, FloatWritable, Float>) {
+        assertEquals(testCase.expectedPrimitive, subjectOverflow.getPrimitiveJavaObject(testCase.ionValue))
     }
 }
 
