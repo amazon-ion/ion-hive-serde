@@ -9,7 +9,7 @@ some conversions must be made. For those [SerDe properties](serde-properties.md)
 | bool      | BOOLEAN                                 | |
 | int       | TINYINT, SMALLINT, INT, BIGINT, DECIMAL | DECIMAL is only used for arbitrary precision integers, see `fail_on_overflow` and properties |
 | float     | FLOAT, DOUBLE                           | see `fail_on_overflow` property |
-| decimal   | DECIMAL                                 | Hive decimals are limited to 38 digits precision, rounding defined by `decimal.rounding_mode` property |
+| decimal   | DECIMAL                                 | Hive decimals are limited to 38 digits precision |
 | timestamp | TIMESTAMP, DATE                         | see timestamp below and the `timestamp.serialization_offset` property |
 | string    | STRING, VARCHAR, CHAR                   | see `fail_on_overflow` property |
 | symbol    | STRING, VARCHAR, CHAR                   | see `fail_on_overflow` property |
@@ -55,10 +55,10 @@ collections can be nested and you can not define union types recursively.
 **Warning**: Hive support for union types is not complete and some operations, e.g. `JOIN` and
 `GROUP BY` on union types do not work. See Hive's
 [documentation](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Types#LanguageManualTypes-UnionTypesunionUnionTypes)
-for more details. Current Hive version: 2.3.*, JIRA issue: https://issues.apache.org/jira/browse/HIVE-2508 
+for more details. Current Hive version: 2.3.*, JIRA issue: https://issues.apache.org/jira/browse/HIVE-2508
 
 ## Ion structs
-When deserializing a duplicated field from an Ion struct a single value will be chosen nondeterministically 
+When deserializing a duplicated field from an Ion struct a single value will be chosen nondeterministically
 and the others will be ignored. This is done as Ion structs do have an order and
 support duplicated fields while Hive's STRUCT<> and MAP<> do not.
 

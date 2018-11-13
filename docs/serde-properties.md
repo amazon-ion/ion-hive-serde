@@ -62,16 +62,16 @@ Example:
 {id: 2}
 ```
 
-## Fail on overflow 
+## Fail on overflow
 Ion allows for arbitrarily large numerical types while Hive does not. By default the SerDe will fail if the Ion value
 will not fit the Hive column but this configuration option can be used to let the value overflow instead of failing.
 
-Specification: 
+Specification:
 ```
 WITH SERDEPROPERTIES (
    "fail_on_overflow" = "<Boolean>" -- default: true. Sets the default behavior for all columns
-   "<colum.name>.fail_on_overflow" = "<Boolean>"  -- default: true. Sets the behavior for specific columns  
-)  
+   "<colum.name>.fail_on_overflow" = "<Boolean>"  -- default: true. Sets the behavior for specific columns
+)
 ```
 
 Example:
@@ -86,13 +86,13 @@ Example:
 CREATE TABLE people (
   n  SMALLINT,
   s  VARCHAR(5),
-  st STRUCT<f1: SMALLINT, f2: VARCHAR(5)> 
+  st STRUCT<f1: SMALLINT, f2: VARCHAR(5)>
 )
 ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
 WITH SERDEPROPERTIES (
-  "n.fail_on_overflow" = "false",   
-  "s.fail_on_overflow" = "false", 
-  "st.fail_on_overflow" = "false" // sets it for all values in the struct 
+  "n.fail_on_overflow" = "false",
+  "s.fail_on_overflow" = "false",
+  "st.fail_on_overflow" = "false" // sets it for all values in the struct
 );
 
 Hive table
@@ -100,9 +100,6 @@ Hive table
 |--------| ------- | ----------------------------|
 | -25536 | "12345" | { f1: -25536, f2: "12345" } |
 ```
-
-## Decimal rounding 
-**TODO** see: https://github.com/amzn/ion-hive-serde/issues/9
 
 ## Serialize As
 **TODO** see: https://github.com/amzn/ion-hive-serde/issues/8
