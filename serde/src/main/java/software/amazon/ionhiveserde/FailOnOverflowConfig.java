@@ -14,25 +14,43 @@
 
 package software.amazon.ionhiveserde;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Encapsulates the fail_on_overflow configuration.
  */
-public class FailOnOverflowConfig {
+class FailOnOverflowConfig {
+
+    private static final String FAIL_ON_OVERFLOW_KEY = "fail_on_overflow";
+    private static final String DEFAULT_FAIL_ON_OVERFLOW = "true";
 
     private final Map<String, Boolean> configByColumnName;
     private final boolean defaultValue;
 
+
     /**
      * Constructor.
      *
-     * @param configByColumnName user defined configuration per column name.
-     * @param defaultValue default value to be used.
+     * @param properties serde properties.
+     * @param columnNames table column names.
      */
-    public FailOnOverflowConfig(final Map<String, Boolean> configByColumnName, final boolean defaultValue) {
-        this.configByColumnName = configByColumnName;
-        this.defaultValue = defaultValue;
+    FailOnOverflowConfig(final Properties properties,
+                         final List<String> columnNames) {
+        final String defaultValue = properties.getProperty(FAIL_ON_OVERFLOW_KEY, DEFAULT_FAIL_ON_OVERFLOW);
+        configByColumnName = new HashMap<>();
+
+        for (String columnName : columnNames) {
+            final String columnPropertyKey = columnName + "." + FAIL_ON_OVERFLOW_KEY;
+            final boolean columnFailOnOverflowValue = Boolean.parseBoolean(
+                properties.getProperty(columnPropertyKey, defaultValue));
+
+            configByColumnName.put(columnName, columnFailOnOverflowValue);
+        }
+
+        this.defaultValue = Boolean.valueOf(defaultValue);
     }
 
     /**
