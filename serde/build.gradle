@@ -15,8 +15,8 @@
 apply plugin: 'java-library'
 
 // only applicable for src/main/java source set
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 dependencies {
     // Included in the single-jar
