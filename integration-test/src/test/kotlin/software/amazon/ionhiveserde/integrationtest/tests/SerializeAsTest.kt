@@ -27,25 +27,39 @@ import software.amazon.ionhiveserde.integrationtest.docker.SHARED_DIR
 import kotlin.test.assertEquals
 
 @RunWith(JUnitParamsRunner::class)
-class FailOnOverflowTest : Base() {
+class SerializeAsTest : Base() {
     companion object : TestLifecycle {
-        private const val TEST_DIR = "$SHARED_DIR/input/FailOnOverflowTest/"
+        private const val TEST_DIR = "$SHARED_DIR/input/SerializeAsTest/"
+        private const val tableNamePrefix = "SerializeAsTest"
+
         private const val INPUT = """
-            { hiveType: "TINYINT",              value: 128,          expected: -128 }
-            { hiveType: "VARCHAR(5)",           value: "1234567890", expected: "12345" }
-            { hiveType: "STRUCT<foo: TINYINT>", value: {foo: 128},   expected: {foo: -128} }
+            { hiveType: "STRING", ionType: "STRING", value: "text", expected: "text" }
+            { hiveType: "STRING", ionType: "SYMBOL", value: "text", expected: 'text' }
+
+            { hiveType: "CHAR(20)", ionType: "STRING", value: "text", expected: "text" }
+            { hiveType: "CHAR(20)", ionType: "SYMBOL", value: "text", expected: 'text' }
+
+            { hiveType: "VARCHAR(20)", ionType: "STRING", value: "text", expected: "text" }
+            { hiveType: "VARCHAR(20)", ionType: "SYMBOL", value: "text", expected: 'text' }
+
+            { hiveType: "DECIMAL", ionType: "DECIMAL", value: 1.0, expected: 1. }
+            { hiveType: "DECIMAL", ionType: "INT",     value: 1.0, expected: 1 }
+
+            { hiveType: "ARRAY<INT>", ionType: "LIST", value: [1,2,3], expected: [1,2,3] }
+            { hiveType: "ARRAY<INT>", ionType: "SEXP", value: [1,2,3], expected: (1 2 3) }
+
+            { hiveType: "BINARY", ionType: "BLOB", value: {{ "text" }}, expected: {{ dGV4dA== }} }
+            { hiveType: "BINARY", ionType: "CLOB", value: {{ "text" }}, expected: {{ "text" }} }
         """
 
-        private const val tableName = "FailOnOverflowTest"
-        private val serdeProperties = mapOf("fail_on_overflow" to "false")
-
-        data class TestCase(val hiveType: String, val value: IonValue, val expected: IonValue)
+        data class TestCase(val hiveType: String, val ionType: String, val value: IonValue, val expected: IonValue)
 
         private fun parseInput() = ION.loader.load(INPUT)
                 .map { it as IonStruct }
                 .map {
                     TestCase(
                             (it["hiveType"] as IonText).stringValue(),
+                            (it["ionType"] as IonText).stringValue(),
                             it["value"],
                             it["expected"])
                 }
@@ -54,7 +68,7 @@ class FailOnOverflowTest : Base() {
             mkdir(TEST_DIR)
 
             parseInput().forEach { testCase ->
-                val path = "$TEST_DIR/${testCase.hiveType.sanitize()}"
+                val path = "$TEST_DIR/${testCase.hiveType.sanitize()}_${testCase.ionType}"
                 mkdir(path)
 
                 ION.newBinaryWriterFromPath("$path/file.10n").use { writer ->
@@ -64,7 +78,6 @@ class FailOnOverflowTest : Base() {
                     writer.stepOut()
                 }
             }
-
         }
 
         override fun tearDown() {
@@ -72,22 +85,28 @@ class FailOnOverflowTest : Base() {
         }
     }
 
-    private fun createTable(hiveType: String) {
+    private fun serdeProperties(ionType: String) = mapOf("column.0.serialize_as" to ionType)
+    private fun tableName(hiveType: String, ionType: String): String =
+            "${tableNamePrefix}_${hiveType.sanitize()}_${ionType.sanitize()}"
+
+    private fun createTable(tableName: String, hiveType: String, ionType: String, serdeProperties: Map<String, String>) {
         hive().createExternalTable(
                 tableName,
                 mapOf("field" to hiveType),
-                "/data/input/FailOnOverflowTest/${hiveType.sanitize()}",
+                "/data/input/SerializeAsTest/${hiveType.sanitize()}_$ionType",
                 serdeProperties)
     }
 
-    fun testCases() = parseInput().map { listOf(it.hiveType, it.expected) }
+    fun testCases() = parseInput().map { listOf(it.hiveType, it.ionType, it.expected) }
 
     @Test
     @Parameters(method = "testCases")
-    fun failOnOverflowTest(hiveType: String, expected: IonValue) {
-        createTable(hiveType)
+    fun serializeAsTest(hiveType: String, ionType: String, expected: IonValue) {
+        val tableName = tableName(hiveType, ionType)
+        val serdeProperties = serdeProperties(ionType)
+        createTable(tableName, hiveType, ionType, serdeProperties)
 
-        val rawBytes = hive().queryToFileAndRead("SELECT field FROM $tableName", serdeProperties)
+        val rawBytes = hive().queryToFileAndRead("SELECT * FROM $tableName", serdeProperties)
         val datagram = ION.loader.load(rawBytes)
 
         assertEquals(1, datagram.size)

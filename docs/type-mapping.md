@@ -41,7 +41,7 @@ some conversions must be made. For those [SerDe properties](serde-properties.md)
 | MAP<>     | struct         | |
 
 Hive types with multiple serialization options can be configured with the
-`columns.<column_name>.serialize_as`.
+`column.<column_index>.serialize_as`.
 
 ## Union types
 Collection types, ARRAYS, STRUCTS AND MAPS, are typed in hive but not in Ion. It's possible to work

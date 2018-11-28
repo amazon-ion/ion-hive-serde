@@ -42,6 +42,7 @@ import software.amazon.ion.IonSystem;
 import software.amazon.ion.IonWriter;
 import software.amazon.ion.system.IonSystemBuilder;
 import software.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
+import software.amazon.ionhiveserde.serializers.TableSerializer;
 
 /**
  * <p>
@@ -57,6 +58,7 @@ public class IonHiveSerDe extends AbstractSerDe {
     private ObjectInspector objectInspector;
     private SerDeProperties serDeProperties;
     private SerDeStats stats;
+    private TableSerializer serializer;
 
     /**
      * {@inheritDoc}
@@ -66,15 +68,15 @@ public class IonHiveSerDe extends AbstractSerDe {
     public void initialize(final @Nullable Configuration conf, final Properties properties) throws SerDeException {
         stats = new SerDeStats();
         final List<String> columnNames = readColumnNames(properties);
+        final List<TypeInfo> columnTypes = readColumnTypes(properties);
         final StructTypeInfo tableInfo = (StructTypeInfo) TypeInfoFactory.getStructTypeInfo(
             columnNames,
-            readColumnTypes(properties));
+            columnTypes);
 
         ion = buildIonSystem();
-
-        serDeProperties = new SerDeProperties(properties, columnNames);
-
+        serDeProperties = new SerDeProperties(properties, columnNames, columnTypes);
         objectInspector = IonObjectInspectorFactory.objectInspectorForTable(tableInfo, serDeProperties);
+        serializer = new TableSerializer(columnNames, serDeProperties);
     }
 
     /**
@@ -97,7 +99,7 @@ public class IonHiveSerDe extends AbstractSerDe {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try (final IonWriter writer = newWriter(out)) {
-            Serializer.serializeStruct(writer, data, (StructObjectInspector) objectInspector, serDeProperties);
+            serializer.serialize(writer, data, (StructObjectInspector) objectInspector);
         } catch (IOException | IllegalArgumentException e) {
             throw new SerDeException(e);
         }

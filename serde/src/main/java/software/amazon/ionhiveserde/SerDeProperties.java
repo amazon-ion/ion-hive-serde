@@ -16,11 +16,11 @@ package software.amazon.ionhiveserde;
 
 import static software.amazon.ionhiveserde.util.SerDePropertyParser.parseOffset;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
+import software.amazon.ion.IonType;
 
 /**
  * Encapsulates all SerDe properties.
@@ -39,9 +39,8 @@ public class SerDeProperties {
     private static final String DEFAULT_SERIALIZE_NULL = SerializeNullStrategy.OMIT.name();
     private final SerializeNullStrategy serializeNull;
 
-    private static final String FAIL_ON_OVERFLOW_KEY = "fail_on_overflow";
-    private static final String FAIL_ON_OVERFLOW = "true";
     private final FailOnOverflowConfig failOnOverflowConfig;
+    private final SerializeAsConfig serializeAsConfig;
 
     /**
      * Constructor.
@@ -49,12 +48,19 @@ public class SerDeProperties {
      * @param properties {@link Properties} passed to {@link IonHiveSerDe#initialize(Configuration, Properties)}.
      * @param columnNames table column names
      */
-    SerDeProperties(final Properties properties, final List<String> columnNames) {
+    SerDeProperties(final Properties properties,
+                    final List<String> columnNames,
+                    final List<TypeInfo> columnTypes) {
         encoding = IonEncoding.valueOf(properties.getProperty(ENCODING_KEY, DEFAULT_ENCODING));
+
         timestampOffsetInMinutes = parseOffset(properties.getProperty(DEFAULT_OFFSET_KEY, DEFAULT_OFFSET));
+
         serializeNull = SerializeNullStrategy.valueOf(
             properties.getProperty(DEFAULT_SERIALIZE_NULL_KEY, DEFAULT_SERIALIZE_NULL));
-        failOnOverflowConfig = parseFailOnOverflow(properties, columnNames);
+
+        failOnOverflowConfig = new FailOnOverflowConfig(properties, columnNames);
+
+        serializeAsConfig = new SerializeAsConfig(properties, columnTypes);
     }
 
     /**
@@ -62,7 +68,7 @@ public class SerDeProperties {
      *
      * @return IonEncoding to be used.
      */
-    IonEncoding getEncoding() {
+    public IonEncoding getEncoding() {
         return encoding;
     }
 
@@ -94,20 +100,13 @@ public class SerDeProperties {
         return failOnOverflowConfig.failOnOverflowFor(columnName);
     }
 
-    private FailOnOverflowConfig parseFailOnOverflow(final Properties properties,
-                                                     final List<String> columnNames) {
-        final String defaultValue = properties.getProperty(FAIL_ON_OVERFLOW_KEY, FAIL_ON_OVERFLOW);
-        final Map<String, Boolean> configByColumnName = new HashMap<>();
-
-        for (String columnName : columnNames) {
-            final String columnPropertyKey = columnName + "." + FAIL_ON_OVERFLOW_KEY;
-            final boolean columnFailOnOverflowValue = Boolean.parseBoolean(
-                properties.getProperty(columnPropertyKey, defaultValue));
-
-            configByColumnName.put(columnName, columnFailOnOverflowValue);
-        }
-
-        return new FailOnOverflowConfig(configByColumnName, Boolean.valueOf(defaultValue));
+    /**
+     * Returns the Ion type to be used during serialization for the column.
+     *
+     * @return the Ion type to be used during serialization for the column.
+     */
+    public IonType serializationIonTypeFor(final int index) {
+        return serializeAsConfig.serializationIonTypeFor(index);
     }
 }
 

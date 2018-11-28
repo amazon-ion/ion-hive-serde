@@ -102,4 +102,55 @@ Hive table
 ```
 
 ## Serialize As
-**TODO** see: https://github.com/amzn/ion-hive-serde/issues/8
+Some Hive types can be serialized into multiple Ion types, for example Hive Strings can be turned into Ion symbols and 
+Strings while Hive Binary can be serialized into Ion clob or Ion blob. This property changes the type mapping for a 
+column.
+
+We use column index instead of column name as Hive generates artificial aliases in the form of `col_<index>` for the 
+result set so it's only possible to reference columns in the result by index.  
+
+Specification:
+```
+WITH SERDEPROPERTIES (
+   "column.<column_index>.serialize_as" = "<ion_type>"
+)  
+```
+
+Possible mappings: 
+
+| Hive    | Ion              | Default |
+| ------- | ---------------- | ------- |
+| STRING  | string, symbol   | string  |
+| CHAR    | string, symbol   | string  |
+| VARCHAR | string, symbol   | string  |
+| ARRAY   | list, sexp       | list    |
+| BINARY  | blob, clob       | blob    |
+| DECIMAL | integer, decimal | decimal |
+ 
+Any other mapping will throw an error.
+
+Example:
+```
+Hive table: myTable
+| c1     | c2      | 
+| ------ | ------- | 
+| "text" | [1,2,3] | 
+
+-- Query
+INSERT OVERWRITE LOCAL DIRECTORY '/tmp'
+ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
+WITH SERDEPROPERTIES (
+  "column.1.serialize_as" = "symbol",
+  "column.1.serialize_as" = "sexp"
+)
+STORED AS
+  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat'
+SELECT c1, c2 FROM myTable;
+
+-- Ion Document
+{
+    col_0: text    // as symbol
+    col_1: (1 2 3) // as sexp
+}
+```
