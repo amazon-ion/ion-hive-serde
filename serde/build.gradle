@@ -21,6 +21,7 @@ targetCompatibility = 1.8
 dependencies {
     // Included in the single-jar
     compile "software.amazon.ion:ion-java:${ionjava_version}"
+    compile "software.amazon.ion:ion-java-path-extraction:${pathextraction_version}"
 
     // Provided by the Hive installation
     compileOnly "org.apache.hive:hive-serde:${hive_version}"

@@ -16,6 +16,7 @@
 buildscript {
     ext.kotlin_version = '1.2.+'
     ext.ionjava_version = '1.0.+'
+    ext.pathextraction_version = '1.0.1'
     ext.hive_version = '2.3.+'
     ext.hadoop_version = '2.7.+'
 
