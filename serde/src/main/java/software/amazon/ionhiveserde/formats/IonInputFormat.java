@@ -27,10 +27,10 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
+import software.amazon.ion.IonException;
 import software.amazon.ion.IonReader;
 import software.amazon.ion.IonSystem;
 import software.amazon.ion.IonWriter;
-import software.amazon.ion.system.IonReaderBuilder;
 import software.amazon.ion.system.IonSystemBuilder;
 import software.amazon.ion.util.IonStreamUtils;
 
@@ -55,6 +55,9 @@ public class IonInputFormat extends FileInputFormat {
 
     private static class IonRecordReader implements RecordReader<LongWritable, BytesWritable> {
 
+        private static final String IGNORE_MALFORMED_KEY = "ignore_malformed";
+        private static final String DEFAULT_IGNORE_MALFORMED = "false";
+
         private boolean isBinary(final FileSplit fileSplit, final JobConf job) throws IOException {
             final Path path = fileSplit.getPath();
             final FileSystem fs = path.getFileSystem(job);
@@ -72,13 +75,16 @@ public class IonInputFormat extends FileInputFormat {
         private final IonReader reader;
         private final ByteArrayOutputStream out;
         private final boolean isBinary;
+        private final boolean ignoreMalformed;
         private final long start;
+
 
         IonRecordReader(final IonSystem ion, final FileSplit fileSplit, final JobConf job)
             throws IOException {
             final Path path = fileSplit.getPath();
             final FileSystem fs = path.getFileSystem(job);
 
+            ignoreMalformed = Boolean.valueOf(job.get(IGNORE_MALFORMED_KEY, DEFAULT_IGNORE_MALFORMED));
             isBinary = isBinary(fileSplit, job);
 
             start = fileSplit.getStart();
@@ -117,20 +123,29 @@ public class IonInputFormat extends FileInputFormat {
 
         @Override
         public final boolean next(final LongWritable key, final BytesWritable value) throws IOException {
-            if (reader.next() == null) {
-                return false;
+            try {
+                if (reader.next() == null) {
+                    return false;
+                }
+
+                out.reset();
+
+                try (final IonWriter writer = newWriter(out)) {
+                    writer.writeValue(reader);
+                }
+
+                byte[] newData = out.toByteArray();
+                value.set(newData, 0, newData.length);
+
+                return true;
+            } catch (IonException e) {
+                // skips rest of the split if ignoring malformed
+                if (ignoreMalformed) {
+                    return false;
+                }
+
+                throw e;
             }
-
-            out.reset();
-
-            try (final IonWriter writer = newWriter(out)) {
-                writer.writeValue(reader);
-            }
-
-            byte[] newData = out.toByteArray();
-            value.set(newData, 0, newData.length);
-
-            return true;
         }
 
         private IonWriter newWriter(final ByteArrayOutputStream out) {

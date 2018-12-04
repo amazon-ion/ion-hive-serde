@@ -42,6 +42,7 @@ public class SerDeProperties {
     private static final String DEFAULT_SERIALIZE_NULL = SerializeNullStrategy.OMIT.name();
     private final SerializeNullStrategy serializeNull;
 
+
     private final FailOnOverflowConfig failOnOverflowConfig;
     private final SerializeAsConfig serializeAsConfig;
     private final PathExtractionConfig pathExtractionConfig;

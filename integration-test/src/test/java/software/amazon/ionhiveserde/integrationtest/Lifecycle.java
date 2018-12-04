@@ -19,6 +19,7 @@ import static software.amazon.ionhiveserde.integrationtest.docker.DockerUtilKt.w
 
 import software.amazon.ionhiveserde.integrationtest.docker.HDFS;
 import software.amazon.ionhiveserde.integrationtest.tests.FailOnOverflowTest;
+import software.amazon.ionhiveserde.integrationtest.tests.IgnoreMalformedTest;
 import software.amazon.ionhiveserde.integrationtest.tests.NullMappingTest;
 import software.amazon.ionhiveserde.integrationtest.tests.PathExtractorTest;
 import software.amazon.ionhiveserde.integrationtest.tests.SerializeAsTest;
@@ -41,6 +42,7 @@ class Lifecycle {
         FailOnOverflowTest.Companion.setup();
         SerializeAsTest.Companion.setup();
         PathExtractorTest.Companion.setup();
+        IgnoreMalformedTest.Companion.setup();
 
         // puts all test data into hdfs at once
         HDFS.put("input/");
@@ -62,6 +64,7 @@ class Lifecycle {
         FailOnOverflowTest.Companion.tearDown();
         SerializeAsTest.Companion.tearDown();
         PathExtractorTest.Companion.tearDown();
+        IgnoreMalformedTest.Companion.tearDown();
 
         HDFS.rm("/data");
         HDFS.rm("/docker-tmp");
