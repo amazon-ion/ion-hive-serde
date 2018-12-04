@@ -21,7 +21,9 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory.intTypeInfo
 import org.junit.Test
 import org.junit.runner.RunWith
+import software.amazon.ion.IonInt
 import software.amazon.ion.IonType
+import software.amazon.ion.system.IonReaderBuilder
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -247,5 +249,28 @@ class SerDePropertiesTest {
                 listOf("column_1"),
                 listOf(TypeInfoFactory.intTypeInfo)
         ).serializationIonTypeFor(1)
+    }
+
+    @Test
+    fun pathExtractor() {
+        val ionDocument = "{f1: 1, obj: {f2: 2}}"
+
+        val struct = ION.newEmptyStruct()
+        val pathExtractor = makeSerDeProperties(
+                Properties().apply {
+                    setProperty("c1.path_extractor", "(f1)")
+                    setProperty("c2.path_extractor", "(obj f2)")
+                },
+                listOf("c1", "c2"),
+                listOf(TypeInfoFactory.intTypeInfo, TypeInfoFactory.intTypeInfo)
+        ).buildPathExtractor(struct, ION)
+
+        assertTrue(struct.isEmpty)
+
+        pathExtractor.match(IonReaderBuilder.standard().build(ionDocument))
+
+        assertEquals(2, struct.size())
+        assertEquals(1, (struct["c1"] as IonInt).intValue())
+        assertEquals(2, (struct["c2"] as IonInt).intValue())
     }
 }

@@ -20,6 +20,7 @@ import static software.amazon.ionhiveserde.integrationtest.docker.DockerUtilKt.w
 import software.amazon.ionhiveserde.integrationtest.docker.HDFS;
 import software.amazon.ionhiveserde.integrationtest.tests.FailOnOverflowTest;
 import software.amazon.ionhiveserde.integrationtest.tests.NullMappingTest;
+import software.amazon.ionhiveserde.integrationtest.tests.PathExtractorTest;
 import software.amazon.ionhiveserde.integrationtest.tests.SerializeAsTest;
 import software.amazon.ionhiveserde.integrationtest.tests.TimestampSerializationOffsetTest;
 import software.amazon.ionhiveserde.integrationtest.tests.TypeMappingTest;
@@ -39,6 +40,7 @@ class Lifecycle {
         TimestampSerializationOffsetTest.Companion.setup();
         FailOnOverflowTest.Companion.setup();
         SerializeAsTest.Companion.setup();
+        PathExtractorTest.Companion.setup();
 
         // puts all test data into hdfs at once
         HDFS.put("input/");
@@ -59,6 +61,7 @@ class Lifecycle {
         TimestampSerializationOffsetTest.Companion.tearDown();
         FailOnOverflowTest.Companion.tearDown();
         SerializeAsTest.Companion.tearDown();
+        PathExtractorTest.Companion.tearDown();
 
         HDFS.rm("/data");
         HDFS.rm("/docker-tmp");

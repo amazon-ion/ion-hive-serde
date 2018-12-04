@@ -20,7 +20,10 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
+import software.amazon.ion.IonStruct;
+import software.amazon.ion.IonSystem;
 import software.amazon.ion.IonType;
+import software.amazon.ionpathextraction.PathExtractor;
 
 /**
  * Encapsulates all SerDe properties.
@@ -41,6 +44,7 @@ public class SerDeProperties {
 
     private final FailOnOverflowConfig failOnOverflowConfig;
     private final SerializeAsConfig serializeAsConfig;
+    private final PathExtractionConfig pathExtractionConfig;
 
     /**
      * Constructor.
@@ -61,6 +65,8 @@ public class SerDeProperties {
         failOnOverflowConfig = new FailOnOverflowConfig(properties, columnNames);
 
         serializeAsConfig = new SerializeAsConfig(properties, columnTypes);
+
+        pathExtractionConfig = new PathExtractionConfig(properties, columnNames);
     }
 
     /**
@@ -107,6 +113,18 @@ public class SerDeProperties {
      */
     public IonType serializationIonTypeFor(final int index) {
         return serializeAsConfig.serializationIonTypeFor(index);
+    }
+
+    /**
+     * Builds a path extractor from configuration that will accumulated matched paths to the struct.
+     *
+     * @param struct mutable struct to accumulated matched paths.
+     * @param domFactory Ion system used to create DOM objects.
+     *
+     * @return PathExtractor configured for matching.
+     */
+    public PathExtractor buildPathExtractor(final IonStruct struct, final IonSystem domFactory) {
+        return pathExtractionConfig.buildPathExtractor(struct, domFactory);
     }
 }
 

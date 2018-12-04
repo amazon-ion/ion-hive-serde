@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import javax.annotation.Nullable;
@@ -38,11 +39,15 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import software.amazon.ion.IonReader;
+import software.amazon.ion.IonStruct;
 import software.amazon.ion.IonSystem;
+import software.amazon.ion.IonValue;
 import software.amazon.ion.IonWriter;
 import software.amazon.ion.system.IonSystemBuilder;
 import software.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
 import software.amazon.ionhiveserde.serializers.TableSerializer;
+import software.amazon.ionpathextraction.PathExtractor;
 
 /**
  * <p>
@@ -136,7 +141,16 @@ public class IonHiveSerDe extends AbstractSerDe {
                 + blob.getClass());
         }
 
-        return Deserializer.deserialize(ion, bytes, length);
+        try (final IonReader reader = ion.newReader(bytes, 0, length)) {
+            final IonStruct struct = ion.newEmptyStruct();
+            final PathExtractor pathExtractor = serDeProperties.buildPathExtractor(struct, ion);
+
+            pathExtractor.match(reader);
+
+            return struct;
+        } catch (IOException e) {
+            throw new SerDeException(e);
+        }
     }
 
     /**
