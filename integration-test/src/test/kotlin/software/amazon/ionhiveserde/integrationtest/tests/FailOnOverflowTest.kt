@@ -41,7 +41,7 @@ class FailOnOverflowTest : Base() {
 
         data class TestCase(val hiveType: String, val value: IonValue, val expected: IonValue)
 
-        private fun parseInput() = ION.loader.load(INPUT)
+        private fun parseInput() = DOM_FACTORY.loader.load(INPUT)
                 .map { it as IonStruct }
                 .map {
                     TestCase(
@@ -57,7 +57,7 @@ class FailOnOverflowTest : Base() {
                 val path = "$TEST_DIR/${testCase.hiveType.sanitize()}"
                 mkdir(path)
 
-                ION.newBinaryWriterFromPath("$path/file.10n").use { writer ->
+                newBinaryWriterFromPath("$path/file.10n").use { writer ->
                     writer.stepIn(IonType.STRUCT)
                     writer.setFieldName("field")
                     testCase.value.writeTo(writer)
@@ -88,7 +88,7 @@ class FailOnOverflowTest : Base() {
         createTable(hiveType)
 
         val rawBytes = hive().queryToFileAndRead("SELECT field FROM $tableName", serdeProperties)
-        val datagram = ION.loader.load(rawBytes)
+        val datagram = DOM_FACTORY.loader.load(rawBytes)
 
         assertEquals(1, datagram.size)
         val struct = datagram[0] as IonStruct

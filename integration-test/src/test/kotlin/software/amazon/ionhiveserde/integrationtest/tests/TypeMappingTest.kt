@@ -52,8 +52,8 @@ class TypeMappingTest : Base() {
                 mkdir(path)
 
                 val writers = sequenceOf(
-                        ION.newTextWriterFromPath("$path/$hiveType.ion"),
-                        ION.newBinaryWriterFromPath("$path/$hiveType.10n")
+                        newTextWriterFromPath("$path/$hiveType.ion"),
+                        newBinaryWriterFromPath("$path/$hiveType.10n")
                 )
 
                 writers.forEach { writer -> writer.use { writeTestFile(it, values) } }
@@ -111,20 +111,20 @@ class TypeMappingTest : Base() {
     }
 
     private fun ResultSet.getIon(index: Int) = when (this.metaData.getColumnType(index)) {
-        Types.BOOLEAN                                -> ION.newBool(this.getBoolean(index))
-        Types.TINYINT, Types.INTEGER                 -> ION.newInt(this.getInt(index))
-        Types.BIGINT                                 -> ION.newInt(this.getLong(index))
-        Types.FLOAT, Types.DOUBLE                    -> ION.newFloat(this.getDouble(index))
-        Types.DECIMAL                                -> ION.newDecimal(this.getBigDecimal(index).stripTrailingZeros())
-        Types.BINARY                                 -> ION.newBlob(this.getBinaryStream(index).readBytes())
-        Types.CHAR, Types.VARCHAR                    -> ION.newString(this.getString(index).trim())
+        Types.BOOLEAN -> DOM_FACTORY.newBool(this.getBoolean(index))
+        Types.TINYINT, Types.INTEGER -> DOM_FACTORY.newInt(this.getInt(index))
+        Types.BIGINT -> DOM_FACTORY.newInt(this.getLong(index))
+        Types.FLOAT, Types.DOUBLE -> DOM_FACTORY.newFloat(this.getDouble(index))
+        Types.DECIMAL -> DOM_FACTORY.newDecimal(this.getBigDecimal(index).stripTrailingZeros())
+        Types.BINARY -> DOM_FACTORY.newBlob(this.getBinaryStream(index).readBytes())
+        Types.CHAR, Types.VARCHAR -> DOM_FACTORY.newString(this.getString(index).trim())
 
         // java object is used for maps
         Types.ARRAY, Types.JAVA_OBJECT, Types.STRUCT -> {
             // hive jdbc driver represents this types a json string
-            ION.singleValue(this.getString(index))
+            DOM_FACTORY.singleValue(this.getString(index))
         }
-        else                                         -> {
+        else -> {
             throw IllegalArgumentException("Unknown sql column type: ${this.metaData.getColumnType(index)}")
         }
     }
@@ -181,7 +181,7 @@ class TypeMappingTest : Base() {
         createTable(tableName, testCase, mapOf("encoding" to encoding.name))
 
         val rawBytes = hive().queryToFileAndRead("SELECT * FROM $tableName")
-        val datagram = ION.loader.load(rawBytes)
+        val datagram = DOM_FACTORY.loader.load(rawBytes)
 
         assertEquals(testCase.expectedIonValues.size, datagram.size)
         testCase.expectedIonValues.forEachIndexed { index, expected ->

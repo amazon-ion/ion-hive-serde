@@ -21,18 +21,23 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import software.amazon.ionhiveserde.integrationtest.tests.FailOnOverflowTest;
 import software.amazon.ionhiveserde.integrationtest.tests.NullMappingTest;
+import software.amazon.ionhiveserde.integrationtest.tests.PathExtractorTest;
+import software.amazon.ionhiveserde.integrationtest.tests.SerializeAsTest;
 import software.amazon.ionhiveserde.integrationtest.tests.TimestampSerializationOffsetTest;
 import software.amazon.ionhiveserde.integrationtest.tests.TypeMappingTest;
+import software.amazon.ionpathextraction.PathExtractor;
 
 /**
  * Test for all integration tests.
  */
 @RunWith(Suite.class)
 @SuiteClasses({
+    FailOnOverflowTest.class,
     NullMappingTest.class,
-    TypeMappingTest.class,
+    PathExtractorTest.class,
+    SerializeAsTest.class,
     TimestampSerializationOffsetTest.class,
-    FailOnOverflowTest.class
+    TypeMappingTest.class,
 })
 public class AllTestsSuite {
 

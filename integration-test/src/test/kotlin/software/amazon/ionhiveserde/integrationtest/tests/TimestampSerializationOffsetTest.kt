@@ -42,9 +42,7 @@ class TimestampSerializationOffsetTest : Base() {
         override fun setup() {
             mkdir(TEST_DIR)
 
-            ION.newBinaryWriterFromPath("$TEST_DIR/timestamps.10n").use { writer ->
-                ION.newReader(INPUT_TIMESTAMPS).use { writer.writeValues(it) }
-            }
+            newBinaryWriterFromPath("$TEST_DIR/timestamps.10n").use { it.writeValues(INPUT_TIMESTAMPS) }
         }
 
         override fun tearDown() {
@@ -69,11 +67,11 @@ class TimestampSerializationOffsetTest : Base() {
         createTable()
 
         val rawBytes = Base.hive().queryToFileAndRead("SELECT * FROM $tableName", serdeProperties)
-        val datagram = ION.loader.load(rawBytes)
+        val datagram = DOM_FACTORY.loader.load(rawBytes)
 
         val expectedOffset = -8 * 60
 
-        val actualTimestamps = ION.loader.load(INPUT_TIMESTAMPS).toTimestampList()
+        val actualTimestamps = DOM_FACTORY.loader.load(INPUT_TIMESTAMPS).toTimestampList()
 
         assertEquals(actualTimestamps.size, datagram.size)
         datagram.toTimestampList().forEachIndexed { index, timestamp ->

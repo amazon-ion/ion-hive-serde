@@ -15,7 +15,7 @@
 package software.amazon.ionhiveserde.integrationtest.setup
 
 import software.amazon.ion.IonStruct
-import software.amazon.ionhiveserde.integrationtest.ION
+import software.amazon.ionhiveserde.integrationtest.DOM_FACTORY
 import software.amazon.ionhiveserde.integrationtest.singleValueFromPath
 
 /**
@@ -24,5 +24,5 @@ import software.amazon.ionhiveserde.integrationtest.singleValueFromPath
 object TestData {
 
     /** contents of type-mapping.ion as an [IonStruct]. */
-    val typeMapping: IonStruct by lazy { ION.singleValueFromPath("test-data/type-mapping.ion") as IonStruct }
+    val typeMapping: IonStruct by lazy { DOM_FACTORY.singleValueFromPath("test-data/type-mapping.ion") as IonStruct }
 }

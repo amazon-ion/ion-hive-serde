@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import javax.annotation.Nullable;
@@ -42,9 +41,12 @@ import org.apache.hadoop.io.Writable;
 import software.amazon.ion.IonReader;
 import software.amazon.ion.IonStruct;
 import software.amazon.ion.IonSystem;
-import software.amazon.ion.IonValue;
 import software.amazon.ion.IonWriter;
+import software.amazon.ion.system.IonBinaryWriterBuilder;
+import software.amazon.ion.system.IonReaderBuilder;
 import software.amazon.ion.system.IonSystemBuilder;
+import software.amazon.ion.system.IonTextWriterBuilder;
+import software.amazon.ion.system.IonWriterBuilder;
 import software.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
 import software.amazon.ionhiveserde.serializers.TableSerializer;
 import software.amazon.ionpathextraction.PathExtractor;
@@ -59,11 +61,14 @@ import software.amazon.ionpathextraction.PathExtractor;
  */
 public class IonHiveSerDe extends AbstractSerDe {
 
-    private IonSystem ion;
+    private IonSystem domFactory;
     private ObjectInspector objectInspector;
     private SerDeProperties serDeProperties;
     private SerDeStats stats;
     private TableSerializer serializer;
+    private IonReaderBuilder readerBuilder;
+    private IonTextWriterBuilder textWriterBuilder;
+    private IonBinaryWriterBuilder binaryWriterBuilder;
 
     /**
      * {@inheritDoc}
@@ -78,8 +83,14 @@ public class IonHiveSerDe extends AbstractSerDe {
             columnNames,
             columnTypes);
 
-        ion = buildIonSystem();
         serDeProperties = new SerDeProperties(properties, columnNames, columnTypes);
+
+        // TODO configure it from SerDeProperties
+        domFactory = IonSystemBuilder.standard().build();
+        readerBuilder = IonReaderBuilder.standard();
+        binaryWriterBuilder = IonBinaryWriterBuilder.standard();
+        textWriterBuilder = IonTextWriterBuilder.standard();
+
         objectInspector = IonObjectInspectorFactory.objectInspectorForTable(tableInfo, serDeProperties);
         serializer = new TableSerializer(columnNames, serDeProperties);
     }
@@ -104,7 +115,7 @@ public class IonHiveSerDe extends AbstractSerDe {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         try (final IonWriter writer = newWriter(out)) {
-            serializer.serialize(writer, data, (StructObjectInspector) objectInspector);
+            serializer.serialize(writer, data, objectInspector);
         } catch (IOException | IllegalArgumentException e) {
             throw new SerDeException(e);
         }
@@ -141,9 +152,9 @@ public class IonHiveSerDe extends AbstractSerDe {
                 + blob.getClass());
         }
 
-        try (final IonReader reader = ion.newReader(bytes, 0, length)) {
-            final IonStruct struct = ion.newEmptyStruct();
-            final PathExtractor pathExtractor = serDeProperties.buildPathExtractor(struct, ion);
+        try (final IonReader reader = readerBuilder.build(bytes, 0, length)) {
+            final IonStruct struct = domFactory.newEmptyStruct();
+            final PathExtractor pathExtractor = serDeProperties.buildPathExtractor(struct, domFactory);
 
             pathExtractor.match(reader);
 
@@ -170,7 +181,11 @@ public class IonHiveSerDe extends AbstractSerDe {
     }
 
     private IonWriter newWriter(final OutputStream out) {
-        return serDeProperties.getEncoding() == IonEncoding.BINARY ? ion.newBinaryWriter(out) : ion.newTextWriter(out);
+        final IonWriterBuilder builder = serDeProperties.getEncoding() == IonEncoding.BINARY
+            ? binaryWriterBuilder
+            : textWriterBuilder;
+
+        return builder.build(out);
     }
 
     private List<String> readColumnNames(final Properties tbl) {
@@ -191,12 +206,6 @@ public class IonHiveSerDe extends AbstractSerDe {
         }
 
         return TypeInfoUtils.getTypeInfosFromTypeString(columnTypeProperty);
-    }
-
-    private IonSystem buildIonSystem() {
-        // TODO configure it from SERDEPROPERTIES
-
-        return IonSystemBuilder.standard().build();
     }
 }
 

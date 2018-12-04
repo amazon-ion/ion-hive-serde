@@ -47,8 +47,8 @@ class NullMappingTest : Base() {
             mkdir(nullDir)
 
             val writers = sequenceOf(
-                    ION.newTextWriterFromPath("$nullDir/null.ion"),
-                    ION.newBinaryWriterFromPath("$nullDir/null.10n"))
+                    newTextWriterFromPath("$nullDir/null.ion"),
+                    newBinaryWriterFromPath("$nullDir/null.10n"))
 
             writers.forEach { writer -> writer.use(::writeTestFile) }
         }
@@ -128,7 +128,7 @@ class NullMappingTest : Base() {
         createTable(tableName, serdeProperties)
 
         val rawBytes = hive().queryToFileAndRead("SELECT * FROM $tableName", serdeProperties)
-        val datagram = ION.loader.load(rawBytes)
+        val datagram = DOM_FACTORY.loader.load(rawBytes)
 
         assertEquals(6, datagram.size)
 

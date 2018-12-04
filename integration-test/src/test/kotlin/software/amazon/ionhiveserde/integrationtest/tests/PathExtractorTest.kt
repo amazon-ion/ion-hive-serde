@@ -19,6 +19,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import software.amazon.ion.IonInt
 import software.amazon.ion.IonStruct
+import software.amazon.ion.system.IonReaderBuilder
 import software.amazon.ionhiveserde.integrationtest.*
 import software.amazon.ionhiveserde.integrationtest.docker.SHARED_DIR
 import kotlin.test.assertEquals
@@ -36,13 +37,11 @@ class PathExtractorTest : Base() {
         override fun setup() {
             mkdir(TEST_DIR)
 
-            ION.newBinaryWriterFromPath("$TEST_DIR/file.10n").use { writer ->
-                ION.newReader(INPUT).use { writer.writeValues(it) }
-            }
+            newBinaryWriterFromPath("$TEST_DIR/file.10n").use { it.writeValues(INPUT) }
         }
 
         override fun tearDown() {
-               rm(TEST_DIR)
+            rm(TEST_DIR)
         }
     }
 
@@ -60,7 +59,7 @@ class PathExtractorTest : Base() {
         createTable(mapOf("renamed_field1" to "INT"), serdeProperties)
 
         val rawBytes = hive().queryToFileAndRead("SELECT renamed_field1 FROM $TABLE_NAME", serdeProperties)
-        val datagram = ION.loader.load(rawBytes)
+        val datagram = DOM_FACTORY.loader.load(rawBytes)
 
         assertEquals(1, datagram.size)
         val struct = datagram[0] as IonStruct
@@ -76,7 +75,7 @@ class PathExtractorTest : Base() {
         createTable(mapOf("field" to "INT"), serdeProperties)
 
         val rawBytes = hive().queryToFileAndRead("SELECT field FROM $TABLE_NAME", serdeProperties)
-        val datagram = ION.loader.load(rawBytes)
+        val datagram = DOM_FACTORY.loader.load(rawBytes)
 
         assertEquals(1, datagram.size)
         val struct = datagram[0] as IonStruct

@@ -30,6 +30,7 @@ import org.apache.hadoop.mapred.Reporter;
 import software.amazon.ion.IonReader;
 import software.amazon.ion.IonSystem;
 import software.amazon.ion.IonWriter;
+import software.amazon.ion.system.IonReaderBuilder;
 import software.amazon.ion.system.IonSystemBuilder;
 import software.amazon.ion.util.IonStreamUtils;
 
