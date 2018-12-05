@@ -58,17 +58,11 @@ public class IonStructToStructInspector extends StructObjectInspector {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<? extends StructField> getAllStructFieldRefs() {
         return fields;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public StructField getStructFieldRef(final String fieldName) {
         if (fieldName == null) {
@@ -78,9 +72,6 @@ public class IonStructToStructInspector extends StructObjectInspector {
         return fieldsByName.get(fieldName);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getStructFieldData(final Object data, final StructField fieldRef) {
         if (isIonNull((IonValue) data)) {
@@ -95,9 +86,6 @@ public class IonStructToStructInspector extends StructObjectInspector {
         return struct.get(fieldRef.getFieldName());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<Object> getStructFieldsDataAsList(final Object data) {
         if (isIonNull((IonValue) data)) {
@@ -114,17 +102,11 @@ public class IonStructToStructInspector extends StructObjectInspector {
         return list;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getTypeName() {
         return ObjectInspectorUtils.getStandardStructTypeName(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Category getCategory() {
         return Category.STRUCT;
@@ -143,33 +125,21 @@ public class IonStructToStructInspector extends StructObjectInspector {
             this.fieldId = fieldId;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getFieldName() {
             return fieldName;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public ObjectInspector getFieldObjectInspector() {
             return fieldObjectInspector;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public int getFieldID() {
             return fieldId;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String getFieldComment() {
             return FIELD_COMMENT;

@@ -25,9 +25,8 @@ import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.UnionTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.VarcharTypeInfo;
-import software.amazon.ionhiveserde.SerDeProperties;
+import software.amazon.ionhiveserde.configuration.SerDeProperties;
 import software.amazon.ionhiveserde.objectinspectors.IonBooleanToBooleanObjectInspector;
-import software.amazon.ionhiveserde.objectinspectors.IonDecimalToDecimalObjectInspector;
 import software.amazon.ionhiveserde.objectinspectors.IonFloatToDoubleObjectInspector;
 import software.amazon.ionhiveserde.objectinspectors.IonFloatToFloatObjectInspector;
 import software.amazon.ionhiveserde.objectinspectors.IonIntToBigIntObjectInspector;
@@ -35,6 +34,7 @@ import software.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector;
 import software.amazon.ionhiveserde.objectinspectors.IonIntToSmallIntObjectInspector;
 import software.amazon.ionhiveserde.objectinspectors.IonIntToTinyIntObjectInspector;
 import software.amazon.ionhiveserde.objectinspectors.IonLobToBinaryObjectInspector;
+import software.amazon.ionhiveserde.objectinspectors.IonNumberToDecimalObjectInspector;
 import software.amazon.ionhiveserde.objectinspectors.IonSequenceToListObjectInspector;
 import software.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector;
 import software.amazon.ionhiveserde.objectinspectors.IonStructToStructInspector;
@@ -75,8 +75,8 @@ public class IonObjectInspectorFactory {
         new IonFloatToFloatObjectInspector(false);
     private static final IonFloatToDoubleObjectInspector FLOAT_TO_DOUBLE_OBJECT_INSPECTOR =
         new IonFloatToDoubleObjectInspector();
-    private static final IonDecimalToDecimalObjectInspector DECIMAL_TO_DECIMAL_OBJECT_INSPECTOR =
-        new IonDecimalToDecimalObjectInspector();
+    private static final IonNumberToDecimalObjectInspector NUMBER_TO_DECIMAL_OBJECT_INSPECTOR =
+        new IonNumberToDecimalObjectInspector();
     private static final IonTextToStringObjectInspector TEXT_TO_STRING_OBJECT_INSPECTOR =
         new IonTextToStringObjectInspector();
     private static final IonLobToBinaryObjectInspector LOB_TO_BINARY_OBJECT_INSPECTOR =
@@ -160,8 +160,7 @@ public class IonObjectInspectorFactory {
                         break;
 
                     case DECIMAL:
-                        // TODO can be decimal or int, needs configuration. Fixing to decimal for now
-                        objectInspector = DECIMAL_TO_DECIMAL_OBJECT_INSPECTOR;
+                        objectInspector = NUMBER_TO_DECIMAL_OBJECT_INSPECTOR;
                         break;
 
                     case FLOAT:

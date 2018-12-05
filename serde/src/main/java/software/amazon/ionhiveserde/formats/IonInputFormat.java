@@ -16,6 +16,8 @@ package software.amazon.ionhiveserde.formats;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,35 +31,33 @@ import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import software.amazon.ion.IonException;
 import software.amazon.ion.IonReader;
-import software.amazon.ion.IonSystem;
 import software.amazon.ion.IonWriter;
-import software.amazon.ion.system.IonSystemBuilder;
 import software.amazon.ion.util.IonStreamUtils;
+import software.amazon.ionhiveserde.IonFactory;
+import software.amazon.ionhiveserde.configuration.HadoopProperties;
+import software.amazon.ionhiveserde.configuration.source.HadoopConfigurationAdapter;
 
 /**
  * Hadoop input format for Ion files, works for text and binary. Splits are based on top-level Ion values.
  */
 public class IonInputFormat extends FileInputFormat {
 
-    private static IonSystem ion = IonSystemBuilder.standard()
-        .withStreamCopyOptimized(true) // use stream copy optimized to copy raw data when possible
-        .build();
+    private static final Log LOG = LogFactory.getLog(IonInputFormat.class);
 
     @Override
     public RecordReader getRecordReader(final InputSplit split, final JobConf job, final Reporter reporter)
         throws IOException {
+
+        LOG.fatal(job);
+
         final FileSplit fileSplit = (FileSplit) split;
 
         reporter.setStatus(fileSplit.toString());
 
-        return new IonRecordReader(ion, fileSplit, job);
+        return new IonRecordReader(fileSplit, job);
     }
 
     private static class IonRecordReader implements RecordReader<LongWritable, BytesWritable> {
-
-        private static final String IGNORE_MALFORMED_KEY = "ignore_malformed";
-        private static final String DEFAULT_IGNORE_MALFORMED = "false";
-
         private boolean isBinary(final FileSplit fileSplit, final JobConf job) throws IOException {
             final Path path = fileSplit.getPath();
             final FileSystem fs = path.getFileSystem(job);
@@ -72,19 +72,18 @@ public class IonInputFormat extends FileInputFormat {
         }
 
         private final FSDataInputStream fsDataInputStream;
+        private final HadoopProperties properties;
+        private final IonFactory ionFactory;
         private final IonReader reader;
         private final ByteArrayOutputStream out;
         private final boolean isBinary;
-        private final boolean ignoreMalformed;
         private final long start;
 
-
-        IonRecordReader(final IonSystem ion, final FileSplit fileSplit, final JobConf job)
+        IonRecordReader(final FileSplit fileSplit, final JobConf job)
             throws IOException {
             final Path path = fileSplit.getPath();
             final FileSystem fs = path.getFileSystem(job);
 
-            ignoreMalformed = Boolean.valueOf(job.get(IGNORE_MALFORMED_KEY, DEFAULT_IGNORE_MALFORMED));
             isBinary = isBinary(fileSplit, job);
 
             start = fileSplit.getStart();
@@ -92,7 +91,12 @@ public class IonInputFormat extends FileInputFormat {
             fsDataInputStream = fs.open(path);
             fsDataInputStream.seek(fileSplit.getStart());
 
-            reader = ion.newReader(fsDataInputStream.getWrappedStream());
+            properties = new HadoopProperties(new HadoopConfigurationAdapter(job));
+
+            ionFactory = new IonFactory(properties);
+
+            reader = ionFactory.newReader(fsDataInputStream.getWrappedStream());
+
             out = new ByteArrayOutputStream();
         }
 
@@ -140,7 +144,7 @@ public class IonInputFormat extends FileInputFormat {
                 return true;
             } catch (IonException e) {
                 // skips rest of the split if ignoring malformed
-                if (ignoreMalformed) {
+                if (properties.getIgnoreMalformed()) {
                     return false;
                 }
 
@@ -149,7 +153,9 @@ public class IonInputFormat extends FileInputFormat {
         }
 
         private IonWriter newWriter(final ByteArrayOutputStream out) {
-            return isBinary ? ion.newBinaryWriter(out) : ion.newTextWriter(out);
+            return isBinary
+                ? ionFactory.newBinaryWriter(out)
+                : ionFactory.newTextWriter(out);
         }
     }
 }

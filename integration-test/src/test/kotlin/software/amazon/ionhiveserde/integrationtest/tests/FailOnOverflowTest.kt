@@ -29,15 +29,15 @@ import kotlin.test.assertEquals
 @RunWith(JUnitParamsRunner::class)
 class FailOnOverflowTest : Base() {
     companion object : TestLifecycle {
-        private const val TEST_DIR = "$SHARED_DIR/input/FailOnOverflowTest/"
+        private const val TABLE_NAME = "FailOnOverflowTest"
+        private const val TEST_DIR = "$SHARED_DIR/input/$TABLE_NAME/"
         private const val INPUT = """
             { hiveType: "TINYINT",              value: 128,          expected: -128 }
             { hiveType: "VARCHAR(5)",           value: "1234567890", expected: "12345" }
             { hiveType: "STRUCT<foo: TINYINT>", value: {foo: 128},   expected: {foo: -128} }
         """
 
-        private const val tableName = "FailOnOverflowTest"
-        private val serdeProperties = mapOf("fail_on_overflow" to "false")
+        private val serdeProperties = mapOf("ion.fail_on_overflow" to "false")
 
         data class TestCase(val hiveType: String, val value: IonValue, val expected: IonValue)
 
@@ -74,9 +74,9 @@ class FailOnOverflowTest : Base() {
 
     private fun createTable(hiveType: String) {
         hive().createExternalTable(
-                tableName,
+                TABLE_NAME,
                 mapOf("field" to hiveType),
-                "/data/input/FailOnOverflowTest/${hiveType.sanitize()}",
+                "/data/input/$TABLE_NAME/${hiveType.sanitize()}",
                 serdeProperties)
     }
 
@@ -87,7 +87,7 @@ class FailOnOverflowTest : Base() {
     fun failOnOverflowTest(hiveType: String, expected: IonValue) {
         createTable(hiveType)
 
-        val rawBytes = hive().queryToFileAndRead("SELECT field FROM $tableName", serdeProperties)
+        val rawBytes = hive().queryToFileAndRead("SELECT field FROM $TABLE_NAME", serdeProperties)
         val datagram = DOM_FACTORY.loader.load(rawBytes)
 
         assertEquals(1, datagram.size)

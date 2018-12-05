@@ -19,14 +19,8 @@
 
 package software.amazon.ionhiveserde.integrationtest
 
-import software.amazon.ion.IonStruct
-import software.amazon.ion.IonSystem
-import software.amazon.ion.IonValue
-import software.amazon.ion.IonWriter
-import software.amazon.ion.system.IonBinaryWriterBuilder
-import software.amazon.ion.system.IonReaderBuilder
-import software.amazon.ion.system.IonSystemBuilder
-import software.amazon.ion.system.IonTextWriterBuilder
+import software.amazon.ion.*
+import software.amazon.ion.system.*
 import java.io.File
 import java.io.FileOutputStream
 
@@ -38,8 +32,15 @@ fun newTextWriterFromPath(path: String): IonWriter =
         IonTextWriterBuilder.standard().build(FileOutputStream(File(path)))
 
 /** Creates Ion binary writer from the local path. */
-fun newBinaryWriterFromPath(path: String): IonWriter =
-        IonBinaryWriterBuilder.standard().build(FileOutputStream(File(path)))
+fun newBinaryWriterFromPath(
+        path: String,
+        catalog: IonCatalog = SimpleCatalog(),
+        vararg imports: SymbolTable): IonWriter {
+    return IonBinaryWriterBuilder.standard()
+            .withCatalog(catalog)
+            .withImports(*imports)
+            .build(FileOutputStream(File(path)))
+}
 
 // Extensions -------------------------------------------------------------------------------------------------------
 

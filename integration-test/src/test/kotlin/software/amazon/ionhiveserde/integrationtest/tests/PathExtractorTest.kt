@@ -55,7 +55,7 @@ class PathExtractorTest : Base() {
 
     @Test
     fun pathExtractorRenameField() {
-        val serdeProperties = mapOf("renamed_field1.path_extractor" to "(field1)")
+        val serdeProperties = mapOf("ion.renamed_field1.path_extractor" to "(field1)")
         createTable(mapOf("renamed_field1" to "INT"), serdeProperties)
 
         val rawBytes = hive().queryToFileAndRead("SELECT renamed_field1 FROM $TABLE_NAME", serdeProperties)
@@ -71,7 +71,7 @@ class PathExtractorTest : Base() {
 
     @Test
     fun pathExtractorUnnest() {
-        val serdeProperties = mapOf("field.path_extractor" to "(obj nested)")
+        val serdeProperties = mapOf("ion.field.path_extractor" to "(obj nested)")
         createTable(mapOf("field" to "INT"), serdeProperties)
 
         val rawBytes = hive().queryToFileAndRead("SELECT field FROM $TABLE_NAME", serdeProperties)

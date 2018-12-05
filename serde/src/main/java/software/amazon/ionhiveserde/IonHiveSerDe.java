@@ -37,15 +37,13 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import software.amazon.ion.IonException;
 import software.amazon.ion.IonReader;
 import software.amazon.ion.IonStruct;
 import software.amazon.ion.IonSystem;
 import software.amazon.ion.IonWriter;
-import software.amazon.ion.system.IonBinaryWriterBuilder;
-import software.amazon.ion.system.IonReaderBuilder;
-import software.amazon.ion.system.IonSystemBuilder;
-import software.amazon.ion.system.IonTextWriterBuilder;
-import software.amazon.ion.system.IonWriterBuilder;
+import software.amazon.ionhiveserde.configuration.IonEncoding;
+import software.amazon.ionhiveserde.configuration.SerDeProperties;
 import software.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
 import software.amazon.ionhiveserde.serializers.TableSerializer;
 import software.amazon.ionpathextraction.PathExtractor;
@@ -60,18 +58,12 @@ import software.amazon.ionpathextraction.PathExtractor;
  */
 public class IonHiveSerDe extends AbstractSerDe {
 
-    private IonSystem domFactory;
     private ObjectInspector objectInspector;
     private SerDeProperties serDeProperties;
     private SerDeStats stats;
     private TableSerializer serializer;
-    private IonReaderBuilder readerBuilder;
-    private IonTextWriterBuilder textWriterBuilder;
-    private IonBinaryWriterBuilder binaryWriterBuilder;
+    private IonFactory ionFactory;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     @SuppressWarnings("deprecation") // we are forced to override this constructor even though it's deprecated
     public void initialize(final @Nullable Configuration conf, final Properties properties) throws SerDeException {
@@ -84,27 +76,19 @@ public class IonHiveSerDe extends AbstractSerDe {
 
         serDeProperties = new SerDeProperties(properties, columnNames, columnTypes);
 
-        // TODO configure it from SerDeProperties
-        domFactory = IonSystemBuilder.standard().build();
-        readerBuilder = IonReaderBuilder.standard();
-        binaryWriterBuilder = IonBinaryWriterBuilder.standard();
-        textWriterBuilder = IonTextWriterBuilder.standard();
+        ionFactory = new IonFactory(serDeProperties);
 
         objectInspector = IonObjectInspectorFactory.objectInspectorForTable(tableInfo, serDeProperties);
         serializer = new TableSerializer(columnNames, serDeProperties);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Class<? extends Writable> getSerializedClass() {
-        return serDeProperties.getEncoding() == IonEncoding.BINARY ? BytesWritable.class : Text.class;
+        return serDeProperties.getEncoding() == IonEncoding.BINARY
+            ? BytesWritable.class
+            : Text.class;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Writable serialize(final Object data, final ObjectInspector objectInspector) throws SerDeException {
         if (objectInspector.getCategory() != STRUCT) {
@@ -124,9 +108,6 @@ public class IonHiveSerDe extends AbstractSerDe {
             : new Text(out.toByteArray());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object deserialize(final Writable blob) throws SerDeException {
         final byte[] bytes;
@@ -151,40 +132,41 @@ public class IonHiveSerDe extends AbstractSerDe {
                 + blob.getClass());
         }
 
-        try (final IonReader reader = readerBuilder.build(bytes, 0, length)) {
+        final IonSystem domFactory = ionFactory.getDomFactory();
+        try (final IonReader reader = ionFactory.newReader(bytes, 0, length)) {
             final IonStruct struct = domFactory.newEmptyStruct();
             final PathExtractor pathExtractor = serDeProperties.buildPathExtractor(struct, domFactory);
 
             pathExtractor.match(reader);
 
             return struct;
+
+        } catch (IonException e) {
+            // skips if ignoring malformed
+            if (serDeProperties.getIgnoreMalformed()) {
+                return null;
+            }
+
+            throw e;
         } catch (IOException e) {
             throw new SerDeException(e);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public SerDeStats getSerDeStats() {
         return stats;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ObjectInspector getObjectInspector() throws SerDeException {
         return objectInspector;
     }
 
     private IonWriter newWriter(final OutputStream out) {
-        final IonWriterBuilder builder = serDeProperties.getEncoding() == IonEncoding.BINARY
-            ? binaryWriterBuilder
-            : textWriterBuilder;
-
-        return builder.build(out);
+        return serDeProperties.getEncoding() == IonEncoding.BINARY
+            ? ionFactory.newBinaryWriter(out)
+            : ionFactory.newTextWriter(out);
     }
 
     private List<String> readColumnNames(final Properties tbl) {
@@ -207,4 +189,3 @@ public class IonHiveSerDe extends AbstractSerDe {
         return TypeInfoUtils.getTypeInfosFromTypeString(columnTypeProperty);
     }
 }
-

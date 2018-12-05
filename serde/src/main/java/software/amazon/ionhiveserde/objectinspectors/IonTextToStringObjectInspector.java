@@ -30,9 +30,6 @@ public class IonTextToStringObjectInspector extends AbstractIonPrimitiveJavaObje
         super(TypeInfoFactory.stringTypeInfo);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getPrimitiveJavaObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {
@@ -42,9 +39,6 @@ public class IonTextToStringObjectInspector extends AbstractIonPrimitiveJavaObje
         return getPrimitiveWritableObject((IonText) o);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Text getPrimitiveWritableObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {

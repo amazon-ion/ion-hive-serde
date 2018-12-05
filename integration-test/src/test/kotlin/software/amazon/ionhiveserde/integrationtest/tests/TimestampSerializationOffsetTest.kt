@@ -24,7 +24,8 @@ import kotlin.test.assertEquals
 
 class TimestampSerializationOffsetTest : Base() {
     companion object : TestLifecycle {
-        private const val TEST_DIR = "$SHARED_DIR/input/TimestampSerializationOffsetTest/"
+        private const val TABLE_NAME = "TimestampSerializationOffsetTest"
+        private const val TEST_DIR = "$SHARED_DIR/input/$TABLE_NAME/"
         private const val INPUT_TIMESTAMPS = """
             { field: 2018-01-01T10:10Z }
             { field: 2018-01-01T10:10-00:00 }
@@ -36,8 +37,7 @@ class TimestampSerializationOffsetTest : Base() {
             { field: 2018-01-01T10:10-23:59 }
             { field: 2018-01-01T10:10+23:59 }
         """
-        private const val tableName = "TimestampSerializationOffsetTest"
-        private val serdeProperties = mapOf("timestamp.serialization_offset" to "-08:00")
+        private val serdeProperties = mapOf("ion.timestamp.serialization_offset" to "-08:00")
 
         override fun setup() {
             mkdir(TEST_DIR)
@@ -52,9 +52,9 @@ class TimestampSerializationOffsetTest : Base() {
 
     private fun createTable() {
         hive().createExternalTable(
-                tableName,
+                TABLE_NAME,
                 mapOf("field" to "TIMESTAMP"),
-                "/data/input/TimestampSerializationOffsetTest/",
+                "/data/input/$TABLE_NAME/",
                 serdeProperties)
     }
 
@@ -66,7 +66,7 @@ class TimestampSerializationOffsetTest : Base() {
     fun timestampSerializedToConfiguredOffset() {
         createTable()
 
-        val rawBytes = Base.hive().queryToFileAndRead("SELECT * FROM $tableName", serdeProperties)
+        val rawBytes = Base.hive().queryToFileAndRead("SELECT * FROM $TABLE_NAME", serdeProperties)
         val datagram = DOM_FACTORY.loader.load(rawBytes)
 
         val expectedOffset = -8 * 60

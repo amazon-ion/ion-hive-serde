@@ -31,9 +31,6 @@ public class IonFloatToFloatObjectInspector extends
         super(TypeInfoFactory.floatTypeInfo, failOnOverflow);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {
@@ -43,17 +40,11 @@ public class IonFloatToFloatObjectInspector extends
         return new FloatWritable(getPrimitiveJavaObjectFromIonValue((IonFloat) o));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Float getValidatedPrimitiveJavaObject(final IonFloat ionValue) {
         return ionValue.floatValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void validateSize(final IonFloat ionFloat) {
         final float f = ionFloat.floatValue();
@@ -65,17 +56,11 @@ public class IonFloatToFloatObjectInspector extends
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public float get(final Object o) {
         return (float) getPrimitiveJavaObject(o);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {

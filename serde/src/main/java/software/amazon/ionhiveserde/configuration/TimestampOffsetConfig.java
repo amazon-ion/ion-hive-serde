@@ -12,12 +12,36 @@
  *
  */
 
-package software.amazon.ionhiveserde.util;
+package software.amazon.ionhiveserde.configuration;
+
+import software.amazon.ionhiveserde.configuration.source.RawConfiguration;
 
 /**
- * Offset parser for the timestamp.serialization_offset property.
+ * Encapsulates the timestamp.serialization_offset configuration.
  */
-public class SerDePropertyParser {
+class TimestampOffsetConfig {
+    private static final String DEFAULT_OFFSET_KEY = "ion.timestamp.serialization_offset";
+    private static final String DEFAULT_OFFSET = "Z";
+    private final int timestampOffsetInMinutes;
+
+    /**
+     * Constructor.
+     *
+     * @param configuration raw configration.
+     */
+    TimestampOffsetConfig(final RawConfiguration configuration) {
+        timestampOffsetInMinutes = parseOffset(configuration.getOrDefault(DEFAULT_OFFSET_KEY, DEFAULT_OFFSET));
+    }
+
+    /**
+     * Returns the timestamp timestampOffsetInMinutes in minutes to use when serializing and deserializing Ion
+     * timestamps.
+     *
+     * @return timestamp timestampOffsetInMinutes in minutes to be used.
+     */
+    int getTimestampOffsetInMinutes() {
+        return timestampOffsetInMinutes;
+    }
 
     /**
      * Parses the string representation of an offset.
@@ -26,7 +50,7 @@ public class SerDePropertyParser {
      * @return offset in minutes.
      * @throws IllegalArgumentException if it cannot correctly parse offsetText.
      */
-    public static int parseOffset(final String offsetText) {
+    private static int parseOffset(final String offsetText) {
         if (offsetText == null) {
             throw new IllegalArgumentException("offset text cannot be null");
         }

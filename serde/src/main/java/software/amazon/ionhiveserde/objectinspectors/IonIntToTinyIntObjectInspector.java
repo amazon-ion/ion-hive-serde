@@ -35,9 +35,6 @@ public class IonIntToTinyIntObjectInspector extends
         super(TypeInfoFactory.byteTypeInfo, failOnOverflow);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {
@@ -47,17 +44,11 @@ public class IonIntToTinyIntObjectInspector extends
         return new ByteWritable(getPrimitiveJavaObjectFromIonValue((IonInt) o));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Byte getValidatedPrimitiveJavaObject(final IonInt ionValue) {
         return (byte) ionValue.intValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void validateSize(final IonInt ionValue) {
         boolean correctIntSize = ionValue.getIntegerSize() == IntegerSize.INT;
@@ -74,17 +65,11 @@ public class IonIntToTinyIntObjectInspector extends
         return MIN_VALUE <= intValue && intValue <= MAX_VALUE;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public byte get(final Object o) {
         return (byte) getPrimitiveJavaObject(o);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {

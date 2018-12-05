@@ -16,19 +16,19 @@ package software.amazon.ionhiveserde.objectinspectors
 
 import org.apache.hadoop.hive.common.type.HiveDecimal
 import org.apache.hadoop.hive.serde2.io.HiveDecimalWritable
-import org.junit.Test
-import software.amazon.ion.IonDecimal
+import software.amazon.ion.IonValue
 import software.amazon.ionhiveserde.ION
-import kotlin.test.assertEquals
 
-class IonDecimalToDecimalObjectInspectorTest
-    : AbstractIonPrimitiveJavaObjectInspectorTest<IonDecimal, HiveDecimalWritable, HiveDecimal>() {
+class IonNumberToDecimalObjectInspectorTest
+    : AbstractIonPrimitiveJavaObjectInspectorTest<IonValue, HiveDecimalWritable, HiveDecimal>() {
 
     override fun validTestCases() = listOf(
             ValidTestCase(ION.newDecimal(1), HiveDecimal.ONE, HiveDecimalWritable(HiveDecimal.ONE)),
-            ValidTestCase(ION.newDecimal(0), HiveDecimal.ZERO, HiveDecimalWritable(HiveDecimal.ZERO))
+            ValidTestCase(ION.newDecimal(0), HiveDecimal.ZERO, HiveDecimalWritable(HiveDecimal.ZERO)),
+            ValidTestCase(ION.newInt(0), HiveDecimal.ZERO, HiveDecimalWritable(HiveDecimal.ZERO)),
+            ValidTestCase(ION.newInt(0), HiveDecimal.ZERO, HiveDecimalWritable(HiveDecimal.ZERO))
     )
 
-    override val subject = IonDecimalToDecimalObjectInspector()
+    override val subject = IonNumberToDecimalObjectInspector()
 }
 

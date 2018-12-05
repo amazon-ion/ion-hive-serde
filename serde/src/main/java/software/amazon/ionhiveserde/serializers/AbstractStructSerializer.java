@@ -23,8 +23,8 @@ import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
 import software.amazon.ion.IonType;
 import software.amazon.ion.IonWriter;
-import software.amazon.ionhiveserde.SerDeProperties;
-import software.amazon.ionhiveserde.SerializeNullStrategy;
+import software.amazon.ionhiveserde.configuration.SerDeProperties;
+import software.amazon.ionhiveserde.configuration.SerializeNullStrategy;
 
 /**
  * Base class for struct serializers.
@@ -51,7 +51,7 @@ abstract class AbstractStructSerializer implements IonSerializer {
                 break;
 
             default:
-                throw new IllegalStateException("TODO");
+                throw new IllegalStateException("Invalid object inspector category " + objectInspector.getCategory());
         }
     }
 

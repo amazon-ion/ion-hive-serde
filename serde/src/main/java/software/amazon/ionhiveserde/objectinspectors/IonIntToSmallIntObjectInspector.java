@@ -35,9 +35,6 @@ public class IonIntToSmallIntObjectInspector extends
         super(TypeInfoFactory.shortTypeInfo, failOnOverflow);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {
@@ -47,17 +44,11 @@ public class IonIntToSmallIntObjectInspector extends
         return new ShortWritable(getPrimitiveJavaObjectFromIonValue((IonInt) o));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Short getValidatedPrimitiveJavaObject(final IonInt ionValue) {
         return (short) ionValue.intValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void validateSize(final IonInt ionValue) {
         boolean correctIntSize = ionValue.getIntegerSize() == IntegerSize.INT;
@@ -74,17 +65,11 @@ public class IonIntToSmallIntObjectInspector extends
         return MIN_VALUE <= intValue && intValue <= MAX_VALUE;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public short get(final Object o) {
         return (short) getPrimitiveJavaObject(o);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {

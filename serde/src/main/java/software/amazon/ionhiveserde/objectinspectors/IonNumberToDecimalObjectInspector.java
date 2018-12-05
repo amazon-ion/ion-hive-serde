@@ -21,44 +21,53 @@ import org.apache.hadoop.hive.serde2.io.HiveDecimalWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.HiveDecimalObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import software.amazon.ion.IonDecimal;
+import software.amazon.ion.IonInt;
 import software.amazon.ion.IonValue;
 
 /**
- * Adapts an {@link IonDecimal} for the decimal Hive type.
+ * Adapts an {@link IonDecimal} or {@link IonInt} for the decimal Hive type.
  */
-public class IonDecimalToDecimalObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
+public class IonNumberToDecimalObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
     HiveDecimalObjectInspector {
 
-    public IonDecimalToDecimalObjectInspector() {
+    public IonNumberToDecimalObjectInspector() {
 
         super(TypeInfoFactory.decimalTypeInfo);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public HiveDecimalWritable getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) {
             return null;
         }
 
-        return new HiveDecimalWritable(getPrimitiveJavaObject((IonDecimal) o));
+        return new HiveDecimalWritable(getPrimitiveJavaObject(o));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public HiveDecimal getPrimitiveJavaObject(final Object o) {
+        final IonValue value = (IonValue) o;
         if (isIonNull((IonValue) o)) {
             return null;
         }
 
-        return getPrimitiveJavaObject((IonDecimal) o);
+        switch (value.getType()) {
+            case INT:
+                return getPrimitiveJavaObject((IonInt) o);
+
+            case DECIMAL:
+                return getPrimitiveJavaObject((IonDecimal) o);
+
+            default:
+                throw new IllegalArgumentException("Invalid Ion type: " + value.getType());
+        }
     }
 
     private HiveDecimal getPrimitiveJavaObject(final IonDecimal ionValue) {
         return HiveDecimal.create(ionValue.bigDecimalValue());
+    }
+
+    private HiveDecimal getPrimitiveJavaObject(final IonInt ionValue) {
+        return HiveDecimal.create(ionValue.bigIntegerValue());
     }
 }

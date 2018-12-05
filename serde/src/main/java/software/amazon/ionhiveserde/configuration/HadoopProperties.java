@@ -12,16 +12,21 @@
  *
  */
 
-package software.amazon.ionhiveserde.serializers;
+package software.amazon.ionhiveserde.configuration;
 
-import software.amazon.ionhiveserde.configuration.SerDeProperties;
+import software.amazon.ionhiveserde.configuration.source.RawConfiguration;
 
 /**
- * Struct serializer.
+ * Encapsulates Ion related Hadoop job properties.
  */
-class ColumnStructSerializer extends AbstractStructSerializer {
+public class HadoopProperties extends BaseProperties {
 
-    ColumnStructSerializer(final SerDeProperties properties) {
-        super(properties);
+    /**
+     * Constructor.
+     *
+     * @param configuration raw configuration.
+     */
+    public HadoopProperties(final RawConfiguration configuration) {
+        super(configuration);
     }
 }

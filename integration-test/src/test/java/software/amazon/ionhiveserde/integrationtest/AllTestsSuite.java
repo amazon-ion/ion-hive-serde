@@ -24,6 +24,7 @@ import software.amazon.ionhiveserde.integrationtest.tests.IgnoreMalformedTest;
 import software.amazon.ionhiveserde.integrationtest.tests.NullMappingTest;
 import software.amazon.ionhiveserde.integrationtest.tests.PathExtractorTest;
 import software.amazon.ionhiveserde.integrationtest.tests.SerializeAsTest;
+import software.amazon.ionhiveserde.integrationtest.tests.SharedSymbolTableTest;
 import software.amazon.ionhiveserde.integrationtest.tests.TimestampSerializationOffsetTest;
 import software.amazon.ionhiveserde.integrationtest.tests.TypeMappingTest;
 import software.amazon.ionpathextraction.PathExtractor;
@@ -38,6 +39,7 @@ import software.amazon.ionpathextraction.PathExtractor;
     NullMappingTest.class,
     PathExtractorTest.class,
     SerializeAsTest.class,
+    SharedSymbolTableTest.class,
     TimestampSerializationOffsetTest.class,
     TypeMappingTest.class
 })

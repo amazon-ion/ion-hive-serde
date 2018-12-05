@@ -12,16 +12,16 @@
  *
  */
 
-package software.amazon.ionhiveserde;
+package software.amazon.ionhiveserde.configuration;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import software.amazon.ion.IonStruct;
 import software.amazon.ion.IonSystem;
 import software.amazon.ion.IonValue;
+import software.amazon.ionhiveserde.configuration.source.RawConfiguration;
 import software.amazon.ionpathextraction.PathExtractor;
 import software.amazon.ionpathextraction.PathExtractorBuilder;
 
@@ -30,25 +30,40 @@ import software.amazon.ionpathextraction.PathExtractorBuilder;
  */
 class PathExtractionConfig {
 
-    private static final String PATH_EXTRACTOR_KEY_SUFFIX = "path_extractor";
-    private static final String CASE_SENSITIVITY_KEY = "case_sensitive";
+    private static final String PATH_EXTRACTOR_KEY_FORMAT = "ion.%s.path_extractor";
+    private static final String PATH_EXTRACTOR_DEFAULT_FORMAT = "( %s )";
+    private static final String CASE_SENSITIVITY_KEY = "ion.case_sensitive";
 
     private final Map<String, String> searchPathByColumnName;
     private final Boolean caseSensitivity;
 
-    PathExtractionConfig(final Properties properties, final List<String> columnNames) {
+    /**
+     * Constructor.
+     *
+     * @param configuration raw configuration.
+     * @param columnNames table column names.
+     */
+    PathExtractionConfig(final RawConfiguration configuration, final List<String> columnNames) {
         searchPathByColumnName = new HashMap<>();
         for (final String columnName : columnNames) {
-            final String searchPathExpression = properties.getProperty(
-                columnName + "." + PATH_EXTRACTOR_KEY_SUFFIX,
-                "(" + columnName + ")");
+            final String searchPathExpression = configuration.getOrDefault(
+                String.format(PATH_EXTRACTOR_KEY_FORMAT, columnName),
+                String.format(PATH_EXTRACTOR_DEFAULT_FORMAT, columnName));
 
             searchPathByColumnName.put(columnName, searchPathExpression);
         }
 
-        caseSensitivity = Boolean.getBoolean(properties.getProperty(CASE_SENSITIVITY_KEY, "false"));
+        caseSensitivity = Boolean.getBoolean(configuration.getOrDefault(CASE_SENSITIVITY_KEY, "false"));
     }
 
+    /**
+     * Builds a path extractor from configuration that will accumulated matched paths to the struct.
+     *
+     * @param struct mutable struct to accumulated matched paths.
+     * @param domFactory Ion system used to create DOM objects.
+     *
+     * @return PathExtractor configured for matching.
+     */
     PathExtractor buildPathExtractor(final IonStruct struct, final IonSystem domFactory) {
         final PathExtractorBuilder builder = PathExtractorBuilder.standard()
             .withMatchRelativePaths(false)

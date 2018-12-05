@@ -12,16 +12,24 @@
  *
  */
 
-package software.amazon.ionhiveserde.serializers;
-
-import software.amazon.ionhiveserde.configuration.SerDeProperties;
+package software.amazon.ionhiveserde.configuration;
 
 /**
- * Struct serializer.
+ * Possible strategies for the serialize_null property.
  */
-class ColumnStructSerializer extends AbstractStructSerializer {
+public enum SerializeNullStrategy {
+    /**
+     * Omit nulls.
+     */
+    OMIT,
 
-    ColumnStructSerializer(final SerDeProperties properties) {
-        super(properties);
-    }
+    /**
+     * Serialize strongly typed nulls.
+     */
+    TYPED,
+
+    /**
+     * Serialize untyped nulls.
+     */
+    UNTYPED;
 }

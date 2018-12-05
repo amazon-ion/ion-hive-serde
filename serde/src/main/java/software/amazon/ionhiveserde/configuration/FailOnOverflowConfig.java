@@ -12,19 +12,20 @@
  *
  */
 
-package software.amazon.ionhiveserde;
+package software.amazon.ionhiveserde.configuration;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import software.amazon.ionhiveserde.configuration.source.RawConfiguration;
 
 /**
  * Encapsulates the fail_on_overflow configuration.
  */
 class FailOnOverflowConfig {
 
-    private static final String FAIL_ON_OVERFLOW_KEY = "fail_on_overflow";
+    private static final String FAIL_ON_OVERFLOW_KEY_FORMAT = "ion.%s.fail_on_overflow";
+    private static final String DEFAULT_FAIL_ON_KEY = "ion.fail_on_overflow";
     private static final String DEFAULT_FAIL_ON_OVERFLOW = "true";
 
     private final Map<String, Boolean> configByColumnName;
@@ -34,23 +35,22 @@ class FailOnOverflowConfig {
     /**
      * Constructor.
      *
-     * @param properties serde properties.
+     * @param configuration raw configuration source.
      * @param columnNames table column names.
      */
-    FailOnOverflowConfig(final Properties properties,
-                         final List<String> columnNames) {
-        final String defaultValue = properties.getProperty(FAIL_ON_OVERFLOW_KEY, DEFAULT_FAIL_ON_OVERFLOW);
+    FailOnOverflowConfig(final RawConfiguration configuration, final List<String> columnNames) {
         configByColumnName = new HashMap<>();
 
-        for (String columnName : columnNames) {
-            final String columnPropertyKey = columnName + "." + FAIL_ON_OVERFLOW_KEY;
-            final boolean columnFailOnOverflowValue = Boolean.parseBoolean(
-                properties.getProperty(columnPropertyKey, defaultValue));
-
-            configByColumnName.put(columnName, columnFailOnOverflowValue);
-        }
-
+        final String defaultValue = configuration.getOrDefault(DEFAULT_FAIL_ON_KEY, DEFAULT_FAIL_ON_OVERFLOW);
         this.defaultValue = Boolean.valueOf(defaultValue);
+
+        for (String columnName : columnNames) {
+            final String columnFailOnOverflowValue = configuration.getOrDefault(
+                String.format(FAIL_ON_OVERFLOW_KEY_FORMAT, columnName),
+                defaultValue);
+
+            configByColumnName.put(columnName, Boolean.valueOf(columnFailOnOverflowValue));
+        }
     }
 
     /**
@@ -59,7 +59,6 @@ class FailOnOverflowConfig {
      * @return true if the column is configured to fail on overflow, false otherwise.
      */
     boolean failOnOverflowFor(final String columnName) {
-        final Boolean columnValue = configByColumnName.get(columnName);
-        return columnValue != null ? columnValue : defaultValue;
+        return configByColumnName.getOrDefault(columnName, defaultValue);
     }
 }

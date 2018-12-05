@@ -29,9 +29,6 @@ public abstract class AbstractIonPrimitiveJavaObjectInspector extends AbstractPr
         super(typeInfo);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final Object copyObject(final Object o) {
         final IonValue ionValue = (IonValue) o;

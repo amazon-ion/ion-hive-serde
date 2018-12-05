@@ -19,7 +19,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.ListObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import software.amazon.ion.IonType;
 import software.amazon.ion.IonWriter;
-import software.amazon.ionhiveserde.SerDeProperties;
+import software.amazon.ionhiveserde.configuration.SerDeProperties;
 
 /**
  * Serializer for sequences.

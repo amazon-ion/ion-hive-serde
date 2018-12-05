@@ -12,24 +12,28 @@
  *
  */
 
-package software.amazon.ionhiveserde;
+package software.amazon.ionhiveserde.configuration.source;
+
+import java.util.Optional;
 
 /**
- * Possible strategies for the serialize_null property.
+ * Raw configuration as a mapping from string keys to string values.
  */
-public enum SerializeNullStrategy {
-    /**
-     * Omit nulls.
-     */
-    OMIT,
+public interface RawConfiguration {
 
     /**
-     * Serialize strongly typed nulls.
+     * Gets the configured value for a key. If no value is configured returns the default value.
      */
-    TYPED,
+    String getOrDefault(final String key, final String defaultValue);
 
     /**
-     * Serialize untyped nulls.
+     * Gets the configured value for a key.
      */
-    UNTYPED;
+    Optional<String> get(final String key);
+
+    /**
+     * Returns true if there is a value configured for the key
+     */
+    boolean containsKey(final String key);
 }
+

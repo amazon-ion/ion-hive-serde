@@ -34,9 +34,6 @@ public class IonIntToBigIntObjectInspector extends AbstractOverflowablePrimitive
         super(TypeInfoFactory.longTypeInfo, failOnOverflow);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {
@@ -46,17 +43,11 @@ public class IonIntToBigIntObjectInspector extends AbstractOverflowablePrimitive
         return new LongWritable(getPrimitiveJavaObjectFromIonValue((IonInt) o));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Long getValidatedPrimitiveJavaObject(final IonInt ionValue) {
         return ionValue.longValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void validateSize(final IonInt ionValue) {
         if (ionValue.getIntegerSize() == IntegerSize.BIG_INTEGER) {
@@ -65,17 +56,11 @@ public class IonIntToBigIntObjectInspector extends AbstractOverflowablePrimitive
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long get(final Object o) {
         return (long) getPrimitiveJavaObject(o);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {

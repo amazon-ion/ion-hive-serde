@@ -31,9 +31,6 @@ public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitive
         super(TypeInfoFactory.timestampTypeInfo);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public TimestampWritable getPrimitiveWritableObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {
@@ -43,9 +40,6 @@ public class IonTimestampToTimestampObjectInspector extends AbstractIonPrimitive
         return new TimestampWritable(getPrimitiveJavaObject((IonTimestamp) o));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Timestamp getPrimitiveJavaObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {

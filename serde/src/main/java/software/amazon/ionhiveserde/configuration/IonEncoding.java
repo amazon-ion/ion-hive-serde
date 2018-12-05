@@ -12,7 +12,7 @@
  *
  */
 
-package software.amazon.ionhiveserde;
+package software.amazon.ionhiveserde.configuration;
 
 /**
  * Possible Ion encodings.

@@ -30,9 +30,6 @@ public class IonFloatToDoubleObjectInspector extends AbstractIonPrimitiveJavaObj
         super(TypeInfoFactory.doubleTypeInfo);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {
@@ -42,17 +39,11 @@ public class IonFloatToDoubleObjectInspector extends AbstractIonPrimitiveJavaObj
         return new DoubleWritable(getPrimitiveJavaObject((IonFloat) o));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public double get(final Object o) {
         return (double) getPrimitiveJavaObject(o);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {

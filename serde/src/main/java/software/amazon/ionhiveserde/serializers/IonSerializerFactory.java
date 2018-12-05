@@ -19,7 +19,7 @@ import java.util.Map;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import software.amazon.ion.IonType;
-import software.amazon.ionhiveserde.SerDeProperties;
+import software.amazon.ionhiveserde.configuration.SerDeProperties;
 
 /**
  * Factory for Ion serializers, reuses serializers when possible.

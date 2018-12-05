@@ -34,17 +34,11 @@ public class IonUnionObjectInspector implements UnionObjectInspector {
         this.objectInspectors = objectInspectors;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<ObjectInspector> getObjectInspectors() {
         return objectInspectors;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public byte getTag(final Object o) {
         // when null assumes it's the first type of the union type
@@ -90,9 +84,6 @@ public class IonUnionObjectInspector implements UnionObjectInspector {
                 .getCanonicalName());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getField(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {
@@ -102,17 +93,11 @@ public class IonUnionObjectInspector implements UnionObjectInspector {
         return o;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getTypeName() {
         return ObjectInspectorUtils.getStandardUnionTypeName(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Category getCategory() {
         return Category.UNION;

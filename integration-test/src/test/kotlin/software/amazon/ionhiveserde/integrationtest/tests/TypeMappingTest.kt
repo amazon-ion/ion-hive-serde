@@ -20,7 +20,7 @@ import junitparams.naming.TestCaseName
 import org.junit.Test
 import org.junit.runner.RunWith
 import software.amazon.ion.*
-import software.amazon.ionhiveserde.IonEncoding
+import software.amazon.ionhiveserde.configuration.IonEncoding
 import software.amazon.ionhiveserde.integrationtest.*
 import software.amazon.ionhiveserde.integrationtest.docker.SHARED_DIR
 import software.amazon.ionhiveserde.integrationtest.setup.TestData
@@ -178,7 +178,7 @@ class TypeMappingTest : Base() {
                                  testCase: TestCase,
                                  encoding: IonEncoding,
                                  assertions: (expected: IonValue, actual: IonValue) -> Unit) {
-        createTable(tableName, testCase, mapOf("encoding" to encoding.name))
+        createTable(tableName, testCase, mapOf("ion.encoding" to encoding.name))
 
         val rawBytes = hive().queryToFileAndRead("SELECT * FROM $tableName")
         val datagram = DOM_FACTORY.loader.load(rawBytes)

@@ -12,27 +12,27 @@
  *
  */
 
-package software.amazon.ionhiveserde;
+package software.amazon.ionhiveserde.configuration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import software.amazon.ion.IonType;
+import software.amazon.ionhiveserde.configuration.source.RawConfiguration;
 
 /**
  * Encapsulates the serialize_as configuration.
  */
 class SerializeAsConfig {
 
-    private static final String SERIALIZE_AS_KEY = "serialize_as";
-    private static final String SERIALIZE_AS_PREFIX = "column";
+    private static final String SERIALIZE_AS_KEY_FORMAT = "ion.column[%d].serialize_as";
     private static final Pattern NORMALIZE_PATTERN = Pattern.compile("([a-zA-Z]+).*");
 
     // first type is the default
@@ -85,7 +85,8 @@ class SerializeAsConfig {
     }
 
     private static void validate(final IonType ionType, final String typeName) {
-        List<IonType> ionTypes = VALID_MAPPINGS.get(typeName);
+        final List<IonType> ionTypes = VALID_MAPPINGS.get(typeName);
+
         if (ionTypes == null || !ionTypes.contains(ionType)) {
             throw new IllegalArgumentException("The hive type: "
                 + typeName
@@ -99,24 +100,20 @@ class SerializeAsConfig {
     /**
      * Constructor.
      *
-     * @param properties SerDe properties.
+     * @param configuration raw configuration source.
      * @param columnTypes table column types.
      */
-    SerializeAsConfig(final Properties properties,
+    SerializeAsConfig(final RawConfiguration configuration,
                       final List<TypeInfo> columnTypes) {
 
         ionTypeByIndex = new ArrayList<>();
 
         for (int i = 0; i < columnTypes.size(); i++) {
-            final String ionTypeName = properties.getProperty(SERIALIZE_AS_PREFIX + "." + i + "." + SERIALIZE_AS_KEY);
+            final Optional<String> ionTypeName = configuration.get(String.format(SERIALIZE_AS_KEY_FORMAT, i));
             final String typeInfoName = normalize(columnTypes.get(i).getTypeName());
 
-            final IonType ionType;
-            if (ionTypeName != null) {
-                ionType = IonType.valueOf(ionTypeName.toUpperCase());
-            } else {
-                ionType = SerializeAsConfig.defaultFor(typeInfoName);
-            }
+            final IonType ionType = ionTypeName.map(t -> IonType.valueOf(t.toUpperCase()))
+                .orElse(SerializeAsConfig.defaultFor(typeInfoName));
 
             validate(ionType, typeInfoName);
 
@@ -124,6 +121,11 @@ class SerializeAsConfig {
         }
     }
 
+    /**
+     * Returns the Ion type to be used during serialization for the column.
+     *
+     * @return the Ion type to be used during serialization for the column.
+     */
     IonType serializationIonTypeFor(final int index) {
         return ionTypeByIndex.get(index);
     }

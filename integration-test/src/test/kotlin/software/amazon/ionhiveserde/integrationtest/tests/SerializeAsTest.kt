@@ -85,7 +85,7 @@ class SerializeAsTest : Base() {
         }
     }
 
-    private fun serdeProperties(ionType: String) = mapOf("column.0.serialize_as" to ionType)
+    private fun serdeProperties(ionType: String) = mapOf("ion.column[0].serialize_as" to ionType)
     private fun tableName(hiveType: String, ionType: String): String =
             "${tableNamePrefix}_${hiveType.sanitize()}_${ionType.sanitize()}"
 

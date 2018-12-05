@@ -32,9 +32,6 @@ public class IonLobToBinaryObjectInspector extends AbstractIonPrimitiveJavaObjec
         super(TypeInfoFactory.binaryTypeInfo);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public BytesWritable getPrimitiveWritableObject(final Object o) {
         if (isIonNull((IonValue) o)) {
@@ -44,9 +41,6 @@ public class IonLobToBinaryObjectInspector extends AbstractIonPrimitiveJavaObjec
         return new BytesWritable(getPrimitiveJavaObject((IonLob) o));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public byte[] getPrimitiveJavaObject(final Object o) {
         if (isIonNull((IonValue) o)) {

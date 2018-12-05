@@ -43,9 +43,6 @@ public class IonTextToVarcharObjectInspector extends
         this.maxLength = maxLength;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public HiveVarcharWritable getPrimitiveWritableObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {
@@ -55,9 +52,6 @@ public class IonTextToVarcharObjectInspector extends
         return new HiveVarcharWritable(getPrimitiveJavaObjectFromIonValue((IonText) o));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public HiveVarchar getPrimitiveJavaObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {
@@ -67,17 +61,11 @@ public class IonTextToVarcharObjectInspector extends
         return getPrimitiveJavaObjectFromIonValue((IonText) o);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected HiveVarchar getValidatedPrimitiveJavaObject(final IonText ionValue) {
         return new HiveVarchar(ionValue.stringValue(), maxLength);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void validateSize(final IonText ionValue) {
         validator.validate(ionValue.stringValue(), maxLength);

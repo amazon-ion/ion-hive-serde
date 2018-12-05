@@ -56,14 +56,14 @@ class IgnoreMalformedTest : Base() {
                 TABLE_NAME,
                 mapOf("field" to "INT"),
                 "/data/input/$TABLE_NAME/$location",
-                mapOf("ignore_malformed" to ignoreMalformed.toString()))
+                mapOf("ion.ignore_malformed" to ignoreMalformed.toString()))
     }
 
     @Test
     fun ignoreMalformed() {
         createTable(ignoreMalformed = true, location = "separated")
 
-        val rawBytes = hive().query("SELECT field FROM $TABLE_NAME") { rs ->
+        hive().query("SELECT field FROM $TABLE_NAME") { rs ->
             assertTrue(rs.next())
 
             assertEquals(1, rs.getInt(1))
@@ -76,7 +76,7 @@ class IgnoreMalformedTest : Base() {
     fun ignoreMalformedMixed() {
         createTable(ignoreMalformed = true, location = "mixed")
 
-        val rawBytes = hive().query("SELECT field FROM $TABLE_NAME") { rs ->
+        hive().query("SELECT field FROM $TABLE_NAME") { rs ->
             assertTrue(rs.next())
 
             assertEquals(2, rs.getInt(1))

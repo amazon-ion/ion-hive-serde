@@ -23,6 +23,7 @@ import software.amazon.ionhiveserde.integrationtest.tests.IgnoreMalformedTest;
 import software.amazon.ionhiveserde.integrationtest.tests.NullMappingTest;
 import software.amazon.ionhiveserde.integrationtest.tests.PathExtractorTest;
 import software.amazon.ionhiveserde.integrationtest.tests.SerializeAsTest;
+import software.amazon.ionhiveserde.integrationtest.tests.SharedSymbolTableTest;
 import software.amazon.ionhiveserde.integrationtest.tests.TimestampSerializationOffsetTest;
 import software.amazon.ionhiveserde.integrationtest.tests.TypeMappingTest;
 
@@ -41,6 +42,7 @@ class Lifecycle {
         TimestampSerializationOffsetTest.Companion.setup();
         FailOnOverflowTest.Companion.setup();
         SerializeAsTest.Companion.setup();
+        SharedSymbolTableTest.Companion.setup();
         PathExtractorTest.Companion.setup();
         IgnoreMalformedTest.Companion.setup();
 
@@ -63,6 +65,7 @@ class Lifecycle {
         TimestampSerializationOffsetTest.Companion.tearDown();
         FailOnOverflowTest.Companion.tearDown();
         SerializeAsTest.Companion.tearDown();
+        SharedSymbolTableTest.Companion.tearDown();
         PathExtractorTest.Companion.tearDown();
         IgnoreMalformedTest.Companion.tearDown();
 
