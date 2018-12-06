@@ -14,6 +14,7 @@
 
 package software.amazon.ionhiveserde.integrationtest.docker
 
+import org.apache.hadoop.mapred.InputFormat
 import software.amazon.ionhiveserde.IonHiveSerDe
 import software.amazon.ionhiveserde.formats.IonInputFormat
 import software.amazon.ionhiveserde.formats.IonOutputFormat
@@ -23,6 +24,7 @@ import java.io.File
 import java.sql.DriverManager
 import java.sql.ResultSet
 import java.util.*
+import kotlin.reflect.KClass
 
 /** local path for the directory shared between local fs and hive docker container. */
 const val SHARED_DIR = "docker-tmp"
@@ -63,12 +65,13 @@ class Hive : Closeable {
     fun createExternalTable(tableName: String,
                             columns: Map<String, String>,
                             location: String,
-                            serdeProperties: Map<String, String> = emptyMap()) {
+                            serdeProperties: Map<String, String> = emptyMap(),
+                            inputFormatClass: KClass<*> = IonInputFormat::class) {
         val columnsAsString = columns.entries.joinToString(",") { "${it.key} ${it.value}" }
 
         execute("""
             CREATE EXTERNAL TABLE $tableName ($columnsAsString)
-            ${serDeStatement(serdeProperties)}
+            ${serDeStatement(serdeProperties, inputFormatClass)}
             LOCATION '$location'
         """)
     }
@@ -149,7 +152,9 @@ class Hive : Closeable {
      *
      * @param properties property name to property value map
      */
-    private fun serDeStatement(properties: Map<String, String> = emptyMap()): String {
+    private fun serDeStatement(
+            properties: Map<String, String> = emptyMap(),
+            inputFormatClass: KClass<*> = IonInputFormat::class): String {
         val serdeProperties = if (properties.isEmpty()) {
             ""
         } else {
@@ -160,7 +165,7 @@ class Hive : Closeable {
             ROW FORMAT SERDE '${IonHiveSerDe::class.java.name}'
             $serdeProperties
             STORED AS
-                INPUTFORMAT '${IonInputFormat::class.java.name}'
+                INPUTFORMAT '${inputFormatClass.java.name}'
                 OUTPUTFORMAT '${IonOutputFormat::class.java.name}'
         """
     }

@@ -7,12 +7,12 @@ some conversions must be made. For those [SerDe properties](serde-properties.md)
 | Ion Type  | Hive Type                               | Notes |
 | --------- | --------------------------------------- | ----- |
 | bool      | BOOLEAN                                 | |
-| int       | TINYINT, SMALLINT, INT, BIGINT, DECIMAL | DECIMAL is only used for arbitrary precision integers, see `fail_on_overflow` and properties |
-| float     | FLOAT, DOUBLE                           | see `fail_on_overflow` property |
+| int       | TINYINT, SMALLINT, INT, BIGINT, DECIMAL | DECIMAL is only used for arbitrary precision integers, see `ion.fail_on_overflow` and properties |
+| float     | FLOAT, DOUBLE                           | see `ion.fail_on_overflow` property |
 | decimal   | DECIMAL                                 | Hive decimals are limited to 38 digits precision |
-| timestamp | TIMESTAMP, DATE                         | see timestamp below and the `timestamp.serialization_offset` property |
-| string    | STRING, VARCHAR, CHAR                   | see `fail_on_overflow` property |
-| symbol    | STRING, VARCHAR, CHAR                   | see `fail_on_overflow` property |
+| timestamp | TIMESTAMP, DATE                         | see timestamp below and the `ion.timestamp.serialization_offset` property |
+| string    | STRING, VARCHAR, CHAR                   | see `ion.fail_on_overflow` property |
+| symbol    | STRING, VARCHAR, CHAR                   | see `ion.fail_on_overflow` property |
 | blob      | BINARY                                  | |
 | clob      | BINARY                                  | |
 | struct    | STRUCT<>                                | see struct and union types below |
@@ -41,7 +41,7 @@ some conversions must be made. For those [SerDe properties](serde-properties.md)
 | MAP<>     | struct         | |
 
 Hive types with multiple serialization options can be configured with the
-`column.<column_index>.serialize_as`.
+`ion.column[<column_index>].serialize_as`.
 
 ## Union types
 Collection types, ARRAYS, STRUCTS AND MAPS, are typed in hive but not in Ion. It's possible to work
@@ -68,7 +68,7 @@ epoch",
 [ref](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Types#LanguageManualTypes-timestamp).
 To avoid loss of information any Ion timestamp is normalized to a fixed offset on deserialization
 and any Hive TIMESTAMP is assumed to be at that same offset. By default the offset is UTC and can
-be changed by the `timestamp.serialization_offset` property.
+be changed by the `ion.timestamp.serialization_offset` property.
 
 Hive DATEs are serialized to an Ion timestamp at date precision. When deserializing an Ion
 timestamp to a Hive date any precision higher than date **is dropped resulting in a potential data

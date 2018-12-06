@@ -32,7 +32,7 @@ class PathExtractionConfig {
 
     private static final String PATH_EXTRACTOR_KEY_FORMAT = "ion.%s.path_extractor";
     private static final String PATH_EXTRACTOR_DEFAULT_FORMAT = "( %s )";
-    private static final String CASE_SENSITIVITY_KEY = "ion.case_sensitive";
+    private static final String CASE_SENSITIVITY_KEY = "ion.path_extractor.case_sensitive";
 
     private final Map<String, String> searchPathByColumnName;
     private final Boolean caseSensitivity;

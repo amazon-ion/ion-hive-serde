@@ -9,7 +9,7 @@ Indicates whether the data will be serialized as Ion text or Ion binary.
 
 ```
 WITH SERDEPROPERTIES (
-"encoding" = "<BINARY | TEXT>" -- default: BINARY
+  "ion.encoding" = "<BINARY | TEXT>" -- default: BINARY
 )
 ```
 
@@ -21,7 +21,7 @@ serializing to Ion.
 
 ```
 WITH SERDEPROPERTIES (
-    "timestamp.serialization_offset" = "<OFFSET>" -- default: "Z"
+    "ion.timestamp.serialization_offset" = "<OFFSET>" -- default: "Z"
 )
 ```
 
@@ -37,7 +37,7 @@ nulls or untyped nulls. Strongly typed nulls type will be determined based on th
 Specification:
 ```
 WITH SERDEPROPERTIES (
-   "serialize_null" = "<OMIT | UNTYPED | TYPED>" -- default: OMIT
+   "ion.serialize_null" = "<OMIT | UNTYPED | TYPED>" -- default: OMIT
 )
 ```
 
@@ -49,15 +49,15 @@ Example:
 | 1  | Foo Bar |
 | 2  | null    |
 
--- Serialized with "serialize_null" = "TYPED"
+-- Serialized with "ion.serialize_null" = "TYPED"
 {id: 1, name: "Foo Bar"}
 {id: 2, name: null.string}
 
--- Serialized with "serialize_null" = "UNTYPED"
+-- Serialized with "ion.serialize_null" = "UNTYPED"
 {id: 1, name: "Foo Bar"}
 {id: 2, name: null}
 
--- Serialized with "serialize_null" = "OMIT"
+-- Serialized with "ion.serialize_null" = "OMIT"
 {id: 1, name: "Foo Bar"}
 {id: 2}
 ```
@@ -69,8 +69,8 @@ will not fit the Hive column but this configuration option can be used to let th
 Specification:
 ```
 WITH SERDEPROPERTIES (
-   "fail_on_overflow" = "<Boolean>" -- default: true. Sets the default behavior for all columns
-   "<colum.name>.fail_on_overflow" = "<Boolean>"  -- default: true. Sets the behavior for specific columns
+   "ion.fail_on_overflow" = "<Boolean>" -- default: true. Sets the default behavior for all columns
+   "ion.<colum.name>.fail_on_overflow" = "<Boolean>"  -- default: true. Sets the behavior for specific columns
 )
 ```
 
@@ -90,10 +90,13 @@ CREATE TABLE people (
 )
 ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
 WITH SERDEPROPERTIES (
-  "n.fail_on_overflow" = "false",
-  "s.fail_on_overflow" = "false",
-  "st.fail_on_overflow" = "false" // sets it for all values in the struct
-);
+  "ion.n.fail_on_overflow" = "false",
+  "ion.s.fail_on_overflow" = "false",
+  "ion.st.fail_on_overflow" = "false" // sets it for all values in the struct
+)
+STORED AS
+  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
 
 Hive table
 | n      | s       | st                          |
@@ -112,7 +115,7 @@ result set so it's only possible to reference columns in the result by index.
 Specification:
 ```
 WITH SERDEPROPERTIES (
-   "column.<column_index>.serialize_as" = "<ion_type>"
+   "ion.column[<column_index>].serialize_as" = "<ion_type>"
 )  
 ```
 
@@ -140,8 +143,8 @@ Hive table: myTable
 INSERT OVERWRITE LOCAL DIRECTORY '/tmp'
 ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
 WITH SERDEPROPERTIES (
-  "column.1.serialize_as" = "symbol",
-  "column.1.serialize_as" = "sexp"
+  "ion.column[0].serialize_as" = "symbol",
+  "ion.column[1].serialize_as" = "sexp"
 )
 STORED AS
   INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
@@ -154,3 +157,222 @@ SELECT c1, c2 FROM myTable;
     col_1: (1 2 3) // as sexp
 }
 ```
+
+## Path extractor
+[Path extraction](https://github.com/amzn/ion-java-path-extraction) can be used to map between ion values and hive 
+columns. 
+
+Specification: 
+```
+WITH SERDEPROPERTIES (
+   "ion.path_extractor.case_sensitive" = "<Boolean>" -- default: true 
+   "ion.<column_name>.path_extractor" = "<path_extractor_expression>"
+)
+```  
+
+Examples:
+```
+-- Ion Document
+/*
+{
+    identification: {
+        name: "Foo Bar",
+        driver_licence: "XXXX"
+    },
+    
+    alias: "foo"    
+}
+*/
+
+CREATE TABLE people (
+  name STRING, nickname STRING 
+)
+ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
+WITH SERDEPROPERTIES (
+  "ion.name.path_extractor" = "(identification name)", -- flattening
+  "ion.nickname.path_extractor" = "(alias)" -- renaming
+)
+STORED AS
+  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+  
+Hive table
+| name      | nickname |
+|-----------| -------- |
+| "Foo Bar" | "foo"    |
+```
+
+## Ignore Malformed
+When configured to ignore malformed entries the SerDe and `IonInputFormat` will skip splits that are malformed or the 
+whole file if it's not able to read it anymore. 
+
+`IonInputFormat` splits on top level ion values, so it'll skip the remaining of an `InputStream` when it gets a bad 
+value as it's not possible to continue parsing Ion stream. When using Hadoop's `TextInputFormat` it splits on `\n` so 
+when the SerDe reads a malformed entry it can skip only that entry as the InputFormat is still able to parse the stream
+looking for `\n` to split. `TextInputFormat` skipped entries are parsed as empty rows by Hive
+
+
+Specification:   
+```
+WITH SERDEPROPERTIES (
+   "ion.ignore_malformed" = "<Boolean>" -- default: false 
+)
+```  
+
+Examples:
+```
+-- With IonInputFormat:
+-- Ion file in either text or binary. Text file formatting is not important. 
+/*
+{ 
+  field: 1  
+}
+{ 
+  field: 2 
+}
+{ 
+  field: 3   // invalid ion missing '}'  
+{ 
+  field: 4 
+}
+*/
+
+CREATE TABLE people (
+  field INT 
+)
+ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
+WITH SERDEPROPERTIES (
+  "ion.ignore_malformed" = "true"
+)
+STORED AS
+  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+  
+Hive table
+| field  | 
+|--------| 
+| 1      |
+| 2      |
+-- field = 3 is malformed so forces the input format to ignore it and the rest of the input stream, 
+-- in this case field = 4
+
+
+-- With TextInputFormat:
+-- Ion file in text format and single entry per line. 
+/*
+{ field: 1 }
+{ field: 2 }
+{ field: 3   // invalid ion missing '}'  
+{ field: 4 }
+*/
+
+CREATE TABLE people (
+  field INT 
+)
+ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
+WITH SERDEPROPERTIES (
+  "ion.ignore_malformed" = "true"
+)
+STORED AS
+  INPUTFORMAT 'org.apache.hadoop.mapred.InputFormat'
+  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+  
+Hive table
+| field  | 
+|--------| 
+| 1      |
+| 2      |
+| null   |
+| 4      |
+-- field = 3 is skipped and interpreted as an empty row.  
+-- Only works for Ion text and files must be a single entry per line.
+``` 
+
+## Catalog
+Catalogs can be used by the SerDe to find any imported 
+[shared symbol tables](http://amzn.github.io/ion-docs/docs/symbols.html#shared-symbol-tables).
+
+Catalogs can be defined in one of three ways, in order or priority: 
+1. Class: implementation of [IonCatalog](https://github.com/amzn/ion-java/blob/master/src/software/amazon/ion/IonCatalog.java). 
+Must be added as a jar to hive in the same way the SerDe jar is included 
+1. Local File: shared symbol tables declared in a local file  
+1. URL: shared symbol tables resource URL 
+
+Specification:
+```
+WITH SERDEPROPERTIES (
+   "ion.catalog.class" = "<fully qualified class name>"
+   "ion.catalog.file" = "<local file path>"
+   "ion.catalog.url" = "<url>"
+)
+```
+
+Examples: 
+```
+-- Class
+CREATE TABLE people (
+  field INT 
+)
+ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
+WITH SERDEPROPERTIES (
+  "ion.catalog.class" = "com.mypackage.DBCatalog" -- using a custom IonCatalog implementation  
+)
+STORED AS
+  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+```
+
+```
+-- File
+CREATE TABLE people (
+  field INT 
+)
+ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
+WITH SERDEPROPERTIES (
+  "ion.catalog.file" = "/var/catalogs/my_catalog.10n" // local ion file    
+)
+STORED AS
+  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+```
+
+```
+-- URL
+CREATE TABLE people (
+  field INT 
+)
+ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
+WITH SERDEPROPERTIES (
+  "ion.catalog.url" = "https://s3-us-west-2.amazonaws.com/catalogs/my_catalog.10n" -- catalog file on S3    
+)
+STORED AS
+  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+```
+
+## Symbol table imports
+Imports to be used when writing out Ion can be specified with the `ion.symbol_table_imports` property. 
+
+Specification:
+```
+WITH SERDEPROPERTIES (
+   "ion.symbol_table_imports" = "<comma separated list of import names>"
+)
+```
+
+Examples: 
+```
+-- Class
+CREATE TABLE people (
+  field INT 
+)
+ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
+WITH SERDEPROPERTIES (
+  "ion.catalog.url" = "https://s3-us-west-2.amazonaws.com/catalogs/my_catalog.10n",
+  "ion.symbol_table_imports" = "import1,import2,other_import"   
+)
+STORED AS
+  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+```
+
