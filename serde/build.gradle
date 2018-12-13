@@ -13,10 +13,78 @@
  */
 
 apply plugin: 'java-library'
+apply plugin: "maven-publish"
+apply plugin: "signing"
 
 // only applicable for src/main/java source set
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+// Publishing
+// -------------------------------------------------------------------------------
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = "ion-hive-serde"
+
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = "Ion Hive SerDe"
+                packaging = "jar"
+                url = "https://github.com/amzn/ion-hive-serde"
+                description = "A Apache Hive SerDe (short for serializer/deserializer) for the Ion file format."
+                scm {
+                    connection = "scm:git@github.com:amzn/ion-hive-serde.git"
+                    developerConnection = "scm:git@github.com:amzn/ion-hive-serde.git"
+                    url = "git@github.com:amzn/ion-hive-serde.git"
+                }
+
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+
+                developers {
+                    developer {
+                        name = "Amazon Ion Team"
+                        email = "ion-team@amazon.com"
+                        organization = "Amazon Labs"
+                        organizationUrl = "https://github.com/amzn"
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
 
 dependencies {
     // Included in the single-jar
