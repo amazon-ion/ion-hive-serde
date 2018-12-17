@@ -40,8 +40,9 @@ task copySerDeJar {
 
     doLast {
         copy {
-            from file('../serde/build/libs/serde-all.jar')
-            into file('./docker-tmp/serde/')
+            from file("../serde/build/libs/ion-hive-serde-all-${project(':serde').version}.jar")
+            into file("./docker-tmp/serde/")
+            rename '.*\\.jar', 'serde-all.jar'
         }
     }
 }

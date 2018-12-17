@@ -12,9 +12,13 @@
  *
  */
 
+version = "0.1.0-SNAPSHOT"
+
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
 apply plugin: "signing"
+
+jar.baseName = 'ion-hive-serde'
 
 // only applicable for src/main/java source set
 sourceCompatibility = 1.8
@@ -100,7 +104,7 @@ dependencies {
 }
 
 task singleJar(dependsOn: 'build', type: Jar) {
-    baseName = project.name + '-all'
+    baseName = "${jar.baseName}-all"
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
