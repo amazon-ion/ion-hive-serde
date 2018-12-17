@@ -24,7 +24,7 @@ import software.amazon.ion.IonSequence;
 import software.amazon.ion.IonValue;
 
 /**
- * Adapts an {@link IonSequence} for the array<> Hive type.
+ * Adapts an {@link IonSequence} for the array Hive type.
  */
 public class IonSequenceToListObjectInspector implements ListObjectInspector {
 

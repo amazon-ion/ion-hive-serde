@@ -43,6 +43,7 @@ public class IonFactory {
 
     /**
      * Returns a configured DOM factory.
+     * @return configured {@link IonSystem}.
      */
     public IonSystem getDomFactory() {
         if (domFactory == null) {
@@ -69,6 +70,7 @@ public class IonFactory {
      * @param bytes byte array with ion data.
      * @param offset byte array offset to start reading the data.
      * @param length number of bytes to read from the byte array.
+     * @return configured {@link IonReader}.
      */
     public IonReader newReader(final byte[] bytes, final int offset, final int length) {
 
@@ -77,6 +79,9 @@ public class IonFactory {
 
     /**
      * Returns a configured IonReader.
+     *
+     * @param input reader input stream.
+     * @return configured {@link IonReader}.
      */
     public IonReader newReader(final InputStream input) {
         return getReaderBuilder().build(input);
@@ -84,6 +89,9 @@ public class IonFactory {
 
     /**
      * Returns a configured text IonWriter.
+     *
+     * @param out writer output stream.
+     * @return configured {@link IonWriter}.
      */
     public IonWriter newTextWriter(final OutputStream out) {
         if (textWriterBuilder == null) {
@@ -97,6 +105,9 @@ public class IonFactory {
 
     /**
      * Returns a configured binary IonWriter.
+     *
+     * @param out writer output stream.
+     * @return configured {@link IonWriter}.
      */
     public IonWriter newBinaryWriter(final OutputStream out) {
         if (binaryWriterBuilder == null) {

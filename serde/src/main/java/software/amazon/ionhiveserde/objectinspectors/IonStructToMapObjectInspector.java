@@ -26,7 +26,7 @@ import software.amazon.ion.IonSymbol;
 import software.amazon.ion.IonValue;
 
 /**
- * Adapts an {@link IonStruct} for the map<> Hive type.
+ * Adapts an {@link IonStruct} for the map Hive type.
  */
 public class IonStructToMapObjectInspector implements MapObjectInspector {
 

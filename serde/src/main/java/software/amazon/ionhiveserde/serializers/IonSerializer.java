@@ -26,6 +26,12 @@ interface IonSerializer {
 
     /**
      * Serializes an Ion value to writer by extracting information from data using the object inspector.
+     *
+     * @param writer writer to use.
+     * @param data data to serialize.
+     * @param objectInspector object inspector to analyze data.
+     * @throws IOException when writer is not able to write out a value .
+     * @throws IllegalArgumentException if serializer is not able to handle the data.
      */
     void serialize(final IonWriter writer,
                    final Object data,
@@ -33,6 +39,8 @@ interface IonSerializer {
 
     /**
      * Ion type handled by this serializer.
+     *
+     * @return type handled by this serializer.
      */
     IonType getIonType();
 }

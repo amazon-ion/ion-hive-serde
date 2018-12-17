@@ -66,6 +66,7 @@ public class SerDeProperties extends BaseProperties {
 
     /**
      * @see EncodingConfig#getEncoding()
+     * @return configured {@link IonEncoding}.
      */
     public IonEncoding getEncoding() {
         return encodingConfig.getEncoding();
@@ -74,6 +75,7 @@ public class SerDeProperties extends BaseProperties {
 
     /**
      * @see TimestampOffsetConfig#getTimestampOffsetInMinutes()
+     * @return configured offset in minutes.
      */
     public int getTimestampOffsetInMinutes() {
         return timestampOffsetConfig.getTimestampOffsetInMinutes();
@@ -81,6 +83,7 @@ public class SerDeProperties extends BaseProperties {
 
     /**
      * @see SerializeNullConfig#getSerializeNull()
+     * @return configured {@link SerializeNullStrategy}.
      */
     public SerializeNullStrategy getSerializeNull() {
         return serializeNullConfig.getSerializeNull();
@@ -89,6 +92,8 @@ public class SerDeProperties extends BaseProperties {
 
     /**
      * @see FailOnOverflowConfig#failOnOverflowFor(String)
+     * @param columnName table column name.
+     * @return true if it must fail on overflow, false otherwise.
      */
     public boolean failOnOverflowFor(final String columnName) {
         return failOnOverflowConfig.failOnOverflowFor(columnName);
@@ -96,6 +101,8 @@ public class SerDeProperties extends BaseProperties {
 
     /**
      * @see SerializeAsConfig#serializationIonTypeFor(int)
+     * @param index table column index.
+     * @return IonType to use when serializing values of the respective column.
      */
     public IonType serializationIonTypeFor(final int index) {
         return serializeAsConfig.serializationIonTypeFor(index);
@@ -103,6 +110,9 @@ public class SerDeProperties extends BaseProperties {
 
     /**
      * @see PathExtractionConfig#buildPathExtractor(IonStruct, IonSystem)
+     * @param struct struct used to accumulate matched search paths.
+     * @param domFactory configured DOM factory to create DOM values.
+     * @return configured {@link PathExtractor}
      */
     public PathExtractor buildPathExtractor(final IonStruct struct, final IonSystem domFactory) {
         return pathExtractionConfig.buildPathExtractor(struct, domFactory);

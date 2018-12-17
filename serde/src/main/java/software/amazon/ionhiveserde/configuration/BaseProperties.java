@@ -33,6 +33,7 @@ public abstract class BaseProperties {
 
     /**
      * @see CatalogConfig#getCatalog()
+     * @return configured catalog.
      */
     public IonCatalog getCatalog() {
         return catalogConfig.getCatalog();
@@ -40,6 +41,7 @@ public abstract class BaseProperties {
 
     /**
      * @see CatalogConfig#getSymbolTableImports()
+     * @return configured catalog.
      */
     public SymbolTable[] getSymbolTableImports() {
         return catalogConfig.getSymbolTableImports();
@@ -47,6 +49,7 @@ public abstract class BaseProperties {
 
     /**
      * @see IgnoreMalformedConfig#getIgnoreMalformed()
+     * @return configured catalog.
      */
     public boolean getIgnoreMalformed() {
         return ignoreMalformedConfig.getIgnoreMalformed();
