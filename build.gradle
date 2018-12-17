@@ -77,4 +77,6 @@ task cleanAll {
             }
         }
     }
+
+    dependsOn(clean)
 }
