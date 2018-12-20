@@ -2,8 +2,8 @@
 
 A Apache Hive SerDe (short for serializer/deserializer) for the Ion file format.
 
-[![Build Status](https://travis-ci.org/amzn/ion-hive-serde .svg?branch=master)](https://travis-ci.org/amzn/ion-hive-serde )
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/software.amazon.ion/ion-hive-serde /badge.svg)](https://maven-badges.herokuapp.com/maven-central/software.amazon.ion/ion-hive-serde)
+[![Build Status](https://travis-ci.org/amzn/ion-hive-serde.svg?branch=master)](https://travis-ci.org/amzn/ion-hive-serde)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/software.amazon.ion/ion-hive-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/software.amazon.ion/ion-hive-serde)
 [![Javadoc](https://javadoc-badge.appspot.com/software.amazon.ion/ion-hive-serde.svg?label=javadoc)](http://www.javadoc.io/doc/software.amazon.ion/ion-hive-serde)
 
 ### Features
