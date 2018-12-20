@@ -44,6 +44,7 @@ information, including how to run the integration tests on your IDE.
 Examples shown using Ion text for readability but for better performance and compression Ion binary is recommended in
 production systems.
 
+
 #### Simple query
 ```
 ~$ cat test.ion
