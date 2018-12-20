@@ -1,0 +1,11 @@
+sudo: false
+language: java
+jdk:
+- openjdk8
+- openjdk9
+- openjdk11
+- oraclejdk8
+- oraclejdk9
+- oraclejdk11
+
+script: ./gradlew :serde:check
