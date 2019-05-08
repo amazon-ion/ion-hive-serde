@@ -15,8 +15,8 @@
 // sets up kotlin plugin
 buildscript {
     ext.kotlin_version = '[1.2.0,1.3.0)'
-    ext.ionjava_version = '[1.0.0,1.1.0)'
-    ext.pathextraction_version = '[1.0.0,1.1.0)'
+    ext.ionjava_version = '[1.4.0,2.0.0)'
+    ext.pathextraction_version = '[1.2.0,2.0.0)'
     ext.hive_version = '[2.3.0,2.4.0)'
     ext.hadoop_version = '[2.7.0,2.8.0)'
 
@@ -53,7 +53,7 @@ allprojects {
 
     apply plugin: 'checkstyle'
     checkstyle {
-        toolVersion = "8.12"
+        toolVersion = "8.18"
         ignoreFailures = false
         maxWarnings = 0
         maxErrors = 0

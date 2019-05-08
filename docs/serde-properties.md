@@ -95,8 +95,8 @@ WITH SERDEPROPERTIES (
   "ion.st.fail_on_overflow" = "false" // sets it for all values in the struct
 )
 STORED AS
-  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
-  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+  INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat';
 
 Hive table
 | n      | s       | st                          |
@@ -147,8 +147,8 @@ WITH SERDEPROPERTIES (
   "ion.column[1].serialize_as" = "sexp"
 )
 STORED AS
-  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
-  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat'
+  INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat'
 SELECT c1, c2 FROM myTable;
 
 -- Ion Document
@@ -193,8 +193,8 @@ WITH SERDEPROPERTIES (
   "ion.nickname.path_extractor" = "(alias)" -- renaming
 )
 STORED AS
-  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
-  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+  INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat';
   
 Hive table
 | name      | nickname |
@@ -245,8 +245,8 @@ WITH SERDEPROPERTIES (
   "ion.ignore_malformed" = "true"
 )
 STORED AS
-  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
-  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+  INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat';
   
 Hive table
 | field  | 
@@ -275,7 +275,7 @@ WITH SERDEPROPERTIES (
 )
 STORED AS
   INPUTFORMAT 'org.apache.hadoop.mapred.InputFormat'
-  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+  OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat';
   
 Hive table
 | field  | 
@@ -293,7 +293,7 @@ Catalogs can be used by the SerDe to find any imported
 [shared symbol tables](http://amzn.github.io/ion-docs/docs/symbols.html#shared-symbol-tables).
 
 Catalogs can be defined in one of three ways, in order or priority: 
-1. Class: implementation of [IonCatalog](https://github.com/amzn/ion-java/blob/master/src/software/amazon/ion/IonCatalog.java). 
+1. Class: implementation of [IonCatalog](https://github.com/amzn/ion-java/blob/master/src/com/amazon/ion/IonCatalog.java).
 Must be added as a jar to hive in the same way the SerDe jar is included 
 1. Local File: shared symbol tables declared in a local file  
 1. URL: shared symbol tables resource URL 
@@ -318,8 +318,8 @@ WITH SERDEPROPERTIES (
   "ion.catalog.class" = "com.mypackage.DBCatalog" -- using a custom IonCatalog implementation  
 )
 STORED AS
-  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
-  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+  INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat';
 ```
 
 ```
@@ -332,8 +332,8 @@ WITH SERDEPROPERTIES (
   "ion.catalog.file" = "/var/catalogs/my_catalog.10n" // local ion file    
 )
 STORED AS
-  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
-  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+  INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat';
 ```
 
 ```
@@ -346,8 +346,8 @@ WITH SERDEPROPERTIES (
   "ion.catalog.url" = "https://s3-us-west-2.amazonaws.com/catalogs/my_catalog.10n" -- catalog file on S3    
 )
 STORED AS
-  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
-  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+  INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat';
 ```
 
 ## Symbol table imports
@@ -372,7 +372,7 @@ WITH SERDEPROPERTIES (
   "ion.symbol_table_imports" = "import1,import2,other_import"   
 )
 STORED AS
-  INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
-  OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat';
+  INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat';
 ```
 

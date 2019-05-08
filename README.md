@@ -3,8 +3,8 @@
 A Apache Hive SerDe (short for serializer/deserializer) for the Ion file format.
 
 [![Build Status](https://travis-ci.org/amzn/ion-hive-serde.svg?branch=master)](https://travis-ci.org/amzn/ion-hive-serde)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/software.amazon.ion/ion-hive-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/software.amazon.ion/ion-hive-serde)
-[![Javadoc](https://javadoc-badge.appspot.com/software.amazon.ion/ion-hive-serde.svg?label=javadoc)](http://www.javadoc.io/doc/software.amazon.ion/ion-hive-serde)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive-serde)
+[![Javadoc](https://javadoc-badge.appspot.com/com.amazon.ion/ion-hive-serde.svg?label=javadoc)](http://www.javadoc.io/doc/com.amazon.ion/ion-hive-serde)
 
 ### Features
 * Read data stored in Ion format both binary and text.
@@ -68,10 +68,10 @@ hive> CREATE EXTERNAL TABLE test (
         name STRING,
         age INT
       )
-      ROW FORMAT SERDE 'software.amazon.ionhiveserde.IonHiveSerDe'
+      ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
       STORED AS
-        INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
-        OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat'
+        INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+        OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat'
       LOCATION '/user/data';
 
 hive> SELECT * FROM test;
@@ -106,15 +106,15 @@ hive> CREATE EXTERNAL TABLE test (
         age INT,
         jobtitle STRING
       )
-      ROW FORMAT SERDE 'software.amazon.ionhiveserde.IonHiveSerDe'
+      ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
       WITH SERDEPROPERTIES (
         "ion.name.path_extractor" = "(personal_info name)",
         "ion.age.path_extractor" = "(personal_info age)",
         "ion.jobtitle.path_extractor" = "(professional_info job_title)",
       )
       STORED AS
-        INPUTFORMAT 'software.amazon.ionhiveserde.formats.IonInputFormat'
-        OUTPUTFORMAT 'software.amazon.ionhiveserde.formats.IonOutputFormat'
+        INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+        OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat'
       LOCATION '/user/data';
 
 hive> SELECT * FROM test;
