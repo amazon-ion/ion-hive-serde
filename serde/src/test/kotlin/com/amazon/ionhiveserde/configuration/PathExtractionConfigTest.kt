@@ -36,11 +36,11 @@ class PathExtractionConfigTest {
         val pathExtractor = com.amazon.ionhiveserde.configuration.PathExtractionConfig(
                 MapBasedRawConfiguration(configMap),
                 listOf("c1", "c2")
-        ).buildPathExtractor(struct, ION)
+        ).pathExtractor()
 
         assertTrue(struct.isEmpty)
 
-        pathExtractor.match(IonReaderBuilder.standard().build(ionDocument))
+        pathExtractor.match(IonReaderBuilder.standard().build(ionDocument), struct)
 
         assertEquals(2, struct.size())
         assertEquals(1, (struct["c1"] as IonInt).intValue())

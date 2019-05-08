@@ -16,7 +16,6 @@
 package com.amazon.ionhiveserde.configuration;
 
 import com.amazon.ion.IonStruct;
-import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonType;
 import com.amazon.ionhiveserde.IonHiveSerDe;
 import com.amazon.ionhiveserde.configuration.source.JavaPropertiesAdapter;
@@ -110,13 +109,11 @@ public class SerDeProperties extends BaseProperties {
     }
 
     /**
-     * @see PathExtractionConfig#buildPathExtractor(IonStruct, IonSystem)
-     * @param struct struct used to accumulate matched search paths.
-     * @param domFactory configured DOM factory to create DOM values.
+     * @see PathExtractionConfig#pathExtractor()
      * @return configured {@link PathExtractor}
      */
-    public PathExtractor buildPathExtractor(final IonStruct struct, final IonSystem domFactory) {
-        return pathExtractionConfig.buildPathExtractor(struct, domFactory);
+    public PathExtractor<IonStruct> pathExtractor() {
+        return pathExtractionConfig.pathExtractor();
     }
 }
 

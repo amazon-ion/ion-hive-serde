@@ -136,9 +136,9 @@ public class IonHiveSerDe extends AbstractSerDe {
         final IonSystem domFactory = ionFactory.getDomFactory();
         try (final IonReader reader = ionFactory.newReader(bytes, 0, length)) {
             final IonStruct struct = domFactory.newEmptyStruct();
-            final PathExtractor pathExtractor = serDeProperties.buildPathExtractor(struct, domFactory);
+            final PathExtractor<IonStruct> pathExtractor = serDeProperties.pathExtractor();
 
-            pathExtractor.match(reader);
+            pathExtractor.match(reader, struct);
 
             return struct;
 

@@ -17,7 +17,6 @@ package com.amazon.ionhiveserde.configuration;
 
 import com.amazon.ion.IonReader;
 import com.amazon.ion.IonStruct;
-import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonValue;
 import com.amazon.ionhiveserde.configuration.source.RawConfiguration;
 import com.amazon.ionpathextraction.PathExtractor;
@@ -26,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * Encapsulates the path_extractor configuration.
@@ -37,8 +36,7 @@ class PathExtractionConfig {
     private static final String PATH_EXTRACTOR_DEFAULT_FORMAT = "( %s )";
     private static final String CASE_SENSITIVITY_KEY = "ion.path_extractor.case_sensitive";
 
-    private final Map<String, String> searchPathByColumnName;
-    private final Boolean caseSensitivity;
+    private final PathExtractor<IonStruct> pathExtractor;
 
     /**
      * Constructor.
@@ -47,7 +45,7 @@ class PathExtractionConfig {
      * @param columnNames table column names.
      */
     PathExtractionConfig(final RawConfiguration configuration, final List<String> columnNames) {
-        searchPathByColumnName = new HashMap<>();
+        final Map<String, String> searchPathByColumnName = new HashMap<>();
         for (final String columnName : columnNames) {
             final String searchPathExpression = configuration.getOrDefault(
                 String.format(PATH_EXTRACTOR_KEY_FORMAT, columnName),
@@ -56,19 +54,9 @@ class PathExtractionConfig {
             searchPathByColumnName.put(columnName, searchPathExpression);
         }
 
-        caseSensitivity = Boolean.getBoolean(configuration.getOrDefault(CASE_SENSITIVITY_KEY, "false"));
-    }
+        final boolean caseSensitivity = Boolean.getBoolean(configuration.getOrDefault(CASE_SENSITIVITY_KEY, "false"));
 
-    /**
-     * Builds a path extractor from configuration that will accumulated matched paths to the struct.
-     *
-     * @param struct mutable struct to accumulated matched paths.
-     * @param domFactory Ion system used to create DOM objects.
-     *
-     * @return PathExtractor configured for matching.
-     */
-    PathExtractor buildPathExtractor(final IonStruct struct, final IonSystem domFactory) {
-        final PathExtractorBuilder builder = PathExtractorBuilder.standard()
+        final PathExtractorBuilder<IonStruct> builder = PathExtractorBuilder.<IonStruct>standard()
             .withMatchRelativePaths(false)
             .withMatchCaseInsensitive(caseSensitivity);
 
@@ -76,8 +64,8 @@ class PathExtractionConfig {
             final String columnName = entry.getKey();
             final String searchPathExpression = entry.getValue();
 
-            final Function<IonReader, Integer> callback = ionReader -> {
-                final IonValue ionValue = domFactory.newValue(ionReader);
+            final BiFunction<IonReader, IonStruct, Integer> callback = (ionReader, struct) -> {
+                final IonValue ionValue = struct.getSystem().newValue(ionReader);
 
                 if (ionValue.isNullValue()) {
                     struct.put(columnName, null); // Hive can't handle IonNull
@@ -91,6 +79,15 @@ class PathExtractionConfig {
             builder.withSearchPath(searchPathExpression, callback);
         }
 
-        return builder.build();
+        pathExtractor = builder.build();
+    }
+
+    /**
+     * Returns the configured path extractor will accumulated matched paths to a given {@link IonStruct}.
+
+     * @return PathExtractor configured for matching.
+     */
+    PathExtractor<IonStruct> pathExtractor() {
+        return pathExtractor;
     }
 }
