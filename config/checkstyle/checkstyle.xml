@@ -31,10 +31,10 @@
  -->
 
 <module name="Checker">
+
   <property name="charset" value="UTF-8"/>
 
   <property name="severity" value="warning"/>
-
   <property name="fileExtensions" value="java, properties, xml"/>
   <!-- Checks for whitespace                               -->
   <!-- See http://checkstyle.sf.net/config_whitespace.html -->
@@ -43,7 +43,8 @@
   </module>
 
   <module name="Header">
-    <property name="headerFile" value="config/checkstyle/copyright-header" />
+    <!-- https://github.com/gradle/gradle/issues/8286 -->
+    <property name="headerFile" value="${config_loc}/copyright-header" />
     <property name="fileExtensions" value="java,kt" />
   </module>
 
