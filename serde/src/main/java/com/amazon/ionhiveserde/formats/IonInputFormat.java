@@ -46,6 +46,11 @@ public class IonInputFormat extends FileInputFormat {
     private static final Log LOG = LogFactory.getLog(IonInputFormat.class);
 
     @Override
+    protected boolean isSplitable(final FileSystem fs, final Path filename) {
+        return false;
+    }
+
+    @Override
     public RecordReader getRecordReader(final InputSplit split, final JobConf job, final Reporter reporter)
         throws IOException {
 
