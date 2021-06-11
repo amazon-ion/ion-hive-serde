@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-version = "0.3.0"
+version = "0.4.0-SNAPSHOT"
 group = "com.amazon.ion"
 
 apply plugin: 'java-library'
