@@ -54,11 +54,12 @@ class PathExtractionConfig {
             searchPathByColumnName.put(columnName, searchPathExpression);
         }
 
-        final boolean caseSensitivity = Boolean.getBoolean(configuration.getOrDefault(CASE_SENSITIVITY_KEY, "false"));
+        final boolean caseSensitivity = Boolean.parseBoolean(configuration.getOrDefault(CASE_SENSITIVITY_KEY, "false"));
 
+        // Note: Serde property specifies case sensitivity, but path extractor APIs accept case insensitivity
         final PathExtractorBuilder<IonStruct> builder = PathExtractorBuilder.<IonStruct>standard()
-            .withMatchRelativePaths(false)
-            .withMatchCaseInsensitive(caseSensitivity);
+                .withMatchRelativePaths(false)
+                .withMatchCaseInsensitive(!caseSensitivity);
 
         for (final Entry<String, String> entry : searchPathByColumnName.entrySet()) {
             final String columnName = entry.getKey();
