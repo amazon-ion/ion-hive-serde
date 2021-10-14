@@ -22,6 +22,7 @@ import com.amazon.ion.IonReader;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonWriter;
+import com.amazon.ionhiveserde.caseinsensitivedecorator.IonStructCaseInsensitiveDecorator;
 import com.amazon.ionhiveserde.configuration.IonEncoding;
 import com.amazon.ionhiveserde.configuration.SerDeProperties;
 import com.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
@@ -135,7 +136,10 @@ public class IonHiveSerDe extends AbstractSerDe {
 
         final IonSystem domFactory = ionFactory.getDomFactory();
         try (final IonReader reader = ionFactory.newReader(bytes, 0, length)) {
-            final IonStruct struct = domFactory.newEmptyStruct();
+            IonStruct struct = domFactory.newEmptyStruct();
+            if (!serDeProperties.pathExtractorCaseSensitivity()) {
+                struct = new IonStructCaseInsensitiveDecorator(struct);
+            }
             final PathExtractor<IonStruct> pathExtractor = serDeProperties.pathExtractor();
 
             pathExtractor.match(reader, struct);
