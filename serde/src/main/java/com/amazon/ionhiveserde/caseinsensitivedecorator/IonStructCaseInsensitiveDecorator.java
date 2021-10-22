@@ -88,6 +88,12 @@ public class IonStructCaseInsensitiveDecorator extends IonContainerCaseInsensiti
     }
 
     @Override
+    /*
+       Argument `fieldName` is case sensitive so below method removes the desired value, which means it's possible that
+       struct.containsKey(fieldName) returns true while struct.remove(fieldName) does nothing.
+
+       Refer to https://github.com/amzn/ion-hive-serde/issues/60.
+     */
     public IonValue remove(final String fieldName) {
         return IonCaseInsensitiveDecorator.wrapValue(ionStruct.remove(fieldName));
     }

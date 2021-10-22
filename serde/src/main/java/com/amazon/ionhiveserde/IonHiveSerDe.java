@@ -136,6 +136,14 @@ public class IonHiveSerDe extends AbstractSerDe {
 
         final IonSystem domFactory = ionFactory.getDomFactory();
         try (final IonReader reader = ionFactory.newReader(bytes, 0, length)) {
+
+            /*
+                We're using an IonStruct here because:
+                1. We need a key-value store to carry column values
+                2. The top-level IonStruct as a context object carries the IonSystem which we use as a ValueFactory in
+                   the callbacks created in PathExtractionConfig
+                Refer to https://github.com/amzn/ion-hive-serde/issues/61.
+            */
             IonStruct struct = domFactory.newEmptyStruct();
             if (!serDeProperties.pathExtractorCaseSensitivity()) {
                 struct = new IonStructCaseInsensitiveDecorator(struct);

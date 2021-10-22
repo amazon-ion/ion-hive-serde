@@ -22,10 +22,12 @@ import com.amazon.ion.NullValueException;
 import com.amazon.ion.UnknownSymbolException;
 import com.amazon.ion.ValueFactory;
 
-import java.util.ArrayList;
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
+
 import org.jetbrains.annotations.NotNull;
 
 
@@ -135,48 +137,37 @@ public class IonSequenceCaseInsensitiveDecorator extends IonContainerCaseInsensi
     @NotNull
     @Override
     public List<IonValue> subList(final int fromIndex, final int toIndex) {
-        List<IonValue> l = new ArrayList<>();
-        List<IonValue> sublist = ionSequence.subList(fromIndex, toIndex);
-
-        for (IonValue ionValue : sublist) {
-            l.add(IonCaseInsensitiveDecorator.wrapValue(ionValue));
-        }
-        return l;
+        return ionSequence.subList(fromIndex, toIndex).stream()
+                .map(IonCaseInsensitiveDecorator::wrapValue)
+                .collect(Collectors.toList());
     }
 
     @NotNull
     @Override
     public IonValue[] toArray() {
-        IonValue[] rawArray = ionSequence.toArray();
-        int size = ionSequence.size();
-        for (int i = 0; i < size; i++) {
-            rawArray[i] = IonCaseInsensitiveDecorator.wrapValue(rawArray[i]);
-        }
-        return rawArray;
+        return ionSequence.stream()
+                .map(IonCaseInsensitiveDecorator::wrapValue)
+                .toArray(IonValue[]::new);
     }
 
     @NotNull
     @Override
     @SuppressWarnings("unchecked")
     public <T> T[] toArray(final T[] a) {
-        T[] rawArray = ionSequence.toArray(a);
-        int size = rawArray.length;
-        for (int i = 0; i < size; i++) {
-            rawArray[i] = (T) IonCaseInsensitiveDecorator.wrapValue((IonValue) rawArray[i]);
-        }
-        return rawArray;
+        Class<?> type = a.getClass().getComponentType();
+        return ionSequence.stream()
+                .map(IonCaseInsensitiveDecorator::wrapValue)
+                .map(i -> (T)i)
+                .toArray(size -> (T[]) Array.newInstance(type, size));
     }
-
 
     @Override
     @SuppressWarnings("unchecked")
     public <T extends IonValue> T[] extract(final Class<T> type) {
-        T[] rawArray = ionSequence.extract(type);
-        int size = rawArray.length;
-        for (int i = 0; i < size; i++) {
-            rawArray[i] = (T) IonCaseInsensitiveDecorator.wrapValue((IonValue) rawArray[i]);
-        }
-        return rawArray;
+        return ionSequence.stream()
+                .map(IonCaseInsensitiveDecorator::wrapValue)
+                .map(i -> (T)i)
+                .toArray(size -> (T[]) Array.newInstance(type, size));
     }
 
     public IonSequence clone() throws UnknownSymbolException {
