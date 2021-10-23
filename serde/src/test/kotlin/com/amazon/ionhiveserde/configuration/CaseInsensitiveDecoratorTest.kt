@@ -17,11 +17,13 @@ package com.amazon.ionhiveserde.configuration
 
 import com.amazon.ion.*
 import com.amazon.ionhiveserde.ION
+import com.amazon.ionhiveserde.assertMultiEquals
+import com.amazon.ionhiveserde.assertSequenceWrapper
+import com.amazon.ionhiveserde.assertStructWrapper
 import com.amazon.ionhiveserde.caseinsensitivedecorator.IonSequenceCaseInsensitiveDecorator
 import com.amazon.ionhiveserde.caseinsensitivedecorator.IonStructCaseInsensitiveDecorator
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class CaseInsensitiveDecoratorTest {
     private fun datagram_for(s: String): IonDatagram {
@@ -77,21 +79,21 @@ class CaseInsensitiveDecoratorTest {
     @Test
     fun ionStructCaseInsensitiveDecoratorGetRepeatedFieldFoundIgnoringCase() {
         val struct = struct_for(" { Foo: 'Bar', foo: 'bar' }")
-        assert(
-                struct.get("FOO") == ION.newSymbol("Bar") || struct.get("FOO") == ION.newSymbol("bar")
-        )
+        assertMultiEquals(
+                arrayOf(ION.newSymbol("Bar") as IonValue, ION.newSymbol("bar") as IonValue),
+                struct.get("FOO"))
     }
 
     @Test
     fun ionStructCaseInsensitiveDecoratorGetStruct() {
         val struct = struct_for(" { Foo: {} }")
-        assertTrue(struct.get("Foo") is IonStructCaseInsensitiveDecorator, "Found ${struct.get("Foo").javaClass.simpleName} ,expected IonStructCaseInsensitiveDecorator type.")
+        assertStructWrapper(struct.get("Foo"))
     }
 
     @Test
     fun ionStructCaseInsensitiveDecoratorGetSequence() {
         val struct = struct_for(" { Foo: [] }")
-        assertTrue(struct.get("Foo") is IonSequenceCaseInsensitiveDecorator, "Found ${struct.get("Foo").javaClass.simpleName} ,expected IonSequenceCaseInsensitiveDecorator type.")
+        assertSequenceWrapper(struct.get("Foo"))
     }
 
     @Test
@@ -107,14 +109,14 @@ class CaseInsensitiveDecoratorTest {
     fun ionStructCaseInsensitiveDecoratorRemoveStruct() {
         val struct = struct_for(" { Foo: {} }")
         val s = struct.remove("Foo")
-        assertTrue(s is IonStructCaseInsensitiveDecorator, "Found ${s.javaClass.simpleName} ,expected IonStructCaseInsensitiveDecorator type.")
+        assertStructWrapper(s)
     }
 
     @Test
     fun ionStructCaseInsensitiveDecoratorRemoveSequence() {
         val struct = struct_for(" { Foo: [] }")
         val s = struct.remove("Foo")
-        assertTrue(s is IonSequenceCaseInsensitiveDecorator, "Found ${s.javaClass.simpleName} ,expected IonSequenceCaseInsensitiveDecorator type.")
+        assertSequenceWrapper(s)
     }
 
     @Test
@@ -123,7 +125,7 @@ class CaseInsensitiveDecoratorTest {
         val s = struct.cloneAndRemove("Foo")
 
         assertEquals(s.size(), 0)
-        assertTrue(s is IonStructCaseInsensitiveDecorator, "Found ${s.javaClass.simpleName} ,expected IonStructCaseInsensitiveDecorator type.")
+        assertStructWrapper(s)
     }
 
     @Test
@@ -133,7 +135,7 @@ class CaseInsensitiveDecoratorTest {
 
         assertEquals(s.size(), 1)
         assertEquals(s.containsKey("foo"), true)
-        assertTrue(s is IonStructCaseInsensitiveDecorator, "Found ${s.javaClass.simpleName} ,expected IonStructCaseInsensitiveDecorator type.")
+        assertStructWrapper(s)
     }
 
     @Test
@@ -145,13 +147,13 @@ class CaseInsensitiveDecoratorTest {
     @Test
     fun ionSequenceCaseInsensitiveDecoratorGetStruct() {
         val sequence = sequence_for("[{}]")
-        assertTrue(sequence[0] is IonStructCaseInsensitiveDecorator, "Found ${sequence[0].javaClass.simpleName} ,expected IonStructCaseInsensitiveDecorator type.")
+        assertStructWrapper(sequence[0])
     }
 
     @Test
     fun ionSequenceCaseInsensitiveDecoratorGetSequence() {
         val sequence = sequence_for("[[]]")
-        assertTrue(sequence[0] is IonSequenceCaseInsensitiveDecorator, "Found ${sequence[0].javaClass.simpleName} ,expected IonSequenceCaseInsensitiveDecorator type.")
+        assertSequenceWrapper(sequence[0])
     }
 
     @Test
@@ -167,14 +169,14 @@ class CaseInsensitiveDecoratorTest {
     fun ionSequenceCaseInsensitiveDecoratorSetStruct() {
         val sequence = sequence_for("[{}]")
         val l = sequence.set(0, ION.newInt(2))
-        assertTrue(l is IonStructCaseInsensitiveDecorator, "Found ${l.javaClass.simpleName} ,expected IonStructCaseInsensitiveDecorator type.")
+        assertStructWrapper(l)
     }
 
     @Test
     fun ionSequenceCaseInsensitiveDecoratorSetSequence() {
         val sequence = sequence_for("[[]]")
         val l = sequence.set(0, ION.newInt(2))
-        assertTrue(l is IonSequenceCaseInsensitiveDecorator, "Found ${l.javaClass.simpleName} ,expected IonSequenceCaseInsensitiveDecorator type.")
+        assertSequenceWrapper(l)
     }
 
     @Test
@@ -191,7 +193,7 @@ class CaseInsensitiveDecoratorTest {
         val sequence = sequence_for("[{}]")
         val l = sequence.removeAt(0)
 
-        assertTrue(l is IonStructCaseInsensitiveDecorator, "Found ${l.javaClass.simpleName} ,expected IonStructCaseInsensitiveDecorator type.")
+        assertStructWrapper(l)
     }
 
     @Test
@@ -199,7 +201,7 @@ class CaseInsensitiveDecoratorTest {
         val sequence = sequence_for("[[]]")
         val l = sequence.removeAt(0)
 
-        assertTrue(l is IonSequenceCaseInsensitiveDecorator, "Found ${l.javaClass.simpleName} ,expected IonSequenceCaseInsensitiveDecorator type.")
+        assertSequenceWrapper(l)
     }
 
     @Test
@@ -208,9 +210,9 @@ class CaseInsensitiveDecoratorTest {
         val iter = sequence.listIterator()
         assertEquals(iter.next(), ION.newInt(1))
         val i = iter.next()
-        assertTrue(i is IonSequenceCaseInsensitiveDecorator, "Found ${i.javaClass.simpleName} ,expected IonSequenceCaseInsensitiveDecorator type.")
+        assertSequenceWrapper(i)
         val ii = iter.next()
-        assertTrue(ii is IonStructCaseInsensitiveDecorator, "Found ${ii.javaClass.simpleName} ,expected IonStructCaseInsensitiveDecorator type.")
+        assertStructWrapper(ii)
     }
 
     @Test
@@ -219,7 +221,7 @@ class CaseInsensitiveDecoratorTest {
         val sublist = sequence.subList(0, 3)
         // sublist: [1, [], {}]
         assertEquals(sublist[0], ION.newInt(1))
-        assertTrue(sublist[1] is IonSequenceCaseInsensitiveDecorator, "Found ${sublist[1].javaClass.simpleName} ,expected IonSequenceCaseInsensitiveDecorator type.")
-        assertTrue(sublist[2] is IonStructCaseInsensitiveDecorator, "Found ${sublist[2].javaClass.simpleName} ,expected IonStructCaseInsensitiveDecorator type.")
+        assertSequenceWrapper(sublist[1])
+        assertStructWrapper(sublist[2])
     }
 }
