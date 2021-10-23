@@ -37,6 +37,7 @@ class PathExtractionConfig {
     private static final String CASE_SENSITIVITY_KEY = "ion.path_extractor.case_sensitive";
 
     private final PathExtractor<IonStruct> pathExtractor;
+    private final Boolean caseSensitivity;
 
     /**
      * Constructor.
@@ -55,7 +56,7 @@ class PathExtractionConfig {
         }
 
         final boolean caseSensitivity = Boolean.parseBoolean(configuration.getOrDefault(CASE_SENSITIVITY_KEY, "false"));
-
+        this.caseSensitivity = caseSensitivity;
         // Note: Serde property specifies case sensitivity, but path extractor APIs accept case insensitivity
         final PathExtractorBuilder<IonStruct> builder = PathExtractorBuilder.<IonStruct>standard()
                 .withMatchRelativePaths(false)
@@ -90,5 +91,14 @@ class PathExtractionConfig {
      */
     PathExtractor<IonStruct> pathExtractor() {
         return pathExtractor;
+    }
+
+    /**
+     * Returns a boolean that indicates if the pathExtractor is configured case sensitive.
+
+     * @return true if the pathExtractor is configured case sensitive, false otherwise.
+     */
+    public Boolean getCaseSensitivity() {
+        return caseSensitivity;
     }
 }

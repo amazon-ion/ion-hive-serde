@@ -22,6 +22,7 @@ import com.amazon.ion.IonReader;
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonWriter;
+import com.amazon.ionhiveserde.caseinsensitivedecorator.IonStructCaseInsensitiveDecorator;
 import com.amazon.ionhiveserde.configuration.IonEncoding;
 import com.amazon.ionhiveserde.configuration.SerDeProperties;
 import com.amazon.ionhiveserde.objectinspectors.factories.IonObjectInspectorFactory;
@@ -135,7 +136,18 @@ public class IonHiveSerDe extends AbstractSerDe {
 
         final IonSystem domFactory = ionFactory.getDomFactory();
         try (final IonReader reader = ionFactory.newReader(bytes, 0, length)) {
-            final IonStruct struct = domFactory.newEmptyStruct();
+
+            /*
+                We're using an IonStruct here because:
+                1. We need a key-value store to carry column values
+                2. The top-level IonStruct as a context object carries the IonSystem which we use as a ValueFactory in
+                   the callbacks created in PathExtractionConfig
+                Refer to https://github.com/amzn/ion-hive-serde/issues/61.
+            */
+            IonStruct struct = domFactory.newEmptyStruct();
+            if (!serDeProperties.pathExtractorCaseSensitivity()) {
+                struct = new IonStructCaseInsensitiveDecorator(struct);
+            }
             final PathExtractor<IonStruct> pathExtractor = serDeProperties.pathExtractor();
 
             pathExtractor.match(reader, struct);

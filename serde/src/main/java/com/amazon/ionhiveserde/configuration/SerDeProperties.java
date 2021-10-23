@@ -115,5 +115,12 @@ public class SerDeProperties extends BaseProperties {
     public PathExtractor<IonStruct> pathExtractor() {
         return pathExtractionConfig.pathExtractor();
     }
+
+    /**
+     * @return Boolean that indicates if the path extractor is configured case sensitive
+     */
+    public Boolean pathExtractorCaseSensitivity() {
+        return pathExtractionConfig.getCaseSensitivity();
+    }
 }
 
