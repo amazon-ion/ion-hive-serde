@@ -2,6 +2,7 @@
 .idea/
 build
 out/
+.DS_Store
 integration-test/docker-tmp/serde
 integration-test/docker-tmp/input
 integration-test/docker-tmp/output

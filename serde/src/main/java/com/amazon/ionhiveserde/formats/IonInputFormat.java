@@ -24,13 +24,18 @@ import com.amazon.ionhiveserde.configuration.HadoopProperties;
 import com.amazon.ionhiveserde.configuration.source.HadoopConfigurationAdapter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.Seekable;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileSplit;
 import org.apache.hadoop.mapred.InputSplit;
@@ -64,46 +69,60 @@ public class IonInputFormat extends FileInputFormat {
     }
 
     private static class IonRecordReader implements RecordReader<LongWritable, BytesWritable> {
-        private boolean isBinary(final FileSplit fileSplit, final JobConf job) throws IOException {
-            final Path path = fileSplit.getPath();
-            final FileSystem fs = path.getFileSystem(job);
+        private final InputStream in;
 
-            try (FSDataInputStream inputStream = fs.open(path)) {
-                byte[] bytes = new byte[4];
-
-                inputStream.readFully(bytes, 0, 4);
-
-                return IonStreamUtils.isIonBinary(bytes);
-            }
-        }
-
-        private final FSDataInputStream fsDataInputStream;
         private final HadoopProperties properties;
         private final IonFactory ionFactory;
         private final IonReader reader;
         private final ByteArrayOutputStream out;
         private final boolean isBinary;
         private final long start;
+        private final long end;
+
+        private boolean isBinary(final InputStream inputStream) throws IOException {
+            try (InputStream input = inputStream) {
+                byte[] bytes = new byte[4];
+
+                input.read(bytes, 0, 4);
+
+                return IonStreamUtils.isIonBinary(bytes);
+            }
+        }
 
         IonRecordReader(final FileSplit fileSplit, final JobConf job)
-            throws IOException {
-            final Path path = fileSplit.getPath();
-            final FileSystem fs = path.getFileSystem(job);
-
-            isBinary = isBinary(fileSplit, job);
-
+                throws IOException {
             start = fileSplit.getStart();
+            // We don't handle the case that a FileSplit is starting at a position other than 0.
+            if (start != 0) {
+                throw new IOException(String.format("File split is at position %d, expected 0.", start));
+            }
+            end = start + fileSplit.getLength();
 
-            fsDataInputStream = fs.open(path);
-            fsDataInputStream.seek(fileSplit.getStart());
+            try (InputStream binCheck = getInputStream(fileSplit, job)) {
+                isBinary = isBinary(binCheck);
+            }
+
+            in = getInputStream(fileSplit, job);
 
             properties = new HadoopProperties(new HadoopConfigurationAdapter(job));
 
             ionFactory = new IonFactory(properties);
 
-            reader = ionFactory.newReader(fsDataInputStream.getWrappedStream());
+            reader = ionFactory.newReader(in);
 
             out = new ByteArrayOutputStream();
+        }
+
+        private InputStream getInputStream(final FileSplit fileSplit, final JobConf job) throws IOException {
+            final Path path = fileSplit.getPath();
+            final FileSystem fs = path.getFileSystem(job);
+
+            CompressionCodecFactory compressionCodecs = new CompressionCodecFactory(job);
+            final CompressionCodec codec = compressionCodecs.getCodec(path);
+
+            FSDataInputStream inputStream = fs.open(path);
+
+            return (codec == null) ? inputStream : codec.createInputStream(inputStream);
         }
 
         @Override
@@ -116,19 +135,30 @@ public class IonInputFormat extends FileInputFormat {
             return new BytesWritable();
         }
 
+        // CompressionInputStream and FSDataInputStream are both Seekable, but have no common
+        // Seekable parents. We can confidently cast our InputStream to Seekable.
         @Override
         public final long getPos() throws IOException {
-            return fsDataInputStream.getPos();
+            return ((Seekable)in).getPos();
         }
 
         @Override
         public final void close() throws IOException {
-            this.fsDataInputStream.close();
+            this.in.close();
         }
 
+        // We don't know why `progress` is equal to 0 instead of 1 when start == end, what Hadoop is doing since long
+        // times ago is setting it to 0.
+        //
+        // References:
+        // * The original split support issue: https://issues.apache.org/jira/browse/HADOOP-451
+        // * The original patch that introduced this: https://svn.apache.org/viewvc/lucene/hadoop/trunk/src/java/org/apa
+        // che/hadoop/mapred/TextInputFormat.java?r1=469596&r2=488438&pathrev=502021&diff_format=h
         @Override
         public final float getProgress() throws IOException {
-            return fsDataInputStream.getPos() - start;
+            float size = (this.end - this.start);
+            float progress = (this.getPos() - this.start);
+            return this.end == this.start ? 0.0F : Math.min(1.0F, progress / size);
         }
 
         @Override
