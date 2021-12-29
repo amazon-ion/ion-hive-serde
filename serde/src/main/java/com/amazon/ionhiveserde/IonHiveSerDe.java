@@ -52,7 +52,7 @@ import org.apache.hadoop.io.Writable;
 
 /**
  * <p>
- * Hive SerDe for the <a href="http://amzn.github.io/ion-docs/docs.html">Amazon Ion</a> data format.
+ * Hive SerDe for the <a href="https://amzn.github.io/ion-docs/docs.html">Amazon Ion</a> data format.
  * </p>
  * <p>
  * For more information on Hive SerDes see <a href="https://cwiki.apache.org/confluence/display/Hive/SerDe">wiki</a>.
