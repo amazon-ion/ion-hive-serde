@@ -18,6 +18,7 @@ package com.amazon.ionhiveserde.formats;
 import com.amazon.ionhiveserde.IonHiveSerDe;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Optional;
 import java.util.Properties;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -57,7 +58,13 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
         final FileSystem fs = path.getFileSystem(job);
         final FSDataOutputStream fileOut = fs.create(path, progress);
 
-        return new HadoopAdapter(new IonRecordWriter(fileOut));
+        // If we are passed in a reporter, make sure we call incrCounters during write
+        Optional<Reporter> reporter = Optional.empty();
+        if (progress instanceof Reporter) {
+            reporter = Optional.of((Reporter) progress);
+        }
+
+        return new HadoopAdapter(new IonRecordWriter(fileOut, reporter));
     }
 
     @Override
@@ -72,15 +79,25 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
         final FileSystem fs = finalOutPath.getFileSystem(jc);
         final OutputStream out = fs.create(finalOutPath, progress);
 
-        return new IonRecordWriter(out);
+        // If we are passed in a reporter, make sure we call incrCounters during write
+        Optional<Reporter> reporter = Optional.empty();
+        if (progress instanceof Reporter) {
+            reporter = Optional.of((Reporter) progress);
+        }
+        return new IonRecordWriter(out, reporter);
     }
 
     private static class IonRecordWriter implements FileSinkOperator.RecordWriter {
 
-        private final OutputStream out;
+        private static final String SERIALIZER_COUNTER_GROUP = "Serializer";
+        private static final String BYTES_WRITTEN_COUNTER = "BytesWritten";
 
-        IonRecordWriter(final OutputStream out) {
+        private final OutputStream out;
+        private final Optional<Reporter> reporter;
+
+        IonRecordWriter(final OutputStream out, final Optional<Reporter> reporter) {
             this.out = out;
+            this.reporter = reporter;
         }
 
         @Override
@@ -91,15 +108,20 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
             }
 
             // The SerDe already serialized the data to a Writable as either Ion binary or text. The output format
-            // only needs to flush those bytes out to the destination
+            // only needs to flush those bytes out to the destination, and add the bytes written to the reporter
+            // if needed.
 
             if (value instanceof Text) {
                 final Text text = (Text) value;
-                out.write(text.getBytes(), 0, text.getLength());
+                final int bytesWritten = text.getLength();
+                out.write(text.getBytes(), 0, bytesWritten);
+                updateBytesWritten(bytesWritten);
 
             } else if (value instanceof BytesWritable) {
                 final BytesWritable bytesWritable = (BytesWritable) value;
-                out.write(bytesWritable.getBytes(), 0, bytesWritable.getLength());
+                final int bytesWritten = bytesWritable.getLength();
+                out.write(bytesWritable.getBytes(), 0, bytesWritten);
+                updateBytesWritten(bytesWritten);
 
             } else {
                 throw new IllegalArgumentException("Unknown writable type: " + value.getClass());
@@ -113,6 +135,12 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
 
         void close() throws IOException {
             out.close();
+        }
+
+        private void updateBytesWritten(final int bytesWritten) {
+            if (this.reporter.isPresent()) {
+                this.reporter.get().incrCounter(SERIALIZER_COUNTER_GROUP, BYTES_WRITTEN_COUNTER, bytesWritten);
+            }
         }
     }
 
