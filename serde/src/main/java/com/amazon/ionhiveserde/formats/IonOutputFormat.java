@@ -16,6 +16,8 @@
 package com.amazon.ionhiveserde.formats;
 
 import com.amazon.ionhiveserde.IonHiveSerDe;
+
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
@@ -29,6 +31,8 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordWriter;
@@ -76,15 +80,27 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
                                                              final Progressable progress)
         throws IOException {
 
-        final FileSystem fs = finalOutPath.getFileSystem(jc);
-        final OutputStream out = fs.create(finalOutPath, progress);
+        // I believe we should expect the following to hold:
+        // isCompressed == FileOutputFormat.getCompressOutput(jc);
+        // A layer farther up should be getting this flag from the job configuration
+        if (isCompressed) {
+            CompressionCodec codec = getCompressionCodec(jc);
+            Path file = FileOutputFormat.getTaskOutputPath(jc,
+                    finalOutPath.getName() + codec.getDefaultExtension());
+            FileSystem fs = file.getFileSystem(jc);
+            FSDataOutputStream fileOut = fs.create(file, progress);
+            return new IonRecordWriter(new DataOutputStream(codec.createOutputStream(fileOut)), null);
+        } else {
+            final FileSystem fs = finalOutPath.getFileSystem(jc);
+            final OutputStream out = fs.create(finalOutPath, progress);
 
-        // If we are passed in a reporter, make sure we call incrCounters during write
-        Optional<Reporter> reporter = Optional.empty();
-        if (progress instanceof Reporter) {
-            reporter = Optional.of((Reporter) progress);
+            // If we are passed in a reporter, make sure we call incrCounters during write
+            Optional<Reporter> reporter = Optional.empty();
+            if (progress instanceof Reporter) {
+                reporter = Optional.of((Reporter) progress);
+            }
+            return new IonRecordWriter(out, reporter);
         }
-        return new IonRecordWriter(out, reporter);
     }
 
     private static class IonRecordWriter implements FileSinkOperator.RecordWriter {
@@ -161,5 +177,12 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
         public void close(final Reporter reporter) throws IOException {
             recordWriter.close();
         }
+    }
+
+    public static CompressionCodec getCompressionCodec(final JobConf jc) {
+        CompressionCodecFactory factory = new CompressionCodecFactory(jc);
+        String name = jc.get(org.apache.hadoop.mapreduce.lib.output.
+                FileOutputFormat.COMPRESS_CODEC);
+        return factory.getCodecByName(name);
     }
 }
