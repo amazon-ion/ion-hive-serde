@@ -103,6 +103,12 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
         }
     }
 
+    private static CompressionCodec getCompressionCodec(final JobConf jc) {
+        CompressionCodecFactory factory = new CompressionCodecFactory(jc);
+        String name = jc.get(org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.COMPRESS_CODEC);
+        return factory.getCodecByName(name);
+    }
+
     private static class IonRecordWriter implements FileSinkOperator.RecordWriter {
 
         private static final String SERIALIZER_COUNTER_GROUP = "Serializer";
@@ -179,10 +185,4 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
         }
     }
 
-    public static CompressionCodec getCompressionCodec(final JobConf jc) {
-        CompressionCodecFactory factory = new CompressionCodecFactory(jc);
-        String name = jc.get(org.apache.hadoop.mapreduce.lib.output.
-                FileOutputFormat.COMPRESS_CODEC);
-        return factory.getCodecByName(name);
-    }
 }
