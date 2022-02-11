@@ -89,7 +89,7 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
                     finalOutPath.getName() + codec.getDefaultExtension());
             FileSystem fs = file.getFileSystem(jc);
             FSDataOutputStream fileOut = fs.create(file, progress);
-            return new IonRecordWriter(new DataOutputStream(codec.createOutputStream(fileOut)), null);
+            return new IonRecordWriter(new DataOutputStream(codec.createOutputStream(fileOut)), Optional.empty());
         } else {
             final FileSystem fs = finalOutPath.getFileSystem(jc);
             final OutputStream out = fs.create(finalOutPath, progress);
@@ -144,7 +144,6 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
                 final int bytesWritten = bytesWritable.getLength();
                 out.write(bytesWritable.getBytes(), 0, bytesWritten);
                 updateBytesWritten(bytesWritten);
-
             } else {
                 throw new IllegalArgumentException("Unknown writable type: " + value.getClass());
             }
