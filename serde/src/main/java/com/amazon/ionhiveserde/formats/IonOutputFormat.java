@@ -80,9 +80,6 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
                                                              final Progressable progress)
         throws IOException {
 
-        // I believe we should expect the following to hold:
-        // isCompressed == FileOutputFormat.getCompressOutput(jc);
-        // A layer farther up should be getting this flag from the job configuration
         if (isCompressed) {
             CompressionCodec codec = getCompressionCodec(jc);
             Path file = FileOutputFormat.getTaskOutputPath(jc,
@@ -103,7 +100,10 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
         }
     }
 
-    private static CompressionCodec getCompressionCodec(final JobConf jc) {
+    /**
+     * Helper function to get compression codec by job configuration
+     */
+    public static CompressionCodec getCompressionCodec(final JobConf jc) {
         CompressionCodecFactory factory = new CompressionCodecFactory(jc);
         String name = jc.get(org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.COMPRESS_CODEC);
         return factory.getCodecByName(name);
