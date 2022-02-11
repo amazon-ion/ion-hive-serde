@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Map;
 import org.apache.hadoop.hive.serde2.objectinspector.MapObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
@@ -59,15 +60,20 @@ abstract class AbstractStructSerializer implements IonSerializer {
     private void serializeMap(final IonWriter writer,
                               final Object data,
                               final MapObjectInspector objectInspector) throws IOException {
+        if (objectInspector.getMapKeyObjectInspector().getCategory() != ObjectInspector.Category.PRIMITIVE) {
+            throw new IllegalStateException("Map keys must be primitive. Invalid object inspector category: "
+                    + objectInspector.getCategory());
 
-        final StringObjectInspector keyObjectInspector = (StringObjectInspector) objectInspector
-            .getMapKeyObjectInspector();
+        }
+        final PrimitiveObjectInspector keyObjectInspector = (PrimitiveObjectInspector) objectInspector
+                .getMapKeyObjectInspector();
+
         final ObjectInspector valueObjectInspector = objectInspector.getMapValueObjectInspector();
 
         writer.stepIn(IonType.STRUCT);
 
         for (Map.Entry entry : objectInspector.getMap(data).entrySet()) {
-            final String key = keyObjectInspector.getPrimitiveJavaObject(entry.getKey());
+            final String key = keyObjectInspector.getPrimitiveJavaObject(entry.getKey()).toString();
             final IonSerializer ionSerializer = IonSerializerFactory.serializerForObjectInspector(
                 valueObjectInspector,
                 properties);

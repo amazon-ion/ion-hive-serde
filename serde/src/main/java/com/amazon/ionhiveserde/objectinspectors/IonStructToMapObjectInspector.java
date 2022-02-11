@@ -22,9 +22,10 @@ import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.hadoop.hive.serde2.objectinspector.MapObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
+import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 
 /**
  * Adapts an {@link IonStruct} for the map Hive type.
@@ -34,10 +35,13 @@ public class IonStructToMapObjectInspector implements MapObjectInspector {
     // from java.util.HashMap
     private static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
-    private final ObjectInspector keyObjectInspector = PrimitiveObjectInspectorFactory.javaStringObjectInspector;
+    private final ObjectInspector keyObjectInspector;
     private final ObjectInspector valueObjectInspector;
 
-    public IonStructToMapObjectInspector(final ObjectInspector valueObjectInspector) {
+    public IonStructToMapObjectInspector(
+            final ObjectInspector keyObjectInspector,
+            final ObjectInspector valueObjectInspector) {
+        this.keyObjectInspector = keyObjectInspector;
         this.valueObjectInspector = valueObjectInspector;
     }
 
@@ -73,14 +77,14 @@ public class IonStructToMapObjectInspector implements MapObjectInspector {
         }
 
         final IonStruct struct = (IonStruct) data;
+        PrimitiveObjectInspector primitiveObjectInspector = (PrimitiveObjectInspector) keyObjectInspector;
 
         // sets the initial size of the map to avoid growing as it's immutable while using the default HashMap load
         // factor to maintain the same collision performance
         final int size = (int) Math.ceil(struct.size() / DEFAULT_LOAD_FACTOR);
-
-        final Map<String, IonValue> map = new HashMap<>(size, DEFAULT_LOAD_FACTOR);
+        final Map<Object, IonValue> map = new HashMap<>(size, DEFAULT_LOAD_FACTOR);
         for (IonValue v : struct) {
-            map.put(v.getFieldName(), v);
+            map.put(primitiveObjectInspector.getPrimitiveJavaObject(v.getFieldName()), v);
         }
 
         return map;

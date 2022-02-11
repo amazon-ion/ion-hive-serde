@@ -1,0 +1,50 @@
+/*
+ * Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * A copy of the License is located at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed
+ * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
+package com.amazon.ionhiveserde.objectinspectors.map;
+
+import java.sql.Timestamp;
+import org.apache.hadoop.hive.serde2.io.TimestampWritable;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.TimestampObjectInspector;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
+
+public class IonFieldNameToTimestampObjectInspector
+        extends AbstractOverflowableFieldNameObjectInspector<String, Timestamp>
+        implements TimestampObjectInspector {
+
+    public IonFieldNameToTimestampObjectInspector(final boolean failOnOverflow) {
+        super(TypeInfoFactory.timestampTypeInfo, failOnOverflow);
+    }
+
+    @Override
+    public Timestamp getPrimitiveJavaObject(final Object o) {
+        return getPrimitiveJavaObjectFromIonValue(o.toString());
+    }
+
+    @Override
+    public TimestampWritable getPrimitiveWritableObject(final Object o) {
+        return new TimestampWritable(getPrimitiveJavaObjectFromIonValue(o.toString()));
+    }
+
+    @Override
+    protected Timestamp getValidatedPrimitiveJavaObject(final String fieldName) {
+        return Timestamp.valueOf(fieldName);
+    }
+
+    @Override
+    protected void validateSize(final String fieldName) {
+        // no-op
+    }
+}

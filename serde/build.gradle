@@ -18,6 +18,7 @@ group = "com.amazon.ion"
 
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
+apply plugin: "maven"
 apply plugin: "signing"
 
 jar.baseName = 'ion-hive-serde'

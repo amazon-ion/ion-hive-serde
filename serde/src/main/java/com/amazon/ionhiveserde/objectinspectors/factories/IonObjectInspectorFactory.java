@@ -34,6 +34,17 @@ import com.amazon.ionhiveserde.objectinspectors.IonTextToVarcharObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonTimestampToDateObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonTimestampToTimestampObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonUnionObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.map.IonFieldNameToBigIntObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.map.IonFieldNameToBooleanObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.map.IonFieldNameToDateObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.map.IonFieldNameToDecimalObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.map.IonFieldNameToDoubleObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.map.IonFieldNameToFloatObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.map.IonFieldNameToIntObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.map.IonFieldNameToSmallIntObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.map.IonFieldNameToStringObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.map.IonFieldNameToTimestampObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.map.IonFieldNameToTinyIntObjectInspector;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
@@ -86,6 +97,40 @@ public class IonObjectInspectorFactory {
         new IonTimestampToDateObjectInspector();
     private static final IonTimestampToTimestampObjectInspector TIMESTAMP_TO_TIMESTAMP_OBJECT_INSPECTOR =
         new IonTimestampToTimestampObjectInspector();
+
+    // Map Key Object Inspectors
+    private static final IonFieldNameToBooleanObjectInspector FIELD_NAME_TO_BOOLEAN_OBJECT_INSPECTOR =
+            new IonFieldNameToBooleanObjectInspector(true);
+    private static final IonFieldNameToBigIntObjectInspector FIELD_NAME_TO_BIGINT_OBJECT_INSPECTOR =
+            new IonFieldNameToBigIntObjectInspector(false);
+    private static final IonFieldNameToBigIntObjectInspector FIELD_NAME_TO_BIGINT_FAIL_OBJECT_INSPECTOR =
+            new IonFieldNameToBigIntObjectInspector(true);
+    private static final IonFieldNameToDecimalObjectInspector FIELD_NAME_TO_DECIMAL_OBJECT_INSPECTOR =
+            new IonFieldNameToDecimalObjectInspector(false);
+    private static final IonFieldNameToDateObjectInspector FIELD_NAME_TO_DATE_OBJECT_INSPECTOR =
+            new IonFieldNameToDateObjectInspector(false);
+    private static final IonFieldNameToDoubleObjectInspector FIELD_NAME_TO_DOUBLE_OBJECT_INSPECTOR =
+            new IonFieldNameToDoubleObjectInspector(false);
+    private static final IonFieldNameToFloatObjectInspector FIELD_NAME_TO_FLOAT_FAIL_OBJECT_INSPECTOR =
+            new IonFieldNameToFloatObjectInspector(true);
+    private static final IonFieldNameToFloatObjectInspector FIELD_NAME_TO_FLOAT_OBJECT_INSPECTOR =
+            new IonFieldNameToFloatObjectInspector(false);
+    private static final IonFieldNameToIntObjectInspector FIELD_NAME_TO_INT_FAIL_OBJECT_INSPECTOR =
+            new IonFieldNameToIntObjectInspector(true);
+    private static final IonFieldNameToIntObjectInspector FIELD_NAME_TO_INT_OBJECT_INSPECTOR =
+            new IonFieldNameToIntObjectInspector(false);
+    private static final IonFieldNameToSmallIntObjectInspector FIELD_NAME_TO_SMALLINT_FAIL_OBJECT_INSPECTOR =
+            new IonFieldNameToSmallIntObjectInspector(true);
+    private static final IonFieldNameToSmallIntObjectInspector FIELD_NAME_TO_SMALLINT_OBJECT_INSPECTOR =
+            new IonFieldNameToSmallIntObjectInspector(false);
+    private static final IonFieldNameToTimestampObjectInspector FIELD_NAME_TO_TIMESTAMP_OBJECT_INSPECTOR =
+            new IonFieldNameToTimestampObjectInspector(false);
+    private static final IonFieldNameToTinyIntObjectInspector FIELD_NAME_TO_TINYINT_FAIL_OBJECT_INSPECTOR =
+            new IonFieldNameToTinyIntObjectInspector(true);
+    private static final IonFieldNameToTinyIntObjectInspector FIELD_NAME_TO_TINYINT_OBJECT_INSPECTOR =
+            new IonFieldNameToTinyIntObjectInspector(false);
+    private static final IonFieldNameToStringObjectInspector FIELD_NAME_TO_STRING_OBJECT_INSPECTOR =
+            new IonFieldNameToStringObjectInspector(true);
 
     /**
      * Creates an object inspector for the table correctly configured.
@@ -226,14 +271,17 @@ public class IonObjectInspectorFactory {
                 break;
             case MAP:
                 final MapTypeInfo mapTypeInfo = (MapTypeInfo) typeInfo;
-
+                final ObjectInspector keyObjectInspector = getMapKeyObjectInspector(
+                        mapTypeInfo,
+                        fieldName,
+                        serDeProperties);
                 // FIXME validate key must be string
                 final ObjectInspector valueObjectInspector = objectInspectorForField(
                     mapTypeInfo.getMapValueTypeInfo(),
                     fieldName,
                     serDeProperties);
 
-                objectInspector = new IonStructToMapObjectInspector(valueObjectInspector);
+                objectInspector = new IonStructToMapObjectInspector(keyObjectInspector, valueObjectInspector);
                 break;
 
             case LIST:
@@ -257,5 +305,69 @@ public class IonObjectInspectorFactory {
         }
 
         return objectInspector;
+    }
+
+    private static ObjectInspector getMapKeyObjectInspector(
+            final MapTypeInfo typeInfo,
+            final String fieldName,
+            final SerDeProperties serDeProperties) {
+        ObjectInspector objectInspector = null;
+        final boolean failOnOverflow = serDeProperties.failOnOverflowFor(fieldName);
+
+        switch (typeInfo.getMapKeyTypeInfo().getCategory()) {
+            case PRIMITIVE:
+                final PrimitiveTypeInfo mapKeyPrimitiveTypeInfo = (PrimitiveTypeInfo) typeInfo.getMapKeyTypeInfo();
+                switch (mapKeyPrimitiveTypeInfo.getPrimitiveCategory()) {
+                    case BOOLEAN:
+                        objectInspector = FIELD_NAME_TO_BOOLEAN_OBJECT_INSPECTOR;
+                        break;
+                    case BYTE:
+                        objectInspector = failOnOverflow
+                                ? FIELD_NAME_TO_TINYINT_FAIL_OBJECT_INSPECTOR
+                                : FIELD_NAME_TO_TINYINT_OBJECT_INSPECTOR;
+                        break;
+                    case DATE:
+                        objectInspector = FIELD_NAME_TO_DATE_OBJECT_INSPECTOR;
+                        break;
+                    case DECIMAL:
+                        objectInspector = FIELD_NAME_TO_DECIMAL_OBJECT_INSPECTOR;
+                        break;
+                    case DOUBLE:
+                        objectInspector = FIELD_NAME_TO_DOUBLE_OBJECT_INSPECTOR;
+                        break;
+                    case FLOAT:
+                        objectInspector = failOnOverflow
+                                ? FIELD_NAME_TO_FLOAT_FAIL_OBJECT_INSPECTOR
+                                : FIELD_NAME_TO_FLOAT_OBJECT_INSPECTOR;
+                        break;
+                    case INT:
+                        objectInspector = failOnOverflow
+                                ? FIELD_NAME_TO_INT_FAIL_OBJECT_INSPECTOR
+                                : FIELD_NAME_TO_INT_OBJECT_INSPECTOR;
+                        break;
+                    case LONG:
+                        objectInspector = failOnOverflow
+                                ? FIELD_NAME_TO_BIGINT_FAIL_OBJECT_INSPECTOR
+                                : FIELD_NAME_TO_BIGINT_OBJECT_INSPECTOR;
+                        break;
+                    case SHORT:
+                        objectInspector = failOnOverflow
+                                ? FIELD_NAME_TO_SMALLINT_FAIL_OBJECT_INSPECTOR
+                                : FIELD_NAME_TO_SMALLINT_OBJECT_INSPECTOR;
+                        break;
+                    case TIMESTAMP:
+                        objectInspector = FIELD_NAME_TO_TIMESTAMP_OBJECT_INSPECTOR;
+                        break;
+                    case VARCHAR:
+                    case CHAR:
+                    case STRING:
+                        objectInspector = FIELD_NAME_TO_STRING_OBJECT_INSPECTOR;
+                        break;
+                }
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown primitive category");
+        }
+        return  objectInspector;
     }
 }
