@@ -15,17 +15,23 @@
 
 package com.amazon.ionhiveserde.serializers;
 
+import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
+import com.amazon.ion.system.IonSystemBuilder;
+import com.amazon.ion.system.IonTextWriterBuilder;
 import com.amazon.ionhiveserde.configuration.SerDeProperties;
 import com.amazon.ionhiveserde.configuration.SerializeNullStrategy;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import org.apache.hadoop.hive.serde2.objectinspector.MapObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
+import org.apache.hadoop.io.Text;
 
 /**
  * Base class for struct serializers.
@@ -33,9 +39,11 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspe
 abstract class AbstractStructSerializer implements IonSerializer {
 
     private final SerDeProperties properties;
+    private final IonSystem system;
 
     AbstractStructSerializer(final SerDeProperties properties) {
         this.properties = properties;
+        this.system = IonSystemBuilder.standard().build();
     }
 
     @Override
@@ -59,15 +67,19 @@ abstract class AbstractStructSerializer implements IonSerializer {
     private void serializeMap(final IonWriter writer,
                               final Object data,
                               final MapObjectInspector objectInspector) throws IOException {
+        if (objectInspector.getMapKeyObjectInspector().getCategory() != ObjectInspector.Category.PRIMITIVE) {
+            throw new IllegalStateException("Map keys must be primitive. Invalid object inspector category: "
+                    + objectInspector.getCategory());
 
-        final StringObjectInspector keyObjectInspector = (StringObjectInspector) objectInspector
-            .getMapKeyObjectInspector();
+        }
+        final PrimitiveObjectInspector keyObjectInspector = (PrimitiveObjectInspector) objectInspector
+                .getMapKeyObjectInspector();
+
         final ObjectInspector valueObjectInspector = objectInspector.getMapValueObjectInspector();
-
         writer.stepIn(IonType.STRUCT);
 
         for (Map.Entry entry : objectInspector.getMap(data).entrySet()) {
-            final String key = keyObjectInspector.getPrimitiveJavaObject(entry.getKey());
+            String key = getKey(keyObjectInspector, entry.getKey());
             final IonSerializer ionSerializer = IonSerializerFactory.serializerForObjectInspector(
                 valueObjectInspector,
                 properties);
@@ -77,6 +89,17 @@ abstract class AbstractStructSerializer implements IonSerializer {
         }
 
         writer.stepOut();
+    }
+
+    private String getKey(final PrimitiveObjectInspector keyInspector, final Object entry)
+            throws IOException {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final IonWriter keyWriter = IonTextWriterBuilder.standard().build(out);
+        final IonSerializer keySerializer = IonSerializerFactory.serializerForObjectInspector(
+                keyInspector,
+                properties);
+        serializeFieldValue(keySerializer, keyWriter, entry, keyInspector);
+        return new Text(out.toByteArray()).toString();
     }
 
     private void serializeStruct(final IonWriter writer,

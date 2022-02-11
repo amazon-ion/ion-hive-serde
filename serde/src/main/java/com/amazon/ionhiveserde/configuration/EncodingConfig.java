@@ -32,7 +32,7 @@ class EncodingConfig {
      * @param configuration raw configuration.
      */
     EncodingConfig(final RawConfiguration configuration) {
-        encoding = IonEncoding.valueOf(configuration.getOrDefault(ENCODING_KEY, DEFAULT_ENCODING));
+        encoding = IonEncoding.fromConfigValue(configuration.getOrDefault(ENCODING_KEY, DEFAULT_ENCODING));
     }
 
     /**
