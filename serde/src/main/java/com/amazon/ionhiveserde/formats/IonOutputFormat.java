@@ -82,10 +82,8 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
 
         if (isCompressed) {
             CompressionCodec codec = getCompressionCodec(jc);
-            Path file = FileOutputFormat.getTaskOutputPath(jc,
-                    finalOutPath.getName() + codec.getDefaultExtension());
-            FileSystem fs = file.getFileSystem(jc);
-            FSDataOutputStream fileOut = fs.create(file, progress);
+            FileSystem fs = finalOutPath.getFileSystem(jc);
+            FSDataOutputStream fileOut = fs.create(finalOutPath, progress);
             return new IonRecordWriter(new DataOutputStream(codec.createOutputStream(fileOut)), Optional.empty());
         } else {
             final FileSystem fs = finalOutPath.getFileSystem(jc);
