@@ -68,7 +68,7 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
             reporter = Optional.of((Reporter) progress);
         }
 
-        return new HadoopAdapter(new IonRecordWriter(fileOut, reporter));
+        return new HadoopAdapter(new IonRecordWriter(fileOut, reporter, FileOutputFormat.getCompressOutput(job)));
     }
 
     @Override
@@ -79,29 +79,29 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
                                                              final Properties tableProperties,
                                                              final Progressable progress)
         throws IOException {
+        DataOutputStream out;
+        // If we are passed in a reporter, make sure we call incrCounters during write
+        Optional<Reporter> reporter = Optional.empty();
+        if (progress instanceof Reporter) {
+            reporter = Optional.of((Reporter) progress);
+        }
 
         if (isCompressed) {
             CompressionCodec codec = getCompressionCodec(jc);
             FileSystem fs = finalOutPath.getFileSystem(jc);
             FSDataOutputStream fileOut = fs.create(finalOutPath, progress);
-            return new IonRecordWriter(new DataOutputStream(codec.createOutputStream(fileOut)), Optional.empty());
+            out = new DataOutputStream(codec.createOutputStream(fileOut));
         } else {
             final FileSystem fs = finalOutPath.getFileSystem(jc);
-            final OutputStream out = fs.create(finalOutPath, progress);
-
-            // If we are passed in a reporter, make sure we call incrCounters during write
-            Optional<Reporter> reporter = Optional.empty();
-            if (progress instanceof Reporter) {
-                reporter = Optional.of((Reporter) progress);
-            }
-            return new IonRecordWriter(out, reporter);
+            out = fs.create(finalOutPath, progress);
         }
+        return new IonRecordWriter(out, reporter, isCompressed);
     }
 
     /**
      * Helper function to get compression codec by job configuration
      */
-    public static CompressionCodec getCompressionCodec(final JobConf jc) {
+    private static CompressionCodec getCompressionCodec(final JobConf jc) {
         CompressionCodecFactory factory = new CompressionCodecFactory(jc);
         String name = jc.get(org.apache.hadoop.mapreduce.lib.output.FileOutputFormat.COMPRESS_CODEC);
         return factory.getCodecByName(name);
@@ -111,13 +111,16 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
 
         private static final String SERIALIZER_COUNTER_GROUP = "Serializer";
         private static final String BYTES_WRITTEN_COUNTER = "BytesWritten";
+        private static final String COMPRESSED_OUTPUT_POSITION_COUNTER = "CompressedOutputPosition";
 
-        private final OutputStream out;
+        private final DataOutputStream out;
         private final Optional<Reporter> reporter;
+        private final boolean isCompressed;
 
-        IonRecordWriter(final OutputStream out, final Optional<Reporter> reporter) {
+        IonRecordWriter(final DataOutputStream out, final Optional<Reporter> reporter, final boolean isCompressed) {
             this.out = out;
             this.reporter = reporter;
+            this.isCompressed = isCompressed;
         }
 
         @Override
@@ -134,14 +137,16 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
             if (value instanceof Text) {
                 final Text text = (Text) value;
                 final int bytesWritten = text.getLength();
+                long pos = out.size();
                 out.write(text.getBytes(), 0, bytesWritten);
-                updateBytesWritten(bytesWritten);
-
+                updateBytesWritten(isCompressed ? out.size() - pos : bytesWritten);
             } else if (value instanceof BytesWritable) {
                 final BytesWritable bytesWritable = (BytesWritable) value;
                 final int bytesWritten = bytesWritable.getLength();
+
+                long pos = out.size();
                 out.write(bytesWritable.getBytes(), 0, bytesWritten);
-                updateBytesWritten(bytesWritten);
+                updateBytesWritten(isCompressed ? out.size() - pos : bytesWritten);
             } else {
                 throw new IllegalArgumentException("Unknown writable type: " + value.getClass());
             }
@@ -156,9 +161,11 @@ public class IonOutputFormat extends FileOutputFormat<Object, Writable> implemen
             out.close();
         }
 
-        private void updateBytesWritten(final int bytesWritten) {
+        private void updateBytesWritten(final long bytesWritten) {
             if (this.reporter.isPresent()) {
-                this.reporter.get().incrCounter(SERIALIZER_COUNTER_GROUP, BYTES_WRITTEN_COUNTER, bytesWritten);
+                this.reporter.get().incrCounter(SERIALIZER_COUNTER_GROUP,
+                        this.isCompressed ? COMPRESSED_OUTPUT_POSITION_COUNTER : BYTES_WRITTEN_COUNTER,
+                        bytesWritten);
             }
         }
     }
