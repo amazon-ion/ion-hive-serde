@@ -21,6 +21,7 @@ import com.amazon.ion.IonValue;
 import com.amazon.ion.SymbolToken;
 import com.amazon.ion.UnknownSymbolException;
 import com.amazon.ion.ValueFactory;
+import com.amazon.ion.system.IonTextWriterBuilder;
 
 import java.util.Map;
 
@@ -137,5 +138,10 @@ public class IonStructCaseInsensitiveDecorator extends IonContainerCaseInsensiti
         } else {
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        return ionStruct.toString();
     }
 }
