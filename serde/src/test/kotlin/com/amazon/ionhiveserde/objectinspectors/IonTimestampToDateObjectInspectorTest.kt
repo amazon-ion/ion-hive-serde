@@ -20,30 +20,36 @@ import com.amazon.ion.Timestamp
 import com.amazon.ionhiveserde.ION
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
-import org.apache.hadoop.hive.serde2.io.DateWritable
+import org.apache.hadoop.hive.common.type.Date
+import org.apache.hadoop.hive.serde2.io.DateWritableV2
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.sql.Date
 import kotlin.test.assertEquals
 
 @RunWith(JUnitParamsRunner::class)
 class IonTimestampToDateObjectInspectorTest
-    : AbstractIonPrimitiveJavaObjectInspectorTest<IonTimestamp, DateWritable, Date>() {
+    : AbstractIonPrimitiveJavaObjectInspectorTest<IonTimestamp, DateWritableV2, Date>() {
 
     override val subject = com.amazon.ionhiveserde.objectinspectors.IonTimestampToDateObjectInspector()
     override fun validTestCases() = listOf(
-            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018T")), Date(1514764800000L), DateWritable(Date(1514764800000L))),
-            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08T")), Date(1533081600000L), DateWritable(Date(1533081600000L))),
-            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08-15T")), Date(1534291200000L), DateWritable(Date(1534291200000L))),
-            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08-15T01:01Z")), Date(1534291200000L), DateWritable(Date(1534291200000L))),
-            ValidTestCase(ION.newTimestamp(Timestamp.valueOf("2018-08-15T01:01:01Z")), Date(1534291200000L), DateWritable(Date(1534291200000L)))
+            validTestCase("2018T",               1514764800000L,1514764800000L),
+            validTestCase("2018-08T",            1533081600000L,1533081600000L),
+            validTestCase("2018-08-15T",         1534291200000L,1534291200000L),
+            validTestCase("2018-08-15T01:01Z",   1534291200000L,1534291200000L),
+            validTestCase("2018-08-15T01:01:01Z",1534291200000L,1534291200000L)
     )
+
+    private fun validTestCase(ionFormattedTimestamp: String, dateEpochMilli: Long, dateWritableEpochMilli: Long) =
+            ValidTestCase(
+                    ION.newTimestamp(Timestamp.valueOf(ionFormattedTimestamp)),
+                    Date.ofEpochMilli(dateEpochMilli),
+                    DateWritableV2(Date.ofEpochMilli(dateWritableEpochMilli)))
 
     @Test
     @Parameters(method = "validTestCases")
-    override fun getPrimitiveJavaObject(testCase: ValidTestCase<out IonTimestamp, DateWritable, Date>) {
+    override fun getPrimitiveJavaObject(testCase: ValidTestCase<out IonTimestamp, DateWritableV2, Date>) {
         val actualDate = subject.getPrimitiveJavaObject(testCase.ionValue) as Date
-        // assert on LocalDate because Date keeps the time component internally...
-        assertEquals(testCase.expectedPrimitive.toLocalDate(), actualDate.toLocalDate())
+        // assert on epoch milli because Date keeps the time component internally...
+        assertEquals(testCase.expectedPrimitive.toEpochMilli(), actualDate.toEpochMilli())
     }
 }

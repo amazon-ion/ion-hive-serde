@@ -19,7 +19,8 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.Timestamp;
 import java.io.IOException;
-import java.sql.Date;
+
+import org.apache.hadoop.hive.common.type.Date;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector.PrimitiveCategory;
@@ -48,15 +49,17 @@ class TimestampSerializer implements IonSerializer {
                 final Date date = ((DateObjectInspector) objectInspector)
                     .getPrimitiveJavaObject(data);
 
-                writer.writeTimestamp(Timestamp.forDateZ(date));
+                Timestamp ionTimestamp = Timestamp.forDay(date.getYear(), date.getMonth(),
+                                                     date.getDay());
+                writer.writeTimestamp(ionTimestamp);
                 break;
 
             case TIMESTAMP:
-                final java.sql.Timestamp hiveTimestamp =
+                final org.apache.hadoop.hive.common.type.Timestamp hiveTimestamp =
                     ((TimestampObjectInspector) objectInspector).getPrimitiveJavaObject(data);
 
-                final Timestamp value = Timestamp.forSqlTimestampZ(hiveTimestamp);
-                final Timestamp timestampWithOffset = value.withLocalOffset(offsetInMinutes);
+                final Timestamp timestampWithOffset = Timestamp.forMillis(hiveTimestamp.toEpochMilli(),
+                                                            offsetInMinutes);
                 writer.writeTimestamp(timestampWithOffset);
                 break;
 

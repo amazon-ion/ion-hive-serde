@@ -17,8 +17,9 @@ package com.amazon.ionhiveserde.objectinspectors;
 
 import com.amazon.ion.IonTimestamp;
 import com.amazon.ion.IonValue;
-import java.sql.Date;
-import org.apache.hadoop.hive.serde2.io.DateWritable;
+
+import org.apache.hadoop.hive.common.type.Date;
+import org.apache.hadoop.hive.serde2.io.DateWritableV2;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.DateObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 
@@ -33,12 +34,12 @@ public class IonTimestampToDateObjectInspector extends AbstractIonPrimitiveJavaO
     }
 
     @Override
-    public DateWritable getPrimitiveWritableObject(final Object o) {
+    public DateWritableV2 getPrimitiveWritableObject(final Object o) {
         if (IonUtil.isIonNull((IonValue) o)) {
             return null;
         }
 
-        return new DateWritable(getPrimitiveJavaObject((IonTimestamp) o));
+        return new DateWritableV2(getPrimitiveJavaObject((IonTimestamp) o));
     }
 
     @Override
@@ -51,7 +52,7 @@ public class IonTimestampToDateObjectInspector extends AbstractIonPrimitiveJavaO
     }
 
     private Date getPrimitiveJavaObject(final IonTimestamp ionValue) {
-        return new Date(ionValue.getMillis());
+        return Date.ofEpochMilli(ionValue.getMillis());
     }
 }
 
