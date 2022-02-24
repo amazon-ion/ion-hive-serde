@@ -34,10 +34,10 @@ import com.amazon.ionhiveserde.objectinspectors.IonTextToVarcharObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonTimestampToDateObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonTimestampToTimestampObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonUnionObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonValueToStringObjectInspector;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.amazon.ionhiveserde.objectinspectors.IonValueToStringObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.CharTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.ListTypeInfo;
