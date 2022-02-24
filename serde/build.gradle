@@ -13,14 +13,14 @@
  * permissions and limitations under the License.
  */
 
-version = "0.7.0-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 group = "com.amazon.ion"
 
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
 apply plugin: "signing"
 
-jar.baseName = 'ion-hive-serde'
+jar.baseName = 'ion-hive3-serde'
 
 // only applicable for src/main/java source set
 sourceCompatibility = 1.8
@@ -49,7 +49,7 @@ task singleJar(dependsOn: 'build', type: Jar) {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId = "ion-hive-serde"
+            artifactId = "ion-hive3-serde"
 
             from components.java
             artifact sourcesJar
