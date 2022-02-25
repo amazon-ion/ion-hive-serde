@@ -51,7 +51,9 @@ public class IonValueToStringObjectInspector extends AbstractIonPrimitiveJavaObj
     }
 
     private String getPrimitiveWritableObject(final IonValue ionValue) {
-        String s = ionValue.toString();
-        return ionValue.getType() == IonType.STRING ? s.substring(1, s.length() - 1) : s;
+        if (IonType.isText(ionValue.getType())) {
+            return ((IonText) ionValue).stringValue();
+        }
+        return ionValue.toString();
     }
 }
