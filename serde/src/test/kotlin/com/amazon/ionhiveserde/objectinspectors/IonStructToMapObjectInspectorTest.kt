@@ -20,7 +20,6 @@ import com.amazon.ionhiveserde.ION
 import com.amazon.ionhiveserde.ionNull
 import com.amazon.ionhiveserde.objectinspectors.map.*
 import org.apache.hadoop.hive.common.type.HiveDecimal
-import org.apache.hadoop.hive.serde2.objectinspector.MapObjectInspector
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category.MAP
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category.PRIMITIVE
 import org.junit.Test
@@ -31,7 +30,7 @@ import kotlin.test.assertNull
 import kotlin.test.fail
 
 class IonStructToMapObjectInspectorTest {
-    private val stringIntKeyElementInspector = IonFieldNameToStringObjectInspector(true)
+    private val stringIntKeyElementInspector = IonFieldNameToStringObjectInspector()
     private val stringIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
     private val stringIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(stringIntKeyElementInspector, stringIntValueElementInspector)
 
@@ -39,7 +38,13 @@ class IonStructToMapObjectInspectorTest {
     private val intIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
     private val intIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(intIntKeyElementInspector, intIntValueElementInspector)
 
-    private val bigintIntKeyElementInspector = IonFieldNameToBigIntObjectInspector(true)
+    private val intIntKeyElementInspectorOverflow = IonFieldNameToIntObjectInspector(false)
+    private val intIntValueElementInspectorOverflow = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
+    private val intIntSubjectOverflow = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(
+            intIntKeyElementInspectorOverflow,
+            intIntValueElementInspectorOverflow)
+
+    private val bigintIntKeyElementInspector = IonFieldNameToBigIntObjectInspector()
     private val bigintIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
     private val bigintIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(bigintIntKeyElementInspector, bigintIntValueElementInspector)
 
@@ -55,23 +60,23 @@ class IonStructToMapObjectInspectorTest {
     private val floatIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
     private val floatIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(floatIntKeyElementInspector, floatIntValueElementInspector)
 
-    private val doubleIntKeyElementInspector = IonFieldNameToDoubleObjectInspector(true)
+    private val doubleIntKeyElementInspector = IonFieldNameToDoubleObjectInspector()
     private val doubleIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
     private val doubleIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(doubleIntKeyElementInspector, doubleIntValueElementInspector)
 
-    private val booleanIntKeyElementInspector = IonFieldNameToBooleanObjectInspector(true)
+    private val booleanIntKeyElementInspector = IonFieldNameToBooleanObjectInspector()
     private val booleanIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
     private val booleanIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(booleanIntKeyElementInspector, booleanIntValueElementInspector)
 
-    private val decimalIntKeyElementInspector = IonFieldNameToDecimalObjectInspector(true)
+    private val decimalIntKeyElementInspector = IonFieldNameToDecimalObjectInspector()
     private val decimalIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
     private val decimalIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(decimalIntKeyElementInspector, decimalIntValueElementInspector)
 
-    private val dateIntKeyElementInspector = IonFieldNameToDateObjectInspector(true)
+    private val dateIntKeyElementInspector = IonFieldNameToDateObjectInspector()
     private val dateIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
     private val dateIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(dateIntKeyElementInspector, dateIntValueElementInspector)
 
-    private val timestampIntKeyElementInspector = IonFieldNameToTimestampObjectInspector(true)
+    private val timestampIntKeyElementInspector = IonFieldNameToTimestampObjectInspector()
     private val timestampIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
     private val timestampIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(timestampIntKeyElementInspector, timestampIntValueElementInspector)
 
@@ -79,6 +84,7 @@ class IonStructToMapObjectInspectorTest {
     fun getMapKeyObjectInspector() {
         assertEquals(stringIntSubject.mapKeyObjectInspector.category, PRIMITIVE)
         assertEquals(intIntSubject.mapKeyObjectInspector.category, PRIMITIVE)
+        assertEquals(intIntSubjectOverflow.mapKeyObjectInspector.category, PRIMITIVE)
         assertEquals(bigintIntSubject.mapKeyObjectInspector.category, PRIMITIVE)
         assertEquals(smallintIntSubject.mapKeyObjectInspector.category, PRIMITIVE)
         assertEquals(tinyintIntSubject.mapKeyObjectInspector.category, PRIMITIVE)
@@ -94,6 +100,7 @@ class IonStructToMapObjectInspectorTest {
     fun getMapValueObjectInspector() {
         assertEquals(stringIntValueElementInspector, stringIntSubject.mapValueObjectInspector)
         assertEquals(intIntValueElementInspector, intIntSubject.mapValueObjectInspector)
+        assertEquals(intIntValueElementInspectorOverflow, intIntSubjectOverflow.mapValueObjectInspector)
         assertEquals(bigintIntValueElementInspector, bigintIntSubject.mapValueObjectInspector)
         assertEquals(smallintIntValueElementInspector, smallintIntSubject.mapValueObjectInspector)
         assertEquals(tinyintIntValueElementInspector, tinyintIntSubject.mapValueObjectInspector)
@@ -120,6 +127,11 @@ class IonStructToMapObjectInspectorTest {
         assertEquals(ION.newInt(2), intIntSubject.getMapValueElement(intIntStruct, ION.newSymbol("2")))
         assertEquals(ION.newInt(3), intIntSubject.getMapValueElement(intIntStruct, ION.newSymbol("3")))
         assertNull(intIntSubject.getMapValueElement(intIntStruct, ION.newSymbol("4")))
+
+        assertEquals(ION.newInt(1), intIntSubjectOverflow.getMapValueElement(intIntStruct, ION.newSymbol("1")))
+        assertEquals(ION.newInt(2), intIntSubjectOverflow.getMapValueElement(intIntStruct, ION.newSymbol("2")))
+        assertEquals(ION.newInt(3), intIntSubjectOverflow.getMapValueElement(intIntStruct, ION.newSymbol("3")))
+        assertNull(intIntSubjectOverflow.getMapValueElement(intIntStruct, ION.newSymbol("4")))
 
         val bigintIntStruct = structs[2]
         assertEquals(ION.newInt(1), bigintIntSubject.getMapValueElement(bigintIntStruct, ION.newSymbol("1")))
@@ -257,7 +269,13 @@ class IonStructToMapObjectInspectorTest {
         assertEquals(ION.newInt(3), stringIntActual["c"])
 
         val intIntStruct = structs[1]
-        val intIntActual = intIntSubject.getMap(intIntStruct)
+        var intIntActual = intIntSubject.getMap(intIntStruct)
+        assertEquals(3, intIntActual.size)
+        assertEquals(ION.newInt(1), intIntActual[1])
+        assertEquals(ION.newInt(2), intIntActual[2])
+        assertEquals(ION.newInt(3), intIntActual[3])
+
+        intIntActual = intIntSubjectOverflow.getMap(intIntStruct)
         assertEquals(3, intIntActual.size)
         assertEquals(ION.newInt(1), intIntActual[1])
         assertEquals(ION.newInt(2), intIntActual[2])
@@ -343,6 +361,9 @@ class IonStructToMapObjectInspectorTest {
         assertNull(intIntSubject.getMap(null))
         assertNull(intIntSubject.getMap(ionNull))
 
+        assertNull(intIntSubjectOverflow.getMap(null))
+        assertNull(intIntSubjectOverflow.getMap(ionNull))
+
         assertNull(bigintIntSubject.getMap(null))
         assertNull(bigintIntSubject.getMap(ionNull))
 
@@ -376,6 +397,7 @@ class IonStructToMapObjectInspectorTest {
         val structs = makeStructs()
         assertEquals(3, stringIntSubject.getMapSize(structs[0]))
         assertEquals(3, intIntSubject.getMapSize(structs[1]))
+        assertEquals(3, intIntSubjectOverflow.getMapSize(structs[1]))
         assertEquals(3, bigintIntSubject.getMapSize(structs[2]))
         assertEquals(3, smallintIntSubject.getMapSize(structs[3]))
         assertEquals(3, tinyintIntSubject.getMapSize(structs[4]))
@@ -394,6 +416,9 @@ class IonStructToMapObjectInspectorTest {
 
         assertEquals(-1, intIntSubject.getMapSize(null))
         assertEquals(-1, intIntSubject.getMapSize(ionNull))
+
+        assertEquals(-1, intIntSubjectOverflow.getMapSize(null))
+        assertEquals(-1, intIntSubjectOverflow.getMapSize(ionNull))
 
         assertEquals(-1, bigintIntSubject.getMapSize(null))
         assertEquals(-1, bigintIntSubject.getMapSize(ionNull))

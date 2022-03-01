@@ -20,39 +20,11 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.LongWritable;
 
 public class IonFieldNameToBigIntObjectInspector
-        extends AbstractOverflowableFieldNameObjectInspector<String, Long>
+        extends AbstractFieldNameObjectInspector<Long>
         implements LongObjectInspector {
 
-    public static final long MIN_VALUE = Long.MIN_VALUE;
-    public static final long MAX_VALUE = Long.MAX_VALUE;
-
-    public IonFieldNameToBigIntObjectInspector(final boolean failOnOverflow) {
-        super(TypeInfoFactory.longTypeInfo, failOnOverflow);
-    }
-
-    @Override
-    protected Long getValidatedPrimitiveJavaObject(final String fieldName) {
-        return Long.parseLong(fieldName);
-    }
-
-    @Override
-    protected void validateSize(final String fieldName) {
-        try {
-            long value = Long.parseLong(fieldName);
-
-            if (!validRange(value)) {
-                throw new IllegalArgumentException(
-                        "insufficient precision for " + value + " as " + this.typeInfo.getTypeName());
-            }
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(
-                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
-        }
-    }
-
-    private boolean validRange(final long value) {
-        // runs after checking that fits in a Java long
-        return MIN_VALUE <= value && value <= MAX_VALUE;
+    public IonFieldNameToBigIntObjectInspector() {
+        super(TypeInfoFactory.longTypeInfo);
     }
 
     @Override
@@ -62,11 +34,21 @@ public class IonFieldNameToBigIntObjectInspector
 
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromIonValue(o.toString());
+        return getPrimitiveJavaObjectFromFieldName(o.toString());
     }
 
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        return new LongWritable(getPrimitiveJavaObjectFromIonValue(o.toString()));
+        return new LongWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+    }
+
+    @Override
+    protected Long getValidatedPrimitiveJavaObject(final String fieldName) {
+        try {
+            return Long.parseLong(fieldName);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
+        }
     }
 }

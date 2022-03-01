@@ -20,11 +20,11 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.Text;
 
 public class IonFieldNameToStringObjectInspector
-        extends AbstractOverflowableFieldNameObjectInspector<String, String>
+        extends AbstractFieldNameObjectInspector<String>
         implements StringObjectInspector {
 
-    public IonFieldNameToStringObjectInspector(final boolean failOnOverflow) {
-        super(TypeInfoFactory.stringTypeInfo, failOnOverflow);
+    public IonFieldNameToStringObjectInspector() {
+        super(TypeInfoFactory.stringTypeInfo);
     }
 
     @Override
@@ -40,10 +40,5 @@ public class IonFieldNameToStringObjectInspector
     @Override
     protected String getValidatedPrimitiveJavaObject(final String fieldName) {
         return fieldName;
-    }
-
-    @Override
-    protected void validateSize(final String fieldName) {
-        // no-op
     }
 }

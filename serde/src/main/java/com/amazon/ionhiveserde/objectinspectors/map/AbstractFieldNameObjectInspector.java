@@ -21,10 +21,9 @@ import org.apache.hadoop.hive.serde2.typeinfo.PrimitiveTypeInfo;
 /**
  * Base class for primitive object inspectors that need to handle overflow detection.
  *
- * @param <T> Ion type.
  * @param <O> Primitive type.
  */
-abstract class AbstractOverflowableFieldNameObjectInspector<T, O> extends
+abstract class AbstractFieldNameObjectInspector<O> extends
         AbstractIonPrimitiveJavaObjectInspector {
 
     private final boolean failOnOverflow;
@@ -33,9 +32,18 @@ abstract class AbstractOverflowableFieldNameObjectInspector<T, O> extends
      * Constructor.
      *
      * @param typeInfo type info for this object inspector.
+     */
+    AbstractFieldNameObjectInspector(final PrimitiveTypeInfo typeInfo) {
+        this(typeInfo, false);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param typeInfo type info for this object inspector.
      * @param failOnOverflow if should fail when detecting an overflow.
      */
-    AbstractOverflowableFieldNameObjectInspector(final PrimitiveTypeInfo typeInfo,
+    AbstractFieldNameObjectInspector(final PrimitiveTypeInfo typeInfo,
                                                  final boolean failOnOverflow) {
         super(typeInfo);
         this.failOnOverflow = failOnOverflow;
@@ -44,30 +52,37 @@ abstract class AbstractOverflowableFieldNameObjectInspector<T, O> extends
     /**
      * Gets the primitive Java representation of an Ion value detecting and handling overflows.
      *
-     * @param ionValue Value to read as a Java primitive.
+     * @param fieldName Value to read as a Java primitive.
      * @return Java primitive representation.
      */
-    final O getPrimitiveJavaObjectFromIonValue(final T ionValue) {
+    final O getPrimitiveJavaObjectFromFieldName(final String fieldName) {
         if (failOnOverflow) {
-            validateSize(ionValue);
+            validateSize(fieldName);
         }
 
-        return getValidatedPrimitiveJavaObject(ionValue);
+        return getValidatedPrimitiveJavaObject(fieldName);
     }
 
     /**
      * Gets the primitive Java representation of an Ion value that has passed overflow validation.
      *
-     * @param ionValue Value to read as a Java primitive.
+     * @param fieldName Value to read as a Java primitive.
      * @return Java primitive representation.
      */
-    protected abstract O getValidatedPrimitiveJavaObject(final T ionValue);
+    protected abstract O getValidatedPrimitiveJavaObject(final String fieldName);
 
     /**
      * Validates if an ion value will overflow when converted to java primitive.
      *
-     * @param ionValue Ion value to be validated.
+     * @param fieldName Ion value to be validated.
      * @throws IllegalArgumentException when detecting an overflow.
+     * @throws UnsupportedOperationException if a function has not overridden validateSize and failOnOverflow is true.
      */
-    protected abstract void validateSize(final T ionValue);
+    protected void validateSize(final String fieldName) {
+        if (failOnOverflow) {
+            throw new UnsupportedOperationException(
+                    String.format("Type %s is marked as fail on overflow, but has not implemented validation",
+                            this.getClass().getSimpleName()));
+        }
+    }
 }

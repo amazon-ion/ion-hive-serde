@@ -21,30 +21,25 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.HiveDecimalObject
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 
 public class IonFieldNameToDecimalObjectInspector
-        extends AbstractOverflowableFieldNameObjectInspector<String, HiveDecimal>
+        extends AbstractFieldNameObjectInspector<HiveDecimal>
         implements HiveDecimalObjectInspector {
 
-    public IonFieldNameToDecimalObjectInspector(final boolean failOnOverflow) {
-        super(TypeInfoFactory.decimalTypeInfo, failOnOverflow);
+    public IonFieldNameToDecimalObjectInspector() {
+        super(TypeInfoFactory.decimalTypeInfo);
     }
 
     @Override
     public HiveDecimal getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromIonValue(o.toString());
+        return getPrimitiveJavaObjectFromFieldName(o.toString());
     }
 
     @Override
     public HiveDecimalWritable getPrimitiveWritableObject(final Object o) {
-        return new HiveDecimalWritable(getPrimitiveJavaObjectFromIonValue(o.toString()));
+        return new HiveDecimalWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
     }
 
     @Override
     protected HiveDecimal getValidatedPrimitiveJavaObject(final String fieldName) {
         return HiveDecimal.create(fieldName);
-    }
-
-    @Override
-    protected void validateSize(final String fieldName) {
-        // no-op
     }
 }

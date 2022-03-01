@@ -20,26 +20,11 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.BooleanWritable;
 
 public class IonFieldNameToBooleanObjectInspector
-        extends AbstractOverflowableFieldNameObjectInspector<String, Boolean>
+        extends AbstractFieldNameObjectInspector<Boolean>
         implements BooleanObjectInspector {
 
-    public IonFieldNameToBooleanObjectInspector(final boolean failOnOverflow) {
-        super(TypeInfoFactory.booleanTypeInfo, failOnOverflow);
-    }
-
-    @Override
-    protected Boolean getValidatedPrimitiveJavaObject(final String fieldName) {
-        return Boolean.parseBoolean(fieldName);
-    }
-
-    @Override
-    protected void validateSize(final String fieldName) {
-        try {
-            Boolean booleanValue = Boolean.parseBoolean(fieldName);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(
-                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
-        }
+    public IonFieldNameToBooleanObjectInspector() {
+        super(TypeInfoFactory.booleanTypeInfo);
     }
 
     @Override
@@ -49,11 +34,16 @@ public class IonFieldNameToBooleanObjectInspector
 
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromIonValue(o.toString());
+        return getPrimitiveJavaObjectFromFieldName(o.toString());
     }
 
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        return new BooleanWritable(getPrimitiveJavaObjectFromIonValue(o.toString()));
+        return new BooleanWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+    }
+
+    @Override
+    protected Boolean getValidatedPrimitiveJavaObject(final String fieldName) {
+        return Boolean.parseBoolean(fieldName);
     }
 }

@@ -21,30 +21,25 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.DateObjectInspect
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 
 public class IonFieldNameToDateObjectInspector
-        extends AbstractOverflowableFieldNameObjectInspector<String, Date>
+        extends AbstractFieldNameObjectInspector<Date>
         implements DateObjectInspector {
 
-    public IonFieldNameToDateObjectInspector(final boolean failOnOverflow) {
-        super(TypeInfoFactory.dateTypeInfo, failOnOverflow);
+    public IonFieldNameToDateObjectInspector() {
+        super(TypeInfoFactory.dateTypeInfo);
     }
 
     @Override
     public Date getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromIonValue(o.toString());
+        return getPrimitiveJavaObjectFromFieldName(o.toString());
     }
 
     @Override
     public DateWritable getPrimitiveWritableObject(final Object o) {
-        return new DateWritable(getPrimitiveJavaObjectFromIonValue(o.toString()));
+        return new DateWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
     }
 
     @Override
     protected Date getValidatedPrimitiveJavaObject(final String fieldName) {
         return Date.valueOf(fieldName);
-    }
-
-    @Override
-    protected void validateSize(final String fieldName) {
-        // no-op
     }
 }

@@ -27,5 +27,14 @@ public enum IonEncoding {
     /**
      * Ion text.
      */
-    TEXT
+    TEXT;
+
+    /**
+     * Case insensitive function to retrieve the encoding from a user specified value.
+     * @param encodingValue - String with the encoding value (usually passed in ion.encoding)
+     * @return Enum value corresponding to the passed in string
+     */
+    public static IonEncoding fromConfigValue(final String encodingValue) {
+        return IonEncoding.valueOf(encodingValue.toUpperCase());
+    }
 }

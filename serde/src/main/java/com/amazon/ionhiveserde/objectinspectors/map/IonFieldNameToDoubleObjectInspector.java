@@ -20,26 +20,11 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.DoubleWritable;
 
 public class IonFieldNameToDoubleObjectInspector
-        extends AbstractOverflowableFieldNameObjectInspector<String, Double>
+        extends AbstractFieldNameObjectInspector<Double>
         implements DoubleObjectInspector {
 
-    public IonFieldNameToDoubleObjectInspector(final boolean failOnOverflow) {
-        super(TypeInfoFactory.doubleTypeInfo, failOnOverflow);
-    }
-
-    @Override
-    protected Double getValidatedPrimitiveJavaObject(final String fieldName) {
-        return Double.parseDouble(fieldName);
-    }
-
-    @Override
-    protected void validateSize(final String fieldName) {
-        try {
-            double doubleValue = Double.parseDouble(fieldName);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(
-                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
-        }
+    public IonFieldNameToDoubleObjectInspector() {
+        super(TypeInfoFactory.doubleTypeInfo);
     }
 
     @Override
@@ -49,11 +34,21 @@ public class IonFieldNameToDoubleObjectInspector
 
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromIonValue(o.toString());
+        return getPrimitiveJavaObjectFromFieldName(o.toString());
     }
 
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        return new DoubleWritable(getPrimitiveJavaObjectFromIonValue(o.toString()));
+        return new DoubleWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+    }
+
+    @Override
+    protected Double getValidatedPrimitiveJavaObject(final String fieldName) {
+        try {
+            return Double.parseDouble(fieldName);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
+        }
     }
 }

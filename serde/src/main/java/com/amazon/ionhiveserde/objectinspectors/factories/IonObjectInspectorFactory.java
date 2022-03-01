@@ -100,17 +100,15 @@ public class IonObjectInspectorFactory {
 
     // Map Key Object Inspectors
     private static final IonFieldNameToBooleanObjectInspector FIELD_NAME_TO_BOOLEAN_OBJECT_INSPECTOR =
-            new IonFieldNameToBooleanObjectInspector(true);
+            new IonFieldNameToBooleanObjectInspector();
     private static final IonFieldNameToBigIntObjectInspector FIELD_NAME_TO_BIGINT_OBJECT_INSPECTOR =
-            new IonFieldNameToBigIntObjectInspector(false);
-    private static final IonFieldNameToBigIntObjectInspector FIELD_NAME_TO_BIGINT_FAIL_OBJECT_INSPECTOR =
-            new IonFieldNameToBigIntObjectInspector(true);
-    private static final IonFieldNameToDecimalObjectInspector FIELD_NAME_TO_DECIMAL_OBJECT_INSPECTOR =
-            new IonFieldNameToDecimalObjectInspector(false);
+            new IonFieldNameToBigIntObjectInspector();
     private static final IonFieldNameToDateObjectInspector FIELD_NAME_TO_DATE_OBJECT_INSPECTOR =
-            new IonFieldNameToDateObjectInspector(false);
+            new IonFieldNameToDateObjectInspector();
+    private static final IonFieldNameToDecimalObjectInspector FIELD_NAME_TO_DECIMAL_OBJECT_INSPECTOR =
+            new IonFieldNameToDecimalObjectInspector();
     private static final IonFieldNameToDoubleObjectInspector FIELD_NAME_TO_DOUBLE_OBJECT_INSPECTOR =
-            new IonFieldNameToDoubleObjectInspector(false);
+            new IonFieldNameToDoubleObjectInspector();
     private static final IonFieldNameToFloatObjectInspector FIELD_NAME_TO_FLOAT_FAIL_OBJECT_INSPECTOR =
             new IonFieldNameToFloatObjectInspector(true);
     private static final IonFieldNameToFloatObjectInspector FIELD_NAME_TO_FLOAT_OBJECT_INSPECTOR =
@@ -123,14 +121,14 @@ public class IonObjectInspectorFactory {
             new IonFieldNameToSmallIntObjectInspector(true);
     private static final IonFieldNameToSmallIntObjectInspector FIELD_NAME_TO_SMALLINT_OBJECT_INSPECTOR =
             new IonFieldNameToSmallIntObjectInspector(false);
+    private static final IonFieldNameToStringObjectInspector FIELD_NAME_TO_STRING_OBJECT_INSPECTOR =
+            new IonFieldNameToStringObjectInspector();
     private static final IonFieldNameToTimestampObjectInspector FIELD_NAME_TO_TIMESTAMP_OBJECT_INSPECTOR =
-            new IonFieldNameToTimestampObjectInspector(false);
+            new IonFieldNameToTimestampObjectInspector();
     private static final IonFieldNameToTinyIntObjectInspector FIELD_NAME_TO_TINYINT_FAIL_OBJECT_INSPECTOR =
             new IonFieldNameToTinyIntObjectInspector(true);
     private static final IonFieldNameToTinyIntObjectInspector FIELD_NAME_TO_TINYINT_OBJECT_INSPECTOR =
             new IonFieldNameToTinyIntObjectInspector(false);
-    private static final IonFieldNameToStringObjectInspector FIELD_NAME_TO_STRING_OBJECT_INSPECTOR =
-            new IonFieldNameToStringObjectInspector(true);
 
     /**
      * Creates an object inspector for the table correctly configured.
@@ -346,9 +344,7 @@ public class IonObjectInspectorFactory {
                                 : FIELD_NAME_TO_INT_OBJECT_INSPECTOR;
                         break;
                     case LONG:
-                        objectInspector = failOnOverflow
-                                ? FIELD_NAME_TO_BIGINT_FAIL_OBJECT_INSPECTOR
-                                : FIELD_NAME_TO_BIGINT_OBJECT_INSPECTOR;
+                        objectInspector = FIELD_NAME_TO_BIGINT_OBJECT_INSPECTOR;
                         break;
                     case SHORT:
                         objectInspector = failOnOverflow

@@ -20,32 +20,11 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.FloatWritable;
 
 public class IonFieldNameToFloatObjectInspector
-        extends AbstractOverflowableFieldNameObjectInspector<String, Float>
+        extends AbstractFieldNameObjectInspector<Float>
         implements FloatObjectInspector {
 
     public IonFieldNameToFloatObjectInspector(final boolean failOnOverflow) {
         super(TypeInfoFactory.floatTypeInfo, failOnOverflow);
-    }
-
-    @Override
-    protected Float getValidatedPrimitiveJavaObject(final String fieldName) {
-        return Float.parseFloat(fieldName);
-    }
-
-    @Override
-    protected void validateSize(final String fieldName) {
-        try {
-            double doubleValue = Double.parseDouble(fieldName);
-            double floatValue = Float.parseFloat(fieldName);
-
-            if (Double.compare(floatValue, doubleValue) != 0) {
-                throw new IllegalArgumentException(
-                        "insufficient precision for " + fieldName + " as " + this.typeInfo.getTypeName());
-            }
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(
-                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
-        }
     }
 
     @Override
@@ -55,11 +34,31 @@ public class IonFieldNameToFloatObjectInspector
 
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromIonValue(o.toString());
+        return getPrimitiveJavaObjectFromFieldName(o.toString());
     }
 
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        return new FloatWritable(getPrimitiveJavaObjectFromIonValue(o.toString()));
+        return new FloatWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+    }
+
+    @Override
+    protected Float getValidatedPrimitiveJavaObject(final String fieldName) {
+        return Double.valueOf(fieldName).floatValue();
+    }
+
+    @Override
+    protected void validateSize(final String fieldName) {
+        try {
+            Double doubleValue = Double.valueOf(fieldName);
+
+            if (Double.compare(doubleValue.floatValue(), doubleValue) != 0) {
+                throw new IllegalArgumentException(
+                        "insufficient precision for " + fieldName + " as " + this.typeInfo.getTypeName());
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
+        }
     }
 }

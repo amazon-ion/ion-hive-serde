@@ -20,7 +20,7 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.ShortWritable;
 
 public class IonFieldNameToTinyIntObjectInspector
-        extends AbstractOverflowableFieldNameObjectInspector<String, Byte>
+        extends AbstractFieldNameObjectInspector<Byte>
         implements ByteObjectInspector {
     public static final int MIN_VALUE = -128;
     public static final int MAX_VALUE = 127;
@@ -30,8 +30,23 @@ public class IonFieldNameToTinyIntObjectInspector
     }
 
     @Override
+    public byte get(final Object o) {
+        return (byte) getPrimitiveJavaObject(o);
+    }
+
+    @Override
+    public Object getPrimitiveJavaObject(final Object o) {
+        return getPrimitiveJavaObjectFromFieldName(o.toString());
+    }
+
+    @Override
+    public Object getPrimitiveWritableObject(final Object o) {
+        return new ShortWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+    }
+
+    @Override
     protected Byte getValidatedPrimitiveJavaObject(final String fieldName) {
-        return Byte.parseByte(fieldName);
+        return Long.valueOf(fieldName).byteValue();
     }
 
     @Override
@@ -52,20 +67,5 @@ public class IonFieldNameToTinyIntObjectInspector
     private boolean validRange(final long value) {
         // runs after checking that fits in a Java byte
         return MIN_VALUE <= value && value <= MAX_VALUE;
-    }
-
-    @Override
-    public byte get(final Object o) {
-        return (byte) getPrimitiveJavaObject(o);
-    }
-
-    @Override
-    public Object getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromIonValue(o.toString());
-    }
-
-    @Override
-    public Object getPrimitiveWritableObject(final Object o) {
-        return new ShortWritable(getPrimitiveJavaObjectFromIonValue(o.toString()));
     }
 }

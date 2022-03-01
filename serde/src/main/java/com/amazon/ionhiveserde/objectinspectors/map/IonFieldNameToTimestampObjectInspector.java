@@ -21,30 +21,25 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.TimestampObjectIn
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 
 public class IonFieldNameToTimestampObjectInspector
-        extends AbstractOverflowableFieldNameObjectInspector<String, Timestamp>
+        extends AbstractFieldNameObjectInspector<Timestamp>
         implements TimestampObjectInspector {
 
-    public IonFieldNameToTimestampObjectInspector(final boolean failOnOverflow) {
-        super(TypeInfoFactory.timestampTypeInfo, failOnOverflow);
+    public IonFieldNameToTimestampObjectInspector() {
+        super(TypeInfoFactory.timestampTypeInfo);
     }
 
     @Override
     public Timestamp getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromIonValue(o.toString());
+        return getPrimitiveJavaObjectFromFieldName(o.toString());
     }
 
     @Override
     public TimestampWritable getPrimitiveWritableObject(final Object o) {
-        return new TimestampWritable(getPrimitiveJavaObjectFromIonValue(o.toString()));
+        return new TimestampWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
     }
 
     @Override
     protected Timestamp getValidatedPrimitiveJavaObject(final String fieldName) {
         return Timestamp.valueOf(fieldName);
-    }
-
-    @Override
-    protected void validateSize(final String fieldName) {
-        // no-op
     }
 }
