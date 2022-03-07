@@ -226,9 +226,4 @@ public class IonSequenceCaseInsensitiveDecorator extends IonContainerCaseInsensi
             listIterator.add(ionValue);
         }
     }
-
-    @Override
-    public String toString() {
-        return ionSequence.toString();
-    }
 }

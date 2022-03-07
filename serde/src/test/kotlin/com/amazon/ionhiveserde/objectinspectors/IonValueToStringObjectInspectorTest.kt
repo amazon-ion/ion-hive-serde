@@ -15,7 +15,9 @@
 
 package com.amazon.ionhiveserde.objectinspectors
 
-import com.amazon.ion.*
+import com.amazon.ion.IonType
+import com.amazon.ion.IonValue
+import com.amazon.ion.impl._Private_Utils
 import com.amazon.ionhiveserde.ION
 import org.apache.hadoop.io.Text
 
@@ -25,13 +27,16 @@ class IonValueToStringObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspec
     override fun validTestCases() = listOf(
             ValidTestCase(generateTestIonValues(IonType.STRING), "some string", Text("some string")),
             ValidTestCase(generateTestIonValues(IonType.SYMBOL), "some string", Text("some string")),
+            ValidTestCase(generateTestIonValues(IonType.INT), "12", Text("12")),
             ValidTestCase(generateTestIonValues(IonType.DECIMAL), "12.1", Text("12.1")),
             ValidTestCase(generateTestIonValues(IonType.FLOAT), "12345e0", Text("12345e0")),
             ValidTestCase(generateTestIonValues(IonType.BOOL), "true", Text("true")),
-            ValidTestCase(generateTestIonValues(IonType.TIMESTAMP),"2001-09-09T01:46:39.999Z", Text("2001-09-09T01:46:39.999Z")),
+            ValidTestCase(generateTestIonValues(IonType.TIMESTAMP), "2001-09-09T01:46:39.999Z", Text("2001-09-09T01:46:39.999Z")),
             ValidTestCase(generateTestIonValues(IonType.STRUCT), "{field:1}", Text("{field:1}")),
             ValidTestCase(generateTestIonValues(IonType.LIST), "[1]", Text("[1]")),
             ValidTestCase(generateTestIonValues(IonType.SEXP), "(1)", Text("(1)")),
+            ValidTestCase(generateTestIonValues(IonType.CLOB), "{{\"test\"}}", Text("{{\"test\"}}")),
+            ValidTestCase(generateTestIonValues(IonType.BLOB), "{{AQIDBAU=}}", Text("{{AQIDBAU=}}")),
     )
 
     private fun generateTestIonValues(type: IonType): IonValue {
@@ -41,6 +46,9 @@ class IonValueToStringObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspec
             }
             IonType.SYMBOL -> {
                 return ION.newSymbol("some string")
+            }
+            IonType.INT -> {
+                return ION.newInt(12)
             }
             IonType.DECIMAL -> {
                 return ION.newDecimal(12.1)
@@ -68,6 +76,17 @@ class IonValueToStringObjectInspectorTest : AbstractIonPrimitiveJavaObjectInspec
                 val sexp = ION.newEmptySexp()
                 sexp.add(ION.newInt(1))
                 return sexp
+            }
+            IonType.CLOB -> {
+                val clob = ION.newNullClob()
+                clob.setBytes(_Private_Utils.utf8("test"))
+                return clob
+            }
+            IonType.BLOB -> {
+                val blob = ION.newNullBlob()
+                val bytes = byteArrayOf(1, 2, 3, 4, 5)
+                blob.setBytes(bytes)
+                return blob
             }
             else -> return ION.newNull()
         }
