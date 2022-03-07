@@ -195,6 +195,11 @@ class IonContainerCaseInsensitiveDecorator implements IonContainer {
         return ionContainer.toString();
     }
 
+    @Override
+    public String toString() {
+        return ionContainer.toString();
+    }
+
     public class IteratorCaseInsensitiveDecorator implements Iterator<IonValue> {
         Iterator<IonValue> iterator;
 
