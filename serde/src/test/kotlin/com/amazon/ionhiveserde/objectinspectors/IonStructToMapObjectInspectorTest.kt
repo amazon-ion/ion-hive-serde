@@ -186,8 +186,8 @@ class IonStructToMapObjectInspectorTest {
         val tsList = listOf<Timestamp>(
                 Timestamp.valueOf("2014-10-14 12:34:56.789"),
                 Timestamp.valueOf("2015-10-16 12:34:56.789"))
-        assertEquals(ION.newInt(1), timestampIntSubject.getMapValueElement(timestampIntStruct, ION.newSymbol(tsList[0].toString())))
-        assertEquals(ION.newInt(2), timestampIntSubject.getMapValueElement(timestampIntStruct, ION.newSymbol(tsList[1].toString())))
+        assertEquals(ION.newInt(1), timestampIntSubject.getMapValueElement(timestampIntStruct, ION.newSymbol(getTsKey(tsList[0]))))
+        assertEquals(ION.newInt(2), timestampIntSubject.getMapValueElement(timestampIntStruct, ION.newSymbol(getTsKey(tsList[1]))))
     }
 
     @Test
@@ -246,11 +246,11 @@ class IonStructToMapObjectInspectorTest {
         assertNullThrowsIllegalArgumentException(timestampIntSubject, structs[10])
     }
 
-    private fun assertNullThrowsIllegalArgumentException (subject: IonStructToMapObjectInspector, struct: IonStruct) {
+    private fun assertNullThrowsIllegalArgumentException(subject: IonStructToMapObjectInspector, struct: IonStruct) {
         try {
             assertNull(subject.getMapValueElement(struct, null))
             fail("IllegalArgumentException expected")
-        } catch (e: IllegalArgumentException ) {
+        } catch (e: IllegalArgumentException) {
             // success
         } catch (e: Exception) {
             fail("Expected IllegalArgumentException, caught $e")
@@ -606,11 +606,14 @@ class IonStructToMapObjectInspectorTest {
         val tsList = listOf<Timestamp>(
                 Timestamp.valueOf("2014-10-14 12:34:56.789"),
                 Timestamp.valueOf("2015-10-16 12:34:56.789"))
-
-        struct.add(tsList[0].toString(), ION.newInt(1))
-        struct.add(tsList[1].toString(), ION.newInt(2))
+        struct.add(getTsKey(tsList[0]), ION.newInt(1))
+        struct.add(getTsKey(tsList[1]), ION.newInt(2))
 
         return struct
+    }
+
+    private fun getTsKey(timestamp: Timestamp): String {
+        return com.amazon.ion.Timestamp.forSqlTimestampZ(timestamp).toString()
     }
 
 }

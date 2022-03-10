@@ -15,7 +15,11 @@
 
 package com.amazon.ionhiveserde.objectinspectors.map;
 
+import com.amazon.ion.Timestamp;
+import com.amazon.ionhiveserde.objectinspectors.utils.IonPrimitiveReader;
 import java.sql.Date;
+import java.time.LocalDate;
+
 import org.apache.hadoop.hive.serde2.io.DateWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.DateObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
@@ -40,6 +44,12 @@ public class IonFieldNameToDateObjectInspector
 
     @Override
     protected Date getValidatedPrimitiveJavaObject(final String fieldName) {
-        return Date.valueOf(fieldName);
+        try {
+            Timestamp ionTimestamp = IonPrimitiveReader.timestampValue(fieldName);
+            return Date.valueOf(LocalDate.of(ionTimestamp.getYear(), ionTimestamp.getMonth(), ionTimestamp.getDay()));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
+        }
     }
 }

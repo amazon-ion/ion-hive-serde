@@ -15,7 +15,9 @@
 
 package com.amazon.ionhiveserde.objectinspectors.map;
 
+import com.amazon.ionhiveserde.objectinspectors.utils.IonPrimitiveReader;
 import java.sql.Timestamp;
+
 import org.apache.hadoop.hive.serde2.io.TimestampWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.TimestampObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
@@ -30,16 +32,27 @@ public class IonFieldNameToTimestampObjectInspector
 
     @Override
     public Timestamp getPrimitiveJavaObject(final Object o) {
+        if (o instanceof Timestamp) {
+            return (Timestamp) o;
+        }
         return getPrimitiveJavaObjectFromFieldName(o.toString());
     }
 
     @Override
     public TimestampWritable getPrimitiveWritableObject(final Object o) {
+        if (o instanceof Timestamp) {
+            return new TimestampWritable((Timestamp) o);
+        }
         return new TimestampWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
     }
 
     @Override
     protected Timestamp getValidatedPrimitiveJavaObject(final String fieldName) {
-        return Timestamp.valueOf(fieldName);
+        try {
+            return new Timestamp(IonPrimitiveReader.timestampValue(fieldName).getMillis());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
+        }
     }
 }

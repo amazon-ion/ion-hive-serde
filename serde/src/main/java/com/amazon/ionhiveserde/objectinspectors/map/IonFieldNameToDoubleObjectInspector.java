@@ -15,6 +15,7 @@
 
 package com.amazon.ionhiveserde.objectinspectors.map;
 
+import com.amazon.ionhiveserde.objectinspectors.utils.IonPrimitiveReader;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.DoubleObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.DoubleWritable;
@@ -45,8 +46,8 @@ public class IonFieldNameToDoubleObjectInspector
     @Override
     protected Double getValidatedPrimitiveJavaObject(final String fieldName) {
         try {
-            return Double.parseDouble(fieldName);
-        } catch (NumberFormatException e) {
+            return IonPrimitiveReader.doubleValue(fieldName);
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
                     "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
         }

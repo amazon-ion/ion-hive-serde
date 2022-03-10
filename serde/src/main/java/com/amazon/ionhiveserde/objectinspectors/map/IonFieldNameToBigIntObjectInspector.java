@@ -15,6 +15,7 @@
 
 package com.amazon.ionhiveserde.objectinspectors.map;
 
+import com.amazon.ionhiveserde.objectinspectors.utils.IonPrimitiveReader;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.LongObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.LongWritable;
@@ -45,8 +46,8 @@ public class IonFieldNameToBigIntObjectInspector
     @Override
     protected Long getValidatedPrimitiveJavaObject(final String fieldName) {
         try {
-            return Long.parseLong(fieldName);
-        } catch (NumberFormatException e) {
+            return IonPrimitiveReader.longValue(fieldName);
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
                     "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
         }

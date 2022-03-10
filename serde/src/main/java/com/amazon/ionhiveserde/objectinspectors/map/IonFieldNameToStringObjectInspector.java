@@ -15,6 +15,7 @@
 
 package com.amazon.ionhiveserde.objectinspectors.map;
 
+import com.amazon.ionhiveserde.objectinspectors.utils.IonPrimitiveReader;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.Text;
@@ -39,6 +40,11 @@ public class IonFieldNameToStringObjectInspector
 
     @Override
     protected String getValidatedPrimitiveJavaObject(final String fieldName) {
-        return fieldName;
+        try {
+            return IonPrimitiveReader.stringValue(fieldName);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
+        }
     }
 }

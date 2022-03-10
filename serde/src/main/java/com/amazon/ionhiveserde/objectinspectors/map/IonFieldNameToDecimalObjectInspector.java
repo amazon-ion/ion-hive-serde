@@ -15,6 +15,7 @@
 
 package com.amazon.ionhiveserde.objectinspectors.map;
 
+import com.amazon.ionhiveserde.objectinspectors.utils.IonPrimitiveReader;
 import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.hive.serde2.io.HiveDecimalWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.HiveDecimalObjectInspector;
@@ -40,6 +41,11 @@ public class IonFieldNameToDecimalObjectInspector
 
     @Override
     protected HiveDecimal getValidatedPrimitiveJavaObject(final String fieldName) {
-        return HiveDecimal.create(fieldName);
+        try {
+            return HiveDecimal.create(IonPrimitiveReader.decimalValue(fieldName));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
+        }
     }
 }

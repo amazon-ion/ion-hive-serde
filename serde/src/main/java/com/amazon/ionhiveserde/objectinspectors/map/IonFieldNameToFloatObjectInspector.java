@@ -15,6 +15,7 @@
 
 package com.amazon.ionhiveserde.objectinspectors.map;
 
+import com.amazon.ionhiveserde.objectinspectors.utils.IonPrimitiveReader;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.FloatObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.FloatWritable;
@@ -44,21 +45,21 @@ public class IonFieldNameToFloatObjectInspector
 
     @Override
     protected Float getValidatedPrimitiveJavaObject(final String fieldName) {
-        return Double.valueOf(fieldName).floatValue();
+        try {
+            return IonPrimitiveReader.floatValue(fieldName);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
+        }
     }
 
     @Override
     protected void validateSize(final String fieldName) {
-        try {
-            Double doubleValue = Double.valueOf(fieldName);
+        Double doubleValue = IonPrimitiveReader.doubleValue(fieldName);
 
-            if (Double.compare(doubleValue.floatValue(), doubleValue) != 0) {
-                throw new IllegalArgumentException(
-                        "insufficient precision for " + fieldName + " as " + this.typeInfo.getTypeName());
-            }
-        } catch (NumberFormatException e) {
+        if (Double.compare(doubleValue.floatValue(), doubleValue) != 0) {
             throw new IllegalArgumentException(
-                    "invalid format for " + fieldName + " as " + this.typeInfo.getTypeName());
+                    "insufficient precision for " + fieldName + " as " + this.typeInfo.getTypeName());
         }
     }
 }
