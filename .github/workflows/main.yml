@@ -2,9 +2,9 @@ name: CI Build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, hive2 ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, hive2 ]
 
 jobs:
   build:

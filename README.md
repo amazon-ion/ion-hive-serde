@@ -1,10 +1,10 @@
-## Amazon Ion Hive Serde
+## Amazon Ion Hive2 Serde
 
-A Apache Hive SerDe (short for serializer/deserializer) for the Ion file format.
+An Apache Hive SerDe (short for serializer/deserializer) for the Ion file format, this package supports Hive 2.
 
-[![Build Status](https://travis-ci.org/amzn/ion-hive-serde.svg?branch=master)](https://travis-ci.org/amzn/ion-hive-serde)
+[![Build Status](https://github.com/amzn/ion-hive-serde/actions/workflows/main.yml/badge.svg?branch=hive2)](https://github.com/amzn/ion-hive-serde/actions?query=branch%3Ahive2+)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive-serde)
-[![Javadoc](https://javadoc-badge.appspot.com/com.amazon.ion/ion-hive-serde.svg?label=javadoc)](http://www.javadoc.io/doc/com.amazon.ion/ion-hive-serde)
+[![javadoc.io](https://javadoc.io/badge2/com.amazon.ion/ion-hive-serde/javadoc.io.svg)](http://www.javadoc.io/doc/com.amazon.ion/ion-hive-serde)
 
 ### Features
 * Read data stored in Ion format both binary and text.
@@ -16,7 +16,7 @@ for more information.
 * Configurable through [SerDe properties](docs/serde-properties.md).
 
 ### Installation
-Download the latest `ion-hive-serde-all-<version-number>.jar` from [https://github.com/amzn/ion-hive-serde/releases]
+Download the latest `ion-hive2-serde-all-<version-number>.jar` from [https://github.com/amzn/ion-hive-serde/releases]
 and place the JARs into `hive/lib` or use `ADD JAR` in Hive. That jar contains the SerDe and all its dependencies.
 
 To build it locally run :`./gradlew :serde:singleJar`
