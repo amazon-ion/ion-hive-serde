@@ -3,8 +3,8 @@
 An Apache Hive SerDe (short for serializer/deserializer) for the Ion file format, this package supports Hive 2.
 
 [![Build Status](https://github.com/amzn/ion-hive-serde/actions/workflows/main.yml/badge.svg?branch=hive2)](https://github.com/amzn/ion-hive-serde/actions?query=branch%3Ahive2+)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive-serde)
-[![javadoc.io](https://javadoc.io/badge2/com.amazon.ion/ion-hive-serde/javadoc.io.svg)](http://www.javadoc.io/doc/com.amazon.ion/ion-hive-serde)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive2-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive2-serde)
+[![javadoc.io](https://javadoc.io/badge2/com.amazon.ion/ion-hive2-serde/javadoc.io.svg)](http://www.javadoc.io/doc/com.amazon.ion/ion-hive2-serde)
 
 ### Features
 * Read data stored in Ion format both binary and text.
