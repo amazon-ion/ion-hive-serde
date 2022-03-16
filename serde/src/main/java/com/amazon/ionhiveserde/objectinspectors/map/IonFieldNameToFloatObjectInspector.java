@@ -34,13 +34,8 @@ public class IonFieldNameToFloatObjectInspector
     }
 
     @Override
-    public Object getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromFieldName(o.toString());
-    }
-
-    @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        return new FloatWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+        return new FloatWritable(getPrimitiveJavaObjectFromFieldName(o));
     }
 
     @Override

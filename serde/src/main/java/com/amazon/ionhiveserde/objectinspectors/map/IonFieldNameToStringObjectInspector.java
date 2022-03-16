@@ -30,12 +30,12 @@ public class IonFieldNameToStringObjectInspector
 
     @Override
     public Text getPrimitiveWritableObject(final Object o) {
-        return new Text(o.toString());
+        return new Text(getPrimitiveJavaObjectFromFieldName(o));
     }
 
     @Override
     public String getPrimitiveJavaObject(final Object o) {
-        return o.toString();
+        return getPrimitiveJavaObjectFromFieldName(o);
     }
 
     @Override

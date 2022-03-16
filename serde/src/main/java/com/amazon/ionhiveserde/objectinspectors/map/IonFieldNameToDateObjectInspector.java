@@ -34,12 +34,12 @@ public class IonFieldNameToDateObjectInspector
 
     @Override
     public Date getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromFieldName(o.toString());
+        return getPrimitiveJavaObjectFromFieldName(o);
     }
 
     @Override
     public DateWritable getPrimitiveWritableObject(final Object o) {
-        return new DateWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+        return new DateWritable(getPrimitiveJavaObjectFromFieldName(o));
     }
 
     @Override

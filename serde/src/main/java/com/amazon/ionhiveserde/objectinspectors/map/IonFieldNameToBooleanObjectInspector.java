@@ -34,13 +34,8 @@ public class IonFieldNameToBooleanObjectInspector
     }
 
     @Override
-    public Object getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromFieldName(o.toString());
-    }
-
-    @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        return new BooleanWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+        return new BooleanWritable(getPrimitiveJavaObjectFromFieldName(o));
     }
 
     @Override

@@ -30,55 +30,38 @@ import kotlin.test.assertNull
 import kotlin.test.fail
 
 class IonStructToMapObjectInspectorTest {
-    private val stringIntKeyElementInspector = IonFieldNameToStringObjectInspector()
-    private val stringIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val stringIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(stringIntKeyElementInspector, stringIntValueElementInspector)
+    private val elementInspector = IonIntToIntObjectInspector(true)
 
-    private val intIntKeyElementInspector = IonFieldNameToIntObjectInspector(true)
-    private val intIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val intIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(intIntKeyElementInspector, intIntValueElementInspector)
+    private val stringIntSubject = IonStructToMapObjectInspector(IonFieldNameToStringObjectInspector(), elementInspector)
+    private val intIntSubject = IonStructToMapObjectInspector(IonFieldNameToIntObjectInspector(true), elementInspector)
+    private val intIntSubjectOverflow = IonStructToMapObjectInspector(IonFieldNameToIntObjectInspector(false), elementInspector)
+    private val bigintIntSubject = IonStructToMapObjectInspector(IonFieldNameToBigIntObjectInspector(), elementInspector)
+    private val smallintIntSubject = IonStructToMapObjectInspector(IonFieldNameToSmallIntObjectInspector(true), elementInspector)
+    private val tinyintIntSubject = IonStructToMapObjectInspector(IonFieldNameToTinyIntObjectInspector(true), elementInspector)
+    private val floatIntSubject = IonStructToMapObjectInspector(IonFieldNameToFloatObjectInspector(true), elementInspector)
+    private val doubleIntSubject = IonStructToMapObjectInspector(IonFieldNameToDoubleObjectInspector(), elementInspector)
+    private val booleanIntSubject = IonStructToMapObjectInspector(IonFieldNameToBooleanObjectInspector(), elementInspector)
+    private val decimalIntSubject = IonStructToMapObjectInspector(IonFieldNameToDecimalObjectInspector(), elementInspector)
+    private val dateIntSubject = IonStructToMapObjectInspector(IonFieldNameToDateObjectInspector(), elementInspector)
+    private val timestampIntSubject = IonStructToMapObjectInspector(IonFieldNameToTimestampObjectInspector(), elementInspector)
 
-    private val intIntKeyElementInspectorOverflow = IonFieldNameToIntObjectInspector(false)
-    private val intIntValueElementInspectorOverflow = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val intIntSubjectOverflow = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(
-            intIntKeyElementInspectorOverflow,
-            intIntValueElementInspectorOverflow)
 
-    private val bigintIntKeyElementInspector = IonFieldNameToBigIntObjectInspector()
-    private val bigintIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val bigintIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(bigintIntKeyElementInspector, bigintIntValueElementInspector)
+    private val testBigints = listOf<Long>(1L, 2L, 3L)
+    private val testBooleans = listOf<Boolean>(true, false)
+    private val testDates = listOf<Date>(
+            Date.valueOf("1991-1-1"),
+            Date.valueOf("1992-2-3"))
+    private val testDecimals = listOf<HiveDecimal>(HiveDecimal.create(1), HiveDecimal.create(2))
+    private val testDoubles = listOf<Double>(2.0, 4.0, 6.0)
+    private val testFloats = listOf<Float>(2f, 4f, 8f)
+    private val testInts = listOf<Int>(1, 2, 3)
+    private val testSmallints = listOf<Short>(1, 2, 3)
+    private val testStrings = listOf<String>("a", "b", "c")
+    private val testTimestamps = listOf<Timestamp>(
+            Timestamp.valueOf("2014-10-14 12:34:56.789"),
+            Timestamp.valueOf("2015-10-16 12:34:56.789"))
+    private val testTinyints = listOf<Byte>(1, 2, 3)
 
-    private val smallintIntKeyElementInspector = IonFieldNameToSmallIntObjectInspector(true)
-    private val smallintIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val smallintIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(smallintIntKeyElementInspector, smallintIntValueElementInspector)
-
-    private val tinyintIntKeyElementInspector = IonFieldNameToTinyIntObjectInspector(true)
-    private val tinyintIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val tinyintIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(tinyintIntKeyElementInspector, tinyintIntValueElementInspector)
-
-    private val floatIntKeyElementInspector = IonFieldNameToFloatObjectInspector(true)
-    private val floatIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val floatIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(floatIntKeyElementInspector, floatIntValueElementInspector)
-
-    private val doubleIntKeyElementInspector = IonFieldNameToDoubleObjectInspector()
-    private val doubleIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val doubleIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(doubleIntKeyElementInspector, doubleIntValueElementInspector)
-
-    private val booleanIntKeyElementInspector = IonFieldNameToBooleanObjectInspector()
-    private val booleanIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val booleanIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(booleanIntKeyElementInspector, booleanIntValueElementInspector)
-
-    private val decimalIntKeyElementInspector = IonFieldNameToDecimalObjectInspector()
-    private val decimalIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val decimalIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(decimalIntKeyElementInspector, decimalIntValueElementInspector)
-
-    private val dateIntKeyElementInspector = IonFieldNameToDateObjectInspector()
-    private val dateIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val dateIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(dateIntKeyElementInspector, dateIntValueElementInspector)
-
-    private val timestampIntKeyElementInspector = IonFieldNameToTimestampObjectInspector()
-    private val timestampIntValueElementInspector = com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector(true)
-    private val timestampIntSubject = com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector(timestampIntKeyElementInspector, timestampIntValueElementInspector)
 
     @Test
     fun getMapKeyObjectInspector() {
@@ -98,96 +81,41 @@ class IonStructToMapObjectInspectorTest {
 
     @Test
     fun getMapValueObjectInspector() {
-        assertEquals(stringIntValueElementInspector, stringIntSubject.mapValueObjectInspector)
-        assertEquals(intIntValueElementInspector, intIntSubject.mapValueObjectInspector)
-        assertEquals(intIntValueElementInspectorOverflow, intIntSubjectOverflow.mapValueObjectInspector)
-        assertEquals(bigintIntValueElementInspector, bigintIntSubject.mapValueObjectInspector)
-        assertEquals(smallintIntValueElementInspector, smallintIntSubject.mapValueObjectInspector)
-        assertEquals(tinyintIntValueElementInspector, tinyintIntSubject.mapValueObjectInspector)
-        assertEquals(floatIntValueElementInspector, floatIntSubject.mapValueObjectInspector)
-        assertEquals(doubleIntValueElementInspector, doubleIntSubject.mapValueObjectInspector)
-        assertEquals(booleanIntValueElementInspector, booleanIntSubject.mapValueObjectInspector)
-        assertEquals(decimalIntValueElementInspector, decimalIntSubject.mapValueObjectInspector)
-        assertEquals(dateIntValueElementInspector, dateIntSubject.mapValueObjectInspector)
-        assertEquals(timestampIntValueElementInspector, timestampIntSubject.mapValueObjectInspector)
+        assertEquals(elementInspector, stringIntSubject.mapValueObjectInspector)
+        assertEquals(elementInspector, intIntSubject.mapValueObjectInspector)
+        assertEquals(elementInspector, intIntSubjectOverflow.mapValueObjectInspector)
+        assertEquals(elementInspector, bigintIntSubject.mapValueObjectInspector)
+        assertEquals(elementInspector, smallintIntSubject.mapValueObjectInspector)
+        assertEquals(elementInspector, tinyintIntSubject.mapValueObjectInspector)
+        assertEquals(elementInspector, floatIntSubject.mapValueObjectInspector)
+        assertEquals(elementInspector, doubleIntSubject.mapValueObjectInspector)
+        assertEquals(elementInspector, booleanIntSubject.mapValueObjectInspector)
+        assertEquals(elementInspector, decimalIntSubject.mapValueObjectInspector)
+        assertEquals(elementInspector, dateIntSubject.mapValueObjectInspector)
+        assertEquals(elementInspector, timestampIntSubject.mapValueObjectInspector)
     }
 
     @Test
     fun getMapValueElement() {
         val structs = makeStructs()
-        val stringIntStruct = structs[0]
+        testGetMapValueElement(structs[0], stringIntSubject, testStrings)
+        testGetMapValueElement(structs[1], intIntSubject, testInts.map { it.toString() })
+        testGetMapValueElement(structs[1], intIntSubjectOverflow, testInts.map { it.toString() })
+        testGetMapValueElement(structs[2], bigintIntSubject, testBigints.map { it.toString() })
+        testGetMapValueElement(structs[3], smallintIntSubject, testSmallints.map { it.toString() })
+        testGetMapValueElement(structs[4], tinyintIntSubject, testTinyints.map { it.toString() })
+        testGetMapValueElement(structs[5], floatIntSubject, testFloats.map { it.toString() })
+        testGetMapValueElement(structs[6], doubleIntSubject, testDoubles.map { it.toString() })
+        testGetMapValueElement(structs[7], booleanIntSubject, testBooleans.map { it.toString() })
+        testGetMapValueElement(structs[8], decimalIntSubject, testDecimals.map { it.toString() })
+        testGetMapValueElement(structs[9], dateIntSubject, testDates.map { it.toString() })
+        testGetMapValueElement(structs[10], timestampIntSubject, testTimestamps.map { getTsKey(it) })
+    }
 
-        assertEquals(ION.newInt(1), stringIntSubject.getMapValueElement(stringIntStruct, ION.newSymbol("a")))
-        assertEquals(ION.newInt(2), stringIntSubject.getMapValueElement(stringIntStruct, ION.newSymbol("b")))
-        assertEquals(ION.newInt(3), stringIntSubject.getMapValueElement(stringIntStruct, ION.newSymbol("c")))
-        assertNull(stringIntSubject.getMapValueElement(stringIntStruct, ION.newSymbol("d")))
-
-        val intIntStruct = structs[1]
-        assertEquals(ION.newInt(1), intIntSubject.getMapValueElement(intIntStruct, ION.newSymbol("1")))
-        assertEquals(ION.newInt(2), intIntSubject.getMapValueElement(intIntStruct, ION.newSymbol("2")))
-        assertEquals(ION.newInt(3), intIntSubject.getMapValueElement(intIntStruct, ION.newSymbol("3")))
-        assertNull(intIntSubject.getMapValueElement(intIntStruct, ION.newSymbol("4")))
-
-        assertEquals(ION.newInt(1), intIntSubjectOverflow.getMapValueElement(intIntStruct, ION.newSymbol("1")))
-        assertEquals(ION.newInt(2), intIntSubjectOverflow.getMapValueElement(intIntStruct, ION.newSymbol("2")))
-        assertEquals(ION.newInt(3), intIntSubjectOverflow.getMapValueElement(intIntStruct, ION.newSymbol("3")))
-        assertNull(intIntSubjectOverflow.getMapValueElement(intIntStruct, ION.newSymbol("4")))
-
-        val bigintIntStruct = structs[2]
-        assertEquals(ION.newInt(1), bigintIntSubject.getMapValueElement(bigintIntStruct, ION.newSymbol("1")))
-        assertEquals(ION.newInt(2), bigintIntSubject.getMapValueElement(bigintIntStruct, ION.newSymbol("2")))
-        assertEquals(ION.newInt(3), bigintIntSubject.getMapValueElement(bigintIntStruct, ION.newSymbol("3")))
-        assertNull(bigintIntSubject.getMapValueElement(bigintIntStruct, ION.newSymbol("4")))
-
-        val smallintIntStruct = structs[3]
-        assertEquals(ION.newInt(1), smallintIntSubject.getMapValueElement(smallintIntStruct, ION.newSymbol("1")))
-        assertEquals(ION.newInt(2), smallintIntSubject.getMapValueElement(smallintIntStruct, ION.newSymbol("2")))
-        assertEquals(ION.newInt(3), smallintIntSubject.getMapValueElement(smallintIntStruct, ION.newSymbol("3")))
-        assertNull(smallintIntSubject.getMapValueElement(smallintIntStruct, ION.newSymbol("4")))
-
-        val tinyintIntStruct = structs[4]
-        assertEquals(ION.newInt(1), tinyintIntSubject.getMapValueElement(tinyintIntStruct, ION.newSymbol("1")))
-        assertEquals(ION.newInt(2), tinyintIntSubject.getMapValueElement(tinyintIntStruct, ION.newSymbol("2")))
-        assertEquals(ION.newInt(3), tinyintIntSubject.getMapValueElement(tinyintIntStruct, ION.newSymbol("3")))
-        assertNull(tinyintIntSubject.getMapValueElement(tinyintIntStruct, ION.newSymbol("4")))
-
-        val floatIntStruct = structs[5]
-        val floatList = listOf<Float>(2f, 4f, 8f, 16f)
-        assertEquals(ION.newInt(1), floatIntSubject.getMapValueElement(floatIntStruct, ION.newSymbol(floatList[0].toString())))
-        assertEquals(ION.newInt(2), floatIntSubject.getMapValueElement(floatIntStruct, ION.newSymbol(floatList[1].toString())))
-        assertEquals(ION.newInt(3), floatIntSubject.getMapValueElement(floatIntStruct, ION.newSymbol(floatList[2].toString())))
-        assertNull(floatIntSubject.getMapValueElement(floatIntStruct, ION.newSymbol(floatList[3].toString())))
-
-        val doubleIntStruct = structs[6]
-        val doubleList = listOf<Double>(2.0, 4.0, 6.0, 8.0)
-        assertEquals(ION.newInt(1), doubleIntSubject.getMapValueElement(doubleIntStruct, ION.newSymbol(doubleList[0].toString())))
-        assertEquals(ION.newInt(2), doubleIntSubject.getMapValueElement(doubleIntStruct, ION.newSymbol(doubleList[1].toString())))
-        assertEquals(ION.newInt(3), doubleIntSubject.getMapValueElement(doubleIntStruct, ION.newSymbol(doubleList[2].toString())))
-        assertNull(doubleIntSubject.getMapValueElement(doubleIntStruct, ION.newSymbol(doubleList[3].toString())))
-
-        val boolIntStruct = structs[7]
-        val boolList = listOf<Boolean>(true, false)
-        assertEquals(ION.newInt(1), booleanIntSubject.getMapValueElement(boolIntStruct, ION.newSymbol(boolList[0].toString())))
-        assertEquals(ION.newInt(2), booleanIntSubject.getMapValueElement(boolIntStruct, ION.newSymbol(boolList[1].toString())))
-
-        val decimalIntStruct = structs[8]
-        val decimalList = listOf<HiveDecimal>(HiveDecimal.create(1), HiveDecimal.create(2))
-        assertEquals(ION.newInt(1), decimalIntSubject.getMapValueElement(decimalIntStruct, ION.newSymbol(decimalList[0].toString())))
-        assertEquals(ION.newInt(2), decimalIntSubject.getMapValueElement(decimalIntStruct, ION.newSymbol(decimalList[1].toString())))
-
-        val dateIntStruct = structs[9]
-        val dateList = listOf<Date>(
-                Date.valueOf("1991-1-1"),
-                Date.valueOf("1992-2-3"))
-        assertEquals(ION.newInt(1), dateIntSubject.getMapValueElement(dateIntStruct, ION.newSymbol(dateList[0].toString())))
-        assertEquals(ION.newInt(2), dateIntSubject.getMapValueElement(dateIntStruct, ION.newSymbol(dateList[1].toString())))
-
-        val timestampIntStruct = structs[10]
-        val tsList = listOf<Timestamp>(
-                Timestamp.valueOf("2014-10-14 12:34:56.789"),
-                Timestamp.valueOf("2015-10-16 12:34:56.789"))
-        assertEquals(ION.newInt(1), timestampIntSubject.getMapValueElement(timestampIntStruct, ION.newSymbol(getTsKey(tsList[0]))))
-        assertEquals(ION.newInt(2), timestampIntSubject.getMapValueElement(timestampIntStruct, ION.newSymbol(getTsKey(tsList[1]))))
+    private fun testGetMapValueElement(struct: IonStruct, subject : IonStructToMapObjectInspector, keys: List<String>) {
+        var structVal = 1
+        keys.forEach{assertEquals(ION.newInt(structVal++), subject.getMapValueElement(struct, ION.newSymbol(it)))}
+        assertNull(subject.getMapValueElement(struct, ION.newSymbol("4")))
     }
 
     @Test
@@ -260,136 +188,49 @@ class IonStructToMapObjectInspectorTest {
     @Test
     fun getMap() {
         val structs = makeStructs()
+        testGetMaps(structs[0], stringIntSubject, testStrings)
+        testGetMaps(structs[1], intIntSubject, testInts)
+        testGetMaps(structs[1], intIntSubjectOverflow, testInts)
+        testGetMaps(structs[2], bigintIntSubject, testBigints)
+        testGetMaps(structs[3], smallintIntSubject, testSmallints)
+        testGetMaps(structs[4], tinyintIntSubject, testTinyints)
+        testGetMaps(structs[5], floatIntSubject, testFloats)
+        testGetMaps(structs[6], doubleIntSubject, testDoubles)
+        testGetMaps(structs[7], booleanIntSubject, testBooleans)
+        testGetMaps(structs[8], decimalIntSubject, testDecimals)
+        testGetMaps(structs[9], dateIntSubject, testDates)
+        testGetMaps(structs[10], timestampIntSubject, testTimestamps)
+    }
 
-        val stringIntStruct = structs[0]
-        val stringIntActual = stringIntSubject.getMap(stringIntStruct)
-        assertEquals(3, stringIntActual.size)
-        assertEquals(ION.newInt(1), stringIntActual["a"])
-        assertEquals(ION.newInt(2), stringIntActual["b"])
-        assertEquals(ION.newInt(3), stringIntActual["c"])
-
-        val intIntStruct = structs[1]
-        var intIntActual = intIntSubject.getMap(intIntStruct)
-        assertEquals(3, intIntActual.size)
-        assertEquals(ION.newInt(1), intIntActual[1])
-        assertEquals(ION.newInt(2), intIntActual[2])
-        assertEquals(ION.newInt(3), intIntActual[3])
-
-        intIntActual = intIntSubjectOverflow.getMap(intIntStruct)
-        assertEquals(3, intIntActual.size)
-        assertEquals(ION.newInt(1), intIntActual[1])
-        assertEquals(ION.newInt(2), intIntActual[2])
-        assertEquals(ION.newInt(3), intIntActual[3])
-
-        val bigintIntStruct = structs[2]
-        val bigintIntActual = bigintIntSubject.getMap(bigintIntStruct)
-        assertEquals(3, bigintIntActual.size)
-        assertEquals(ION.newInt(1), bigintIntActual[1L])
-        assertEquals(ION.newInt(2), bigintIntActual[2L])
-        assertEquals(ION.newInt(3), bigintIntActual[3L])
-
-        val smallintIntStruct = structs[3]
-        val smallintIntActual = smallintIntSubject.getMap(smallintIntStruct)
-        val smallintList = listOf<Short>(1, 2, 3)
-        assertEquals(3, smallintIntActual.size)
-        assertEquals(ION.newInt(1), smallintIntActual[smallintList[0]])
-        assertEquals(ION.newInt(2), smallintIntActual[smallintList[1]])
-        assertEquals(ION.newInt(3), smallintIntActual[smallintList[2]])
-
-        val tinyintIntStruct = structs[4]
-        val tinyintIntActual = tinyintIntSubject.getMap(tinyintIntStruct)
-        assertEquals(3, tinyintIntActual.size)
-        val tinyintList = listOf<Byte>(1, 2, 3)
-        assertEquals(ION.newInt(1), tinyintIntActual[tinyintList[0]])
-        assertEquals(ION.newInt(2), tinyintIntActual[tinyintList[1]])
-        assertEquals(ION.newInt(3), tinyintIntActual[tinyintList[2]])
-
-        val floatIntStruct = structs[5]
-        val floatIntActual = floatIntSubject.getMap(floatIntStruct)
-        assertEquals(3, floatIntActual.size)
-        val floatList = listOf<Float>(2f, 4f, 8f)
-        assertEquals(ION.newInt(1), floatIntActual[floatList[0]])
-        assertEquals(ION.newInt(2), floatIntActual[floatList[1]])
-        assertEquals(ION.newInt(3), floatIntActual[floatList[2]])
-
-        val doubleIntStruct = structs[6]
-        val doubleIntActual = doubleIntSubject.getMap(doubleIntStruct)
-        assertEquals(3, doubleIntActual.size)
-        val doubleList = listOf<Double>(2.0, 4.0, 6.0)
-        assertEquals(ION.newInt(1), doubleIntActual[doubleList[0]])
-        assertEquals(ION.newInt(2), doubleIntActual[doubleList[1]])
-        assertEquals(ION.newInt(3), doubleIntActual[doubleList[2]])
-
-        val booleanIntStruct = structs[7]
-        val booleanIntActual = booleanIntSubject.getMap(booleanIntStruct)
-        assertEquals(2, booleanIntActual.size)
-        val booleanList = listOf<Boolean>(true, false)
-        assertEquals(ION.newInt(1), booleanIntActual[booleanList[0]])
-        assertEquals(ION.newInt(2), booleanIntActual[booleanList[1]])
-
-        val decimalIntStruct = structs[8]
-        val decimalIntActual = decimalIntSubject.getMap(decimalIntStruct)
-        assertEquals(2, decimalIntActual.size)
-        val decimalList = listOf<HiveDecimal>(HiveDecimal.create(1), HiveDecimal.create(2))
-        assertEquals(ION.newInt(1), decimalIntActual[decimalList[0]])
-        assertEquals(ION.newInt(2), decimalIntActual[decimalList[1]])
-
-        val dateIntStruct = structs[9]
-        val dateIntActual = dateIntSubject.getMap(dateIntStruct)
-        assertEquals(2, dateIntActual.size)
-        val dateList = listOf<Date>(
-                Date.valueOf("1991-1-1"),
-                Date.valueOf("1992-2-3"))
-        assertEquals(ION.newInt(1), dateIntActual[dateList[0]])
-        assertEquals(ION.newInt(2), dateIntActual[dateList[1]])
-
-        val timestampIntStruct = structs[10]
-        val timestampIntActual = timestampIntSubject.getMap(timestampIntStruct)
-        assertEquals(2, timestampIntActual.size)
-        val tsList = listOf<Timestamp>(
-                Timestamp.valueOf("2014-10-14 12:34:56.789"),
-                Timestamp.valueOf("2015-10-16 12:34:56.789"))
-        assertEquals(ION.newInt(1), timestampIntActual[tsList[0]])
-        assertEquals(ION.newInt(2), timestampIntActual[tsList[1]])
+    private fun testGetMaps(struct : IonStruct, subject : IonStructToMapObjectInspector, keyValues : List<Any>) {
+        val map = subject.getMap(struct)
+        assertEquals(keyValues.size, map.size)
+        var ionVal = 1
+        keyValues.forEach{assertEquals(ION.newInt(ionVal++), map[it])}
     }
 
     @Test
     fun getMapForNullData() {
-        assertNull(stringIntSubject.getMap(null))
-        assertNull(stringIntSubject.getMap(ionNull))
+        testGetMapForNullData(stringIntSubject)
 
-        assertNull(intIntSubject.getMap(null))
-        assertNull(intIntSubject.getMap(ionNull))
+        testGetMapForNullData(intIntSubjectOverflow)
+        testGetMapForNullData(bigintIntSubject)
+        testGetMapForNullData(smallintIntSubject)
+        testGetMapForNullData(tinyintIntSubject)
 
-        assertNull(intIntSubjectOverflow.getMap(null))
-        assertNull(intIntSubjectOverflow.getMap(ionNull))
+        testGetMapForNullData(floatIntSubject)
+        testGetMapForNullData(doubleIntSubject)
+        testGetMapForNullData(decimalIntSubject)
 
-        assertNull(bigintIntSubject.getMap(null))
-        assertNull(bigintIntSubject.getMap(ionNull))
+        testGetMapForNullData(booleanIntSubject)
 
-        assertNull(smallintIntSubject.getMap(null))
-        assertNull(smallintIntSubject.getMap(ionNull))
+        testGetMapForNullData(dateIntSubject)
+        testGetMapForNullData(timestampIntSubject)
+    }
 
-        assertNull(tinyintIntSubject.getMap(null))
-        assertNull(tinyintIntSubject.getMap(ionNull))
-
-        assertNull(floatIntSubject.getMap(null))
-        assertNull(floatIntSubject.getMap(ionNull))
-
-        assertNull(doubleIntSubject.getMap(null))
-        assertNull(doubleIntSubject.getMap(ionNull))
-
-        assertNull(booleanIntSubject.getMap(null))
-        assertNull(booleanIntSubject.getMap(ionNull))
-
-        assertNull(decimalIntSubject.getMap(null))
-        assertNull(decimalIntSubject.getMap(ionNull))
-
-        assertNull(dateIntSubject.getMap(null))
-        assertNull(dateIntSubject.getMap(ionNull))
-
-        assertNull(timestampIntSubject.getMap(null))
-        assertNull(timestampIntSubject.getMap(ionNull))
+    private fun testGetMapForNullData(subject : IonStructToMapObjectInspector) {
+        assertNull(subject.getMap(null))
+        assertNull(subject.getMap(ionNull))
     }
 
     @Test
@@ -411,41 +252,26 @@ class IonStructToMapObjectInspectorTest {
 
     @Test
     fun getMapSizeForNull() {
-        assertEquals(-1, stringIntSubject.getMapSize(null))
-        assertEquals(-1, stringIntSubject.getMapSize(ionNull))
+        testGetMapSizeForNull(stringIntSubject)
 
-        assertEquals(-1, intIntSubject.getMapSize(null))
-        assertEquals(-1, intIntSubject.getMapSize(ionNull))
+        testGetMapSizeForNull(intIntSubjectOverflow)
+        testGetMapSizeForNull(bigintIntSubject)
+        testGetMapSizeForNull(smallintIntSubject)
+        testGetMapSizeForNull(tinyintIntSubject)
 
-        assertEquals(-1, intIntSubjectOverflow.getMapSize(null))
-        assertEquals(-1, intIntSubjectOverflow.getMapSize(ionNull))
+        testGetMapSizeForNull(floatIntSubject)
+        testGetMapSizeForNull(doubleIntSubject)
+        testGetMapSizeForNull(decimalIntSubject)
 
-        assertEquals(-1, bigintIntSubject.getMapSize(null))
-        assertEquals(-1, bigintIntSubject.getMapSize(ionNull))
+        testGetMapSizeForNull(booleanIntSubject)
 
-        assertEquals(-1, smallintIntSubject.getMapSize(null))
-        assertEquals(-1, smallintIntSubject.getMapSize(ionNull))
+        testGetMapSizeForNull(dateIntSubject)
+        testGetMapSizeForNull(timestampIntSubject)
+    }
 
-        assertEquals(-1, tinyintIntSubject.getMapSize(null))
-        assertEquals(-1, tinyintIntSubject.getMapSize(ionNull))
-
-        assertEquals(-1, floatIntSubject.getMapSize(null))
-        assertEquals(-1, floatIntSubject.getMapSize(ionNull))
-
-        assertEquals(-1, doubleIntSubject.getMapSize(null))
-        assertEquals(-1, doubleIntSubject.getMapSize(ionNull))
-
-        assertEquals(-1, booleanIntSubject.getMapSize(null))
-        assertEquals(-1, booleanIntSubject.getMapSize(ionNull))
-
-        assertEquals(-1, decimalIntSubject.getMapSize(null))
-        assertEquals(-1, decimalIntSubject.getMapSize(ionNull))
-
-        assertEquals(-1, dateIntSubject.getMapSize(null))
-        assertEquals(-1, dateIntSubject.getMapSize(ionNull))
-
-        assertEquals(-1, timestampIntSubject.getMapSize(null))
-        assertEquals(-1, timestampIntSubject.getMapSize(ionNull))
+    private fun testGetMapSizeForNull(subject : IonStructToMapObjectInspector) {
+        assertEquals(-1, subject.getMapSize(null))
+        assertEquals(-1, subject.getMapSize(ionNull))
     }
 
     @Test
@@ -480,140 +306,28 @@ class IonStructToMapObjectInspectorTest {
 
     private fun makeStructs(): List<IonStruct> {
         return listOf<IonStruct>(
-                makeStringIntStruct(),
-                makeIntIntStruct(),
-                makeBigintIntStruct(),
-                makeSmallintIntStruct(),
-                makeTinyintIntStruct(),
-                makeFloatIntStruct(),
-                makeDoubleIntStruct(),
-                makeBoolIntStruct(),
-                makeDecimalIntStruct(),
-                makeDateIntStruct(),
-                makeTimestampIntStruct())
-    }
-
-    private fun makeStringIntStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-
-        struct.add("a", ION.newInt(1))
-        struct.add("b", ION.newInt(2))
-        struct.add("c", ION.newInt(3))
-
-        return struct
-    }
-
-    private fun makeIntIntStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-        val intList = listOf<Int>(1, 2, 3)
-
-        struct.add(intList[0].toString(), ION.newInt(1))
-        struct.add(intList[1].toString(), ION.newInt(2))
-        struct.add(intList[2].toString(), ION.newInt(3))
-
-        return struct
-    }
-
-    private fun makeBigintIntStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-        val bigintList = listOf<Long>(1L, 2L, 3L)
-
-        struct.add(bigintList[0].toString(), ION.newInt(1))
-        struct.add(bigintList[1].toString(), ION.newInt(2))
-        struct.add(bigintList[2].toString(), ION.newInt(3))
-
-        return struct
-    }
-
-    private fun makeSmallintIntStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-        val smallintList = listOf<Short>(1, 2, 3)
-
-        struct.add(smallintList[0].toString(), ION.newInt(1))
-        struct.add(smallintList[1].toString(), ION.newInt(2))
-        struct.add(smallintList[2].toString(), ION.newInt(3))
-
-        return struct
-    }
-
-    private fun makeTinyintIntStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-        val smallintList = listOf<Byte>(1, 2, 3)
-
-        struct.add(smallintList[0].toString(), ION.newInt(1))
-        struct.add(smallintList[1].toString(), ION.newInt(2))
-        struct.add(smallintList[2].toString(), ION.newInt(3))
-
-        return struct
-    }
-
-    private fun makeFloatIntStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-        val floatList = listOf<Float>(2f, 4f, 8f)
-
-        struct.add(floatList[0].toString(), ION.newInt(1))
-        struct.add(floatList[1].toString(), ION.newInt(2))
-        struct.add(floatList[2].toString(), ION.newInt(3))
-
-        return struct
-    }
-
-    private fun makeDoubleIntStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-        val doubleList = listOf<Double>(2.0, 4.0, 6.0)
-
-        struct.add(doubleList[0].toString(), ION.newInt(1))
-        struct.add(doubleList[1].toString(), ION.newInt(2))
-        struct.add(doubleList[2].toString(), ION.newInt(3))
-
-        return struct
-    }
-
-    private fun makeBoolIntStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-        val boolList = listOf<Boolean>(true, false)
-
-        struct.add(boolList[0].toString(), ION.newInt(1))
-        struct.add(boolList[1].toString(), ION.newInt(2))
-
-        return struct
-    }
-
-    private fun makeDecimalIntStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-        val decimalList = listOf<HiveDecimal>(HiveDecimal.create(1), HiveDecimal.create(2))
-
-        struct.add(decimalList[0].toString(), ION.newInt(1))
-        struct.add(decimalList[1].toString(), ION.newInt(2))
-
-        return struct
-    }
-
-    private fun makeDateIntStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-        val dateList = listOf<Date>(
-                Date.valueOf("1991-1-1"),
-                Date.valueOf("1992-2-3"))
-
-        struct.add(dateList[0].toString(), ION.newInt(1))
-        struct.add(dateList[1].toString(), ION.newInt(2))
-
-        return struct
-    }
-
-    private fun makeTimestampIntStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-        val tsList = listOf<Timestamp>(
-                Timestamp.valueOf("2014-10-14 12:34:56.789"),
-                Timestamp.valueOf("2015-10-16 12:34:56.789"))
-        struct.add(getTsKey(tsList[0]), ION.newInt(1))
-        struct.add(getTsKey(tsList[1]), ION.newInt(2))
-
-        return struct
+                generateStruct(testStrings),
+                generateStruct(testInts.map { it.toString() }),
+                generateStruct(testBigints.map { it.toString() }),
+                generateStruct(testSmallints.map { it.toString() }),
+                generateStruct(testTinyints.map { it.toString() }),
+                generateStruct(testFloats.map { it.toString() }),
+                generateStruct(testDoubles.map { it.toString() }),
+                generateStruct(testBooleans.map { it.toString() }),
+                generateStruct(testDecimals.map { it.toString() }),
+                generateStruct(testDates.map { it.toString() }),
+                generateStruct(testTimestamps.map { getTsKey(it) }))
     }
 
     private fun getTsKey(timestamp: Timestamp): String {
         return com.amazon.ion.Timestamp.forSqlTimestampZ(timestamp).toString()
+    }
+
+    private fun generateStruct(keys : List<String>): IonStruct {
+        val struct = ION.newEmptyStruct();
+        var structVal = 1
+        keys.stream().forEach{struct.add(it, ION.newInt(structVal++))}
+        return struct
     }
 
 }

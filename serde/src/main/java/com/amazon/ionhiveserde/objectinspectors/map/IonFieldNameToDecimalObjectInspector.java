@@ -31,12 +31,12 @@ public class IonFieldNameToDecimalObjectInspector
 
     @Override
     public HiveDecimal getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromFieldName(o.toString());
+        return getPrimitiveJavaObjectFromFieldName(o);
     }
 
     @Override
     public HiveDecimalWritable getPrimitiveWritableObject(final Object o) {
-        return new HiveDecimalWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+        return new HiveDecimalWritable(getPrimitiveJavaObjectFromFieldName(o));
     }
 
     @Override

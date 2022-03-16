@@ -34,13 +34,8 @@ public class IonFieldNameToBigIntObjectInspector
     }
 
     @Override
-    public Object getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromFieldName(o.toString());
-    }
-
-    @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        return new LongWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+        return new LongWritable(getPrimitiveJavaObjectFromFieldName(o));
     }
 
     @Override

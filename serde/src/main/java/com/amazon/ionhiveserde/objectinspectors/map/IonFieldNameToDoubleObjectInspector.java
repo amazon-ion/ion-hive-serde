@@ -35,12 +35,12 @@ public class IonFieldNameToDoubleObjectInspector
 
     @Override
     public Object getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromFieldName(o.toString());
+        return getPrimitiveJavaObjectFromFieldName(o);
     }
 
     @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        return new DoubleWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+        return new DoubleWritable(getPrimitiveJavaObjectFromFieldName(o));
     }
 
     @Override

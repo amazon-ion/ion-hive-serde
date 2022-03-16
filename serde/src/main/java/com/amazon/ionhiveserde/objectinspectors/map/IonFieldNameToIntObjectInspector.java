@@ -24,9 +24,6 @@ public class IonFieldNameToIntObjectInspector
         extends AbstractFieldNameObjectInspector<Integer>
         implements IntObjectInspector {
 
-    public static final long MIN_VALUE = Integer.MIN_VALUE;
-    public static final long MAX_VALUE = Integer.MAX_VALUE;
-
     public IonFieldNameToIntObjectInspector(final boolean failOnOverflow) {
         super(TypeInfoFactory.intTypeInfo, failOnOverflow);
     }
@@ -37,13 +34,8 @@ public class IonFieldNameToIntObjectInspector
     }
 
     @Override
-    public Object getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromFieldName(o.toString());
-    }
-
-    @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        return new IntWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+        return new IntWritable(getPrimitiveJavaObjectFromFieldName(o));
     }
 
     @Override
@@ -68,6 +60,6 @@ public class IonFieldNameToIntObjectInspector
 
     private boolean validRange(final long value) {
         // runs after checking that fits in a Java int
-        return MIN_VALUE <= value && value <= MAX_VALUE;
+        return Integer.MIN_VALUE <= value && value <= Integer.MAX_VALUE;
     }
 }

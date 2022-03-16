@@ -35,7 +35,7 @@ public class IonFieldNameToTimestampObjectInspector
         if (o instanceof Timestamp) {
             return (Timestamp) o;
         }
-        return getPrimitiveJavaObjectFromFieldName(o.toString());
+        return getPrimitiveJavaObjectFromFieldName(o);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class IonFieldNameToTimestampObjectInspector
         if (o instanceof Timestamp) {
             return new TimestampWritable((Timestamp) o);
         }
-        return new TimestampWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+        return new TimestampWritable(getPrimitiveJavaObjectFromFieldName(o));
     }
 
     @Override

@@ -23,8 +23,6 @@ import org.apache.hadoop.io.ShortWritable;
 public class IonFieldNameToSmallIntObjectInspector
         extends AbstractFieldNameObjectInspector<Short>
         implements ShortObjectInspector {
-    public static final long MIN_VALUE = Short.MIN_VALUE;
-    public static final long MAX_VALUE = Short.MAX_VALUE;
 
     public IonFieldNameToSmallIntObjectInspector(final boolean failOnOverflow) {
         super(TypeInfoFactory.shortTypeInfo, failOnOverflow);
@@ -36,13 +34,8 @@ public class IonFieldNameToSmallIntObjectInspector
     }
 
     @Override
-    public Object getPrimitiveJavaObject(final Object o) {
-        return getPrimitiveJavaObjectFromFieldName(o.toString());
-    }
-
-    @Override
     public Object getPrimitiveWritableObject(final Object o) {
-        return new ShortWritable(getPrimitiveJavaObjectFromFieldName(o.toString()));
+        return new ShortWritable(getPrimitiveJavaObjectFromFieldName(o));
     }
 
     @Override
@@ -67,6 +60,6 @@ public class IonFieldNameToSmallIntObjectInspector
 
     private boolean validRange(final long value) {
         // runs after checking that fits in a Java short
-        return MIN_VALUE <= value && value <= MAX_VALUE;
+        return Short.MIN_VALUE <= value && value <= Short.MAX_VALUE;
     }
 }

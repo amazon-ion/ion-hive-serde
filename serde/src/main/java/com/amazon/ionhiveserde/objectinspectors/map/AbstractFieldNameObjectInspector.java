@@ -55,12 +55,18 @@ abstract class AbstractFieldNameObjectInspector<O> extends
      * @param fieldName Value to read as a Java primitive.
      * @return Java primitive representation.
      */
-    final O getPrimitiveJavaObjectFromFieldName(final String fieldName) {
+    final O getPrimitiveJavaObjectFromFieldName(final Object fieldName) {
+        final String fieldNameAsString;
+        if (fieldName instanceof String) {
+            fieldNameAsString = (String) fieldName;
+        } else {
+            fieldNameAsString = fieldName.toString();
+        }
         if (failOnOverflow) {
-            validateSize(fieldName);
+            validateSize(fieldNameAsString);
         }
 
-        return getValidatedPrimitiveJavaObject(fieldName);
+        return getValidatedPrimitiveJavaObject(fieldNameAsString);
     }
 
     /**
@@ -84,5 +90,15 @@ abstract class AbstractFieldNameObjectInspector<O> extends
                     String.format("Type %s is marked as fail on overflow, but has not implemented validation",
                             this.getClass().getSimpleName()));
         }
+    }
+
+    /**
+     * Returns a java primitive object from a field name
+     * @param o - Object o that contains a string version of the field name
+     * @return Java primitive object
+     */
+    @Override
+    public Object getPrimitiveJavaObject(final Object o) {
+        return getPrimitiveJavaObjectFromFieldName(o.toString());
     }
 }
