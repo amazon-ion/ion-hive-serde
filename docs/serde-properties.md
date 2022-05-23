@@ -202,6 +202,66 @@ Hive table
 | "Foo Bar" | "foo"    |
 ```
 
+### Case sensitivity
+Determines whether to treat Amazon Ion field names as case sensitive. When false, the SerDe ignores case parsing Amazon Ion field names.
+
+Specification: 
+```
+WITH SERDEPROPERTIES (
+   "ion.path_extractor.case_sensitive" = "<Boolean>" -- default: true 
+)
+```  
+
+Example:
+Suppose you have a Hive table schema that defines a field alias in lower case and an Amazon Ion document with both an alias field and an ALIAS field, as in the following example.
+```
+-- Hive Table Schema
+alias: STRING
+
+-- Amazon Ion Document
+{ 'ALIAS': 'value1'} 
+{ 'alias': 'value2'}
+```
+The following example shows the resulting extracted table when case sensitivity is set to false:
+```
+CREATE TABLE people (
+  alias STRING 
+)
+ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
+WITH SERDEPROPERTIES (
+  "ion.alias.path_extractor" = "(alias)"
+  "ion.path_extractor.case_sensitive" = "false"
+)
+STORED AS
+  INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat';
+
+--Extracted Table
+| alias    |
+|----------|
+| "value1" |
+| "value2" |
+```
+The following example shows the resulting extracted table when case sensitivity is set to true:
+```
+CREATE TABLE people (
+  alias STRING 
+)
+ROW FORMAT SERDE 'com.amazon.ionhiveserde.IonHiveSerDe'
+WITH SERDEPROPERTIES (
+  "ion.alias.path_extractor" = "(alias)"
+  "ion.path_extractor.case_sensitive" = "true"
+)
+STORED AS
+  INPUTFORMAT 'com.amazon.ionhiveserde.formats.IonInputFormat'
+  OUTPUTFORMAT 'com.amazon.ionhiveserde.formats.IonOutputFormat';
+
+--Extracted Table
+| alias    |
+|----------|
+| "value2" |
+```
+
 ## Ignore Malformed
 When configured to ignore malformed entries the SerDe and `IonInputFormat` will skip splits that are malformed or the 
 whole file if it's not able to read it anymore. 
