@@ -17,6 +17,7 @@ package com.amazon.ionhiveserde.objectinspectors
 
 import com.amazon.ion.IonStruct
 import com.amazon.ionhiveserde.ION
+import com.amazon.ionhiveserde.caseinsensitivedecorator.IonStructCaseInsensitiveDecorator
 import com.amazon.ionhiveserde.ionNull
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category.MAP
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory
@@ -60,25 +61,42 @@ class IonStructToMapObjectInspectorTest {
     }
 
     @Test
+    fun getMapSize() {
+        assertEquals(3, subject.getMapSize(makeStruct()))
+    }
+
+    @Test
     fun getMap() {
         val struct = makeStruct()
-
         val actual = subject.getMap(struct)
-        assertEquals(3, actual.size)
+
         assertEquals(ION.newInt(1), actual["a"])
         assertEquals(ION.newInt(2), actual["b"])
         assertEquals(ION.newInt(3), actual["c"])
+    }
+
+    /**
+     * The map size should be 1; The Ion null should be removed when convert Ion struct to Map.
+     */
+    @Test
+    fun getMapSizeForCaseInsensitiveDecorator() {
+        assertEquals(1, subject.getMapSize(makeCaseInsensitiveStruct()))
+    }
+
+    @Test
+    fun getMapForCaseInsensitiveDecorator() {
+        val struct = makeCaseInsensitiveStruct()
+        val actual = subject.getMap(struct)
+
+        assertEquals(ION.newInt(1), actual["a"])
+        // Ion null should be treated as null here as Hive doesn't know how to parse Ion null
+        assertEquals(null, actual["b"])
     }
 
     @Test
     fun getMapForNullData() {
         assertNull(subject.getMap(null))
         assertNull(subject.getMap(ionNull))
-    }
-
-    @Test
-    fun getMapSize() {
-        assertEquals(3, subject.getMapSize(makeStruct()))
     }
 
     @Test
@@ -107,4 +125,13 @@ class IonStructToMapObjectInspectorTest {
         return struct
     }
 
+    private fun makeCaseInsensitiveStruct(): IonStruct {
+        val rawStruct = ION.newEmptyStruct()
+        val struct = IonStructCaseInsensitiveDecorator(rawStruct)
+
+        struct.add("a", ION.newInt(1))
+        struct.add("b", ION.newNull())
+
+        return struct
+    }
 }

@@ -24,6 +24,7 @@ import com.amazon.ionhiveserde.caseinsensitivedecorator.IonSequenceCaseInsensiti
 import com.amazon.ionhiveserde.caseinsensitivedecorator.IonStructCaseInsensitiveDecorator
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 class CaseInsensitiveDecoratorTest {
     private fun datagram_for(s: String): IonDatagram {
@@ -114,14 +115,14 @@ class CaseInsensitiveDecoratorTest {
 
     @Test
     fun ionStructCaseInsensitiveDecoratorRemoveSequence() {
-        val struct = struct_for(" { Foo: [] }")
+        val struct = struct_for("{ Foo: [] }")
         val s = struct.remove("Foo")
         assertSequenceWrapper(s)
     }
 
     @Test
     fun ionStructCaseInsensitiveDecoratorCloneAndRemove() {
-        val struct = struct_for(" { Foo: 'bar' }")
+        val struct = struct_for(" {Foo: 'bar' }")
         val s = struct.cloneAndRemove("Foo")
 
         assertEquals(s.size(), 0)
@@ -130,12 +131,31 @@ class CaseInsensitiveDecoratorTest {
 
     @Test
     fun ionStructCaseInsensitiveDecoratorCloneAndRetain() {
-        val struct = struct_for(" { Foo: 'bar' }")
+        val struct = struct_for("{ Foo: 'bar' }")
         val s = struct.cloneAndRetain("Foo")
 
         assertEquals(s.size(), 1)
         assertEquals(s.containsKey("foo"), true)
         assertStructWrapper(s)
+    }
+
+    @Test
+    fun ionStructCaseInsensitiveDecoratorIteratorNext() {
+        val struct = struct_for(" { Foo: 1, Bar: '2'}")
+        val iter = struct.iterator()
+        val foo = iter.next()
+        assertEquals(foo, ION.newInt(1))
+        val bar = iter.next()
+        assertEquals(bar, ION.newSymbol("2"))
+    }
+
+    @Test
+    fun ionStructCaseInsensitiveDecoratorIteratorNull() {
+        val struct = struct_for(" { Foo: null }")
+        val iter = struct.iterator()
+        val v = iter.next()
+        // Returns Ion null like what Ion container does
+        assertEquals(v, ION.newNull())
     }
 
     @Test
@@ -223,5 +243,25 @@ class CaseInsensitiveDecoratorTest {
         assertEquals(sublist[0], ION.newInt(1))
         assertSequenceWrapper(sublist[1])
         assertStructWrapper(sublist[2])
+    }
+
+    @Test
+    fun ionSequenceCaseInsensitiveDecoratorIteratorNext() {
+        val sequence = sequence_for("[1, '2']")
+        val iter = sequence.iterator()
+        val foo = iter.next()
+        assertEquals(foo, ION.newInt(1))
+        val bar = iter.next()
+        assertEquals(bar, ION.newSymbol("2"))
+    }
+
+
+    @Test
+    fun ionSequenceCaseInsensitiveDecoratorIteratorNull() {
+        val sequence = sequence_for("[ null ]")
+        val iter = sequence.iterator()
+        val v = iter.next()
+        // Returns Ion null like what Ion container does
+        assertEquals(v, ION.newNull());
     }
 }
