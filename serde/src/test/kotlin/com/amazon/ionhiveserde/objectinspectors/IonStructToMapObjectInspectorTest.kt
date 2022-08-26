@@ -75,12 +75,9 @@ class IonStructToMapObjectInspectorTest {
         assertEquals(ION.newInt(3), actual["c"])
     }
 
-    /**
-     * The map size should be 1; The Ion null should be removed when convert Ion struct to Map.
-     */
     @Test
     fun getMapSizeForCaseInsensitiveDecorator() {
-        assertEquals(1, subject.getMapSize(makeCaseInsensitiveStruct()))
+        assertEquals(2, subject.getMapSize(makeCaseInsensitiveStruct()))
     }
 
     @Test
