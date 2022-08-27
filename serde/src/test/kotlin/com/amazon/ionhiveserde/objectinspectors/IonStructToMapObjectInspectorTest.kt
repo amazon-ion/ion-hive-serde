@@ -15,10 +15,10 @@
 
 package com.amazon.ionhiveserde.objectinspectors
 
-import com.amazon.ion.IonStruct
 import com.amazon.ionhiveserde.ION
-import com.amazon.ionhiveserde.caseinsensitivedecorator.IonStructCaseInsensitiveDecorator
 import com.amazon.ionhiveserde.ionNull
+import com.amazon.ionhiveserde.makeCaseInsensitiveStruct
+import com.amazon.ionhiveserde.makeStruct
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category.MAP
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory
 import org.junit.Test
@@ -110,25 +110,5 @@ class IonStructToMapObjectInspectorTest {
     @Test
     fun getCategory() {
         assertEquals(MAP, subject.category)
-    }
-
-    private fun makeStruct(): IonStruct {
-        val struct = ION.newEmptyStruct()
-
-        struct.add("a", ION.newInt(1))
-        struct.add("b", ION.newInt(2))
-        struct.add("c", ION.newInt(3))
-
-        return struct
-    }
-
-    private fun makeCaseInsensitiveStruct(): IonStruct {
-        val rawStruct = ION.newEmptyStruct()
-        val struct = IonStructCaseInsensitiveDecorator(rawStruct)
-
-        struct.add("a", ION.newInt(1))
-        struct.add("b", ION.newNull())
-
-        return struct
     }
 }
