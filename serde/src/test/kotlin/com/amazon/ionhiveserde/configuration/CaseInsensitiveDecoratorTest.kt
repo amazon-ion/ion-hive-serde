@@ -249,10 +249,8 @@ class CaseInsensitiveDecoratorTest {
     fun ionSequenceCaseInsensitiveDecoratorIteratorNext() {
         val sequence = sequence_for("[1, '2']")
         val iter = sequence.iterator()
-        val foo = iter.next()
-        assertEquals(foo, ION.newInt(1))
-        val bar = iter.next()
-        assertEquals(bar, ION.newSymbol("2"))
+        assertEquals(iter.next(), ION.newInt(1))
+        assertEquals(iter.next(), ION.newSymbol("2"))
     }
 
 
