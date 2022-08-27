@@ -141,7 +141,7 @@ class CaseInsensitiveDecoratorTest {
 
     @Test
     fun ionStructCaseInsensitiveDecoratorIteratorNext() {
-        val struct = struct_for(" { Foo: 1, Bar: '2'}")
+        val struct = struct_for("{ Foo: 1, Bar: '2' }")
         val iter = struct.iterator()
         val foo = iter.next()
         assertEquals(foo, ION.newInt(1))
