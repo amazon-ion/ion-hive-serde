@@ -16,9 +16,9 @@
 package com.amazon.ionhiveserde.objectinspectors
 
 import com.amazon.ionhiveserde.ION
+import com.amazon.ionhiveserde.case_insensitive
 import com.amazon.ionhiveserde.ionNull
-import com.amazon.ionhiveserde.makeCaseInsensitiveStruct
-import com.amazon.ionhiveserde.makeStruct
+import com.amazon.ionhiveserde.struct_for
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category.MAP
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory
 import org.junit.Test
@@ -41,7 +41,7 @@ class IonStructToMapObjectInspectorTest {
 
     @Test
     fun getMapValueElement() {
-        val struct = makeStruct()
+        val struct = struct_for("{a: 1, b: 2, c: 3}")
 
         assertEquals(ION.newInt(1), subject.getMapValueElement(struct, ION.newSymbol("a")))
         assertEquals(ION.newInt(2), subject.getMapValueElement(struct, ION.newSymbol("b")))
@@ -57,17 +57,17 @@ class IonStructToMapObjectInspectorTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun getMapValueElementForNullKey() {
-        assertNull(subject.getMapValueElement(makeStruct(), null))
+        assertNull(subject.getMapValueElement(struct_for("{a: 1, b: 2, c: 3}"), null))
     }
 
     @Test
     fun getMapSize() {
-        assertEquals(3, subject.getMapSize(makeStruct()))
+        assertEquals(3, subject.getMapSize(struct_for("{a: 1, b: 2, c: 3}")))
     }
 
     @Test
     fun getMap() {
-        val struct = makeStruct()
+        val struct = struct_for("{a: 1, b: 2, c: 3}")
         val actual = subject.getMap(struct)
 
         assertEquals(ION.newInt(1), actual["a"])
@@ -77,16 +77,15 @@ class IonStructToMapObjectInspectorTest {
 
     @Test
     fun getMapSizeForCaseInsensitiveDecorator() {
-        assertEquals(2, subject.getMapSize(makeCaseInsensitiveStruct()))
+        assertEquals(2, subject.getMapSize(case_insensitive(struct_for("{a: 1, b: null}"))))
     }
 
     @Test
     fun getMapForCaseInsensitiveDecorator() {
-        val struct = makeCaseInsensitiveStruct()
+        val struct = case_insensitive(struct_for("{a: 1, b: null}"))
         val actual = subject.getMap(struct)
 
         assertEquals(ION.newInt(1), actual["a"])
-        // Ion null should be treated as null here as Hive doesn't know how to parse Ion null
         assertEquals(null, actual["b"])
     }
 
