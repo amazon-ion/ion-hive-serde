@@ -82,18 +82,15 @@ public class IonStructToMapObjectInspector implements MapObjectInspector {
         for (IonValue v : struct) {
             if (!IonUtil.isIonNull(v)) {
                 map.put(v.getFieldName(), v);
+            } else {
+                // Hive can't handle Ion null
+                map.put(v.getFieldName(), null);
             }
         }
 
         return map;
     }
 
-    /**
-     * Return the size of data (Ion struct). Note that it's not the size of the final Map passed to upper layer as
-     * Ion null will be removed during conversion.
-     *
-     * @return size of the original struct
-     */
     @Override
     public int getMapSize(final Object data) {
         if (IonUtil.isIonNull((IonValue) data)) {

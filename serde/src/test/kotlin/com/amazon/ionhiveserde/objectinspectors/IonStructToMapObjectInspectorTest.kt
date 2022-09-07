@@ -62,17 +62,20 @@ class IonStructToMapObjectInspectorTest {
 
     @Test
     fun getMapSize() {
-        assertEquals(3, subject.getMapSize(struct_for("{a: 1, b: 2, c: 3}")))
+        assertEquals(3, subject.getMapSize(struct_for("{a: 1, b: 2, c: null}")))
     }
 
     @Test
     fun getMap() {
-        val struct = struct_for("{a: 1, b: 2, c: 3}")
+        val struct = struct_for("{a: 1, b: 2, c: null}")
         val actual = subject.getMap(struct)
+
+        // We should make sure the null value is inside the map returned from getMap()
+        assertEquals(3, actual.size)
 
         assertEquals(ION.newInt(1), actual["a"])
         assertEquals(ION.newInt(2), actual["b"])
-        assertEquals(ION.newInt(3), actual["c"])
+        assertEquals(null, actual["c"])
     }
 
     @Test
@@ -84,6 +87,9 @@ class IonStructToMapObjectInspectorTest {
     fun getMapForCaseInsensitiveDecorator() {
         val struct = case_insensitive(struct_for("{a: 1, b: null}"))
         val actual = subject.getMap(struct)
+
+        // We should make sure the null value is inside the map returned from getMap()
+        assertEquals(2, actual.size)
 
         assertEquals(ION.newInt(1), actual["a"])
         assertEquals(null, actual["b"])
