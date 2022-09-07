@@ -97,7 +97,12 @@ public class IonStructToStructInspector extends StructObjectInspector {
 
         List<Object> list = new ArrayList<>(struct.size());
         for (IonValue v : struct) {
-            list.add(v);
+            if (!IonUtil.isIonNull(v)) {
+                list.add(v);
+            } else {
+                // Hive can't handle Ion null
+                list.add(null);
+            }
         }
 
         return list;
