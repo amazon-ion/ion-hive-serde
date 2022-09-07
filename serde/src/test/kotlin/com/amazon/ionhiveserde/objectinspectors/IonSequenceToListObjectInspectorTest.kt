@@ -52,7 +52,7 @@ class IonSequenceToListObjectInspectorTest {
     fun getListElement(sequence: IonSequence) {
         assertEquals(ION.newInt(1), subject.getListElement(sequence, 0))
         assertEquals(ION.newInt(2), subject.getListElement(sequence, 1))
-        assertEquals(ION.newNullInt(), subject.getListElement(sequence, 2))
+        assertEquals(null, subject.getListElement(sequence, 2))
 
         assertNull(subject.getListElement(sequence, 4))
         assertNull(subject.getListElement(sequence, -1))

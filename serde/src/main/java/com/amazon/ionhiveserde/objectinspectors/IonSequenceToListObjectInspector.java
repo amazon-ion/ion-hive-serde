@@ -56,8 +56,8 @@ public class IonSequenceToListObjectInspector implements ListObjectInspector {
         if (index < 0 || sequence.size() <= index) {
             return null;
         }
-
-        return sequence.get(index);
+        IonValue v = sequence.get(index);
+        return isIonNull(v) ? null : v;
     }
 
     @Override

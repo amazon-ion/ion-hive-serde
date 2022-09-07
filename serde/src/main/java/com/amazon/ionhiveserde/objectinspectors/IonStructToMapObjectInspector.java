@@ -62,8 +62,9 @@ public class IonStructToMapObjectInspector implements MapObjectInspector {
 
         final IonStruct struct = (IonStruct) data;
         final IonSymbol symbol = (IonSymbol) key;
+        IonValue v = struct.get(symbol.stringValue());
 
-        return struct.get(symbol.stringValue());
+        return IonUtil.isIonNull(v) ? null : v;
     }
 
     @Override

@@ -41,11 +41,11 @@ class IonStructToMapObjectInspectorTest {
 
     @Test
     fun getMapValueElement() {
-        val struct = struct_for("{a: 1, b: 2, c: 3}")
+        val struct = struct_for("{a: 1, b: 2, c: null}")
 
         assertEquals(ION.newInt(1), subject.getMapValueElement(struct, ION.newSymbol("a")))
         assertEquals(ION.newInt(2), subject.getMapValueElement(struct, ION.newSymbol("b")))
-        assertEquals(ION.newInt(3), subject.getMapValueElement(struct, ION.newSymbol("c")))
+        assertEquals(null, subject.getMapValueElement(struct, ION.newSymbol("c")))
         assertNull(subject.getMapValueElement(struct, ION.newSymbol("d")))
     }
 

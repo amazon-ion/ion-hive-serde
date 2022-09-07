@@ -83,8 +83,9 @@ public class IonStructToStructInspector extends StructObjectInspector {
         }
 
         final IonStruct struct = (IonStruct) data;
+        IonValue v = struct.get(fieldRef.getFieldName());
 
-        return struct.get(fieldRef.getFieldName());
+        return isIonNull(v) ? null : v;
     }
 
     @Override
