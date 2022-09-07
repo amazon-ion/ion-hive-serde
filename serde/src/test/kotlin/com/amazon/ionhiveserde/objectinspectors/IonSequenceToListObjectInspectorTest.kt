@@ -43,7 +43,7 @@ class IonSequenceToListObjectInspectorTest {
             arrayOf(ION.newEmptyList(), ION.newEmptySexp()).map {
                 it.add(ION.newInt(1))
                 it.add(ION.newInt(2))
-                it.add(ION.newInt(3))
+                it.add(ION.newNullInt())
                 it
             }.toTypedArray()
 
@@ -52,7 +52,7 @@ class IonSequenceToListObjectInspectorTest {
     fun getListElement(sequence: IonSequence) {
         assertEquals(ION.newInt(1), subject.getListElement(sequence, 0))
         assertEquals(ION.newInt(2), subject.getListElement(sequence, 1))
-        assertEquals(ION.newInt(3), subject.getListElement(sequence, 2))
+        assertEquals(ION.newNullInt(), subject.getListElement(sequence, 2))
 
         assertNull(subject.getListElement(sequence, 4))
         assertNull(subject.getListElement(sequence, -1))
@@ -79,7 +79,11 @@ class IonSequenceToListObjectInspectorTest {
     @Parameters(named = "sequences")
     fun getList(sequence: IonSequence) {
         val actual = subject.getList(sequence)
-        assertEquals(sequence, actual)
+        // We should make sure the null value is inside the list returned by getList()
+        assertEquals(3, actual.size)
+        assertEquals(ION.newInt(1), actual[0])
+        assertEquals(ION.newInt(2), actual[1])
+        assertEquals(null, actual[2])
     }
 
     @Test
