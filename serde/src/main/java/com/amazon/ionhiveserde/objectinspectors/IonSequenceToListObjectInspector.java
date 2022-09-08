@@ -19,11 +19,11 @@ import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
 import static org.apache.hadoop.hive.serde.serdeConstants.LIST_TYPE_NAME;
 
 import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonValue;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.hadoop.hive.serde2.objectinspector.ListObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 
@@ -56,8 +56,8 @@ public class IonSequenceToListObjectInspector implements ListObjectInspector {
         if (index < 0 || sequence.size() <= index) {
             return null;
         }
-        IonValue v = sequence.get(index);
-        return isIonNull(v) ? null : v;
+
+        return IonUtil.handleNull(sequence.get(index));
     }
 
     @Override
@@ -77,18 +77,7 @@ public class IonSequenceToListObjectInspector implements ListObjectInspector {
         }
 
         final IonSequence sequence = (IonSequence) data;
-        final List<IonValue> list = new ArrayList<>(sequence.size());
-
-        for (IonValue v : sequence) {
-            if (!IonUtil.isIonNull(v)) {
-                list.add(v);
-            } else {
-                // Hive can't handle Ion null
-                list.add(null);
-            }
-        }
-
-        return list;
+        return sequence.stream().map(IonUtil::handleNull).collect(Collectors.toList());
     }
 
     @Override
