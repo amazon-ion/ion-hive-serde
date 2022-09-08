@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
@@ -83,9 +86,8 @@ public class IonStructToStructInspector extends StructObjectInspector {
         }
 
         final IonStruct struct = (IonStruct) data;
-        IonValue v = struct.get(fieldRef.getFieldName());
 
-        return isIonNull(v) ? null : v;
+        return IonUtil.handleNull(struct.get(fieldRef.getFieldName()));
     }
 
     @Override
@@ -96,17 +98,8 @@ public class IonStructToStructInspector extends StructObjectInspector {
 
         final IonStruct struct = (IonStruct) data;
 
-        List<Object> list = new ArrayList<>(struct.size());
-        for (IonValue v : struct) {
-            if (!IonUtil.isIonNull(v)) {
-                list.add(v);
-            } else {
-                // Hive can't handle Ion null
-                list.add(null);
-            }
-        }
-
-        return list;
+        return StreamSupport.stream(struct.spliterator(), false).map(IonUtil::handleNull)
+                .collect(Collectors.toList());
     }
 
     @Override
