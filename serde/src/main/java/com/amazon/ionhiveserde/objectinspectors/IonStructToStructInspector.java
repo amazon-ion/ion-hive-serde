@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
@@ -84,7 +87,7 @@ public class IonStructToStructInspector extends StructObjectInspector {
 
         final IonStruct struct = (IonStruct) data;
 
-        return struct.get(fieldRef.getFieldName());
+        return IonUtil.handleNull(struct.get(fieldRef.getFieldName()));
     }
 
     @Override
@@ -95,12 +98,8 @@ public class IonStructToStructInspector extends StructObjectInspector {
 
         final IonStruct struct = (IonStruct) data;
 
-        List<Object> list = new ArrayList<>(struct.size());
-        for (IonValue v : struct) {
-            list.add(v);
-        }
-
-        return list;
+        return StreamSupport.stream(struct.spliterator(), false).map(IonUtil::handleNull)
+                .collect(Collectors.toList());
     }
 
     @Override

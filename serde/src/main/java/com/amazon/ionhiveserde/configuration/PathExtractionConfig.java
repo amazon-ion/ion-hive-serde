@@ -69,11 +69,8 @@ class PathExtractionConfig {
             final BiFunction<IonReader, IonStruct, Integer> callback = (ionReader, struct) -> {
                 final IonValue ionValue = struct.getSystem().newValue(ionReader);
 
-                if (ionValue.isNullValue()) {
-                    struct.put(columnName, null); // Hive can't handle IonNull
-                } else {
-                    struct.put(columnName, ionValue);
-                }
+                // Hive can't handle IonNull, and we will filter all IonNull later in object inspectors
+                struct.put(columnName, ionValue);
 
                 return 0;
             };

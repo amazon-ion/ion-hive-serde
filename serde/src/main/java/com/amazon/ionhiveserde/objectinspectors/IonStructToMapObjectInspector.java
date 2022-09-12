@@ -22,6 +22,9 @@ import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.apache.hadoop.hive.serde2.objectinspector.MapObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
@@ -63,7 +66,7 @@ public class IonStructToMapObjectInspector implements MapObjectInspector {
         final IonStruct struct = (IonStruct) data;
         final IonSymbol symbol = (IonSymbol) key;
 
-        return struct.get(symbol.stringValue());
+        return IonUtil.handleNull(struct.get(symbol.stringValue()));
     }
 
     @Override
@@ -74,16 +77,8 @@ public class IonStructToMapObjectInspector implements MapObjectInspector {
 
         final IonStruct struct = (IonStruct) data;
 
-        // sets the initial size of the map to avoid growing as it's immutable while using the default HashMap load
-        // factor to maintain the same collision performance
-        final int size = (int) Math.ceil(struct.size() / DEFAULT_LOAD_FACTOR);
-
-        final Map<String, IonValue> map = new HashMap<>(size, DEFAULT_LOAD_FACTOR);
-        for (IonValue v : struct) {
-            map.put(v.getFieldName(), v);
-        }
-
-        return map;
+        return StreamSupport.stream(struct.spliterator(), false)
+                .collect(HashMap::new, (m,v) -> m.put(v.getFieldName(), IonUtil.handleNull(v)), HashMap::putAll);
     }
 
     @Override

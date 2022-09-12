@@ -20,7 +20,10 @@ import static org.apache.hadoop.hive.serde.serdeConstants.LIST_TYPE_NAME;
 
 import com.amazon.ion.IonSequence;
 import com.amazon.ion.IonValue;
+
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.hadoop.hive.serde2.objectinspector.ListObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 
@@ -54,7 +57,7 @@ public class IonSequenceToListObjectInspector implements ListObjectInspector {
             return null;
         }
 
-        return sequence.get(index);
+        return IonUtil.handleNull(sequence.get(index));
     }
 
     @Override
@@ -73,7 +76,8 @@ public class IonSequenceToListObjectInspector implements ListObjectInspector {
             return null;
         }
 
-        return (IonSequence) data;
+        final IonSequence sequence = (IonSequence) data;
+        return sequence.stream().map(IonUtil::handleNull).collect(Collectors.toList());
     }
 
     @Override
