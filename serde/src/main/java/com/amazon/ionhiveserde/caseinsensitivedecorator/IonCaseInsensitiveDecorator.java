@@ -22,11 +22,11 @@ import com.amazon.ion.IonValue;
 public class IonCaseInsensitiveDecorator {
     /**
      * Wraps an IonValue in an IonContainerCaseInsensitiveDecorator if it's an ion container.
-
+     *
      * @return a case insensitive decorator wrapped Ion Value.
      */
     public static IonValue wrapValue(final IonValue v) {
-        if (v == null || v.isNullValue()) {
+        if (v == null) {
             return null;
         }
 

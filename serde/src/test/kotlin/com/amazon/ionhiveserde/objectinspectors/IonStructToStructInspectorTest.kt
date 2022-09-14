@@ -17,6 +17,8 @@ package com.amazon.ionhiveserde.objectinspectors
 
 import com.amazon.ion.IonStruct
 import com.amazon.ionhiveserde.ION
+import com.amazon.ionhiveserde.case_insensitive
+import com.amazon.ionhiveserde.struct_for
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category.STRUCT
 import org.apache.hadoop.hive.serde2.objectinspector.StructField
@@ -73,9 +75,22 @@ class IonStructToStructInspectorTest {
 
     @Test
     fun getStructFieldsDataAsList() {
-        val list = subject.getStructFieldsDataAsList(makeStruct())
+        val list = subject.getStructFieldsDataAsList(struct_for("{cboolean: true, cint: 1, cnull: null}"))
+        // We should make sure the null value is inside the list returned by getStructFieldsDataAsList()
+        assertEquals(3, list.size)
         assertEquals(ION.newBool(true), list[0])
         assertEquals(ION.newInt(1), list[1])
+        assertEquals(null, list[2])
+    }
+
+    @Test
+    fun getStructFieldsDataAsListForCaseInsensitiveDecorator() {
+        val list = subject.getStructFieldsDataAsList(case_insensitive(struct_for("{cboolean: true, cint: 1, cnull: null}")))
+        // We should make sure the null value is inside the list returned by getStructFieldsDataAsList()
+        assertEquals(3, list.size)
+        assertEquals(ION.newBool(true), list[0])
+        assertEquals(ION.newInt(1), list[1])
+        assertEquals(null, list[2])
     }
 
     @Test
