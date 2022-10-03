@@ -34,8 +34,10 @@ import com.amazon.ionhiveserde.objectinspectors.IonTextToVarcharObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonTimestampToDateObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonTimestampToTimestampObjectInspector;
 import com.amazon.ionhiveserde.objectinspectors.IonUnionObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonValueToStringObjectInspector;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.CharTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.ListTypeInfo;
@@ -86,6 +88,9 @@ public class IonObjectInspectorFactory {
         new IonTimestampToDateObjectInspector();
     private static final IonTimestampToTimestampObjectInspector TIMESTAMP_TO_TIMESTAMP_OBJECT_INSPECTOR =
         new IonTimestampToTimestampObjectInspector();
+    private static final IonValueToStringObjectInspector ION_VALUE_TO_STRING_OBJECT_INSPECTOR =
+            new IonValueToStringObjectInspector();
+
 
     /**
      * Creates an object inspector for the table correctly configured.
@@ -187,7 +192,7 @@ public class IonObjectInspectorFactory {
                         break;
 
                     case STRING:
-                        objectInspector = TEXT_TO_STRING_OBJECT_INSPECTOR;
+                        objectInspector = ION_VALUE_TO_STRING_OBJECT_INSPECTOR;
                         break;
 
                     case BINARY:
