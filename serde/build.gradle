@@ -110,5 +110,12 @@ dependencies {
     compileOnly "org.apache.hadoop:hadoop-common:${hadoop_version}"
     compileOnly "org.apache.hadoop:hadoop-main:${hadoop_version}"
     compileOnly "org.apache.hadoop:hadoop-mapreduce-client-core:${hadoop_version}"
+
+    testImplementation "io.github.hiverunner:hiverunner:6.1.0"
 }
 
+tasks {
+    test {
+        useJUnitPlatform()
+    }
+}

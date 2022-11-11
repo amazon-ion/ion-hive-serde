@@ -29,12 +29,12 @@ import kotlin.test.assertTrue
 class PathExtractionConfigTest {
     @Test
     fun pathExtractor() {
-        val ionDocument = "{f1: 1, obj: {f2: 2}}"
+        val ionDocument = "{'f-1': 1, obj: {f2: 2}}"
 
         val struct = ION.newEmptyStruct()
 
         val configMap = mapOf(
-                "ion.c1.path_extractor" to "(f1)",
+                "ion.c1.path_extractor" to "(\"f-1\")",
                 "ion.c2.path_extractor" to "(obj f2)")
 
         val pathExtractor = com.amazon.ionhiveserde.configuration.PathExtractionConfig(
