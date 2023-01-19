@@ -21,7 +21,7 @@ package com.amazon.ionhiveserde.integrationtest.docker
  * There is something wrong with the hadoop docker config that's blocking interacting with HDFS from outside the docker
  * container. To work around that we are using shell to send commands to docker to manipulate HDFS.
  *
- * See https://github.com/amzn/ion-hive-serde/issues/37 for more info
+ * See https://github.com/amazon-ion/ion-hive-serde/issues/37 for more info
  */
 object HDFS {
 
