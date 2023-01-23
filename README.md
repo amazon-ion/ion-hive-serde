@@ -2,7 +2,7 @@
 
 An Apache Hive SerDe (short for serializer/deserializer) for the Ion file format, this package supports Hive 2.
 
-[![Build Status](https://github.com/amzn/ion-hive-serde/actions/workflows/main.yml/badge.svg?branch=hive2)](https://github.com/amzn/ion-hive-serde/actions?query=branch%3Ahive2+)
+[![Build Status](https://github.com/amazon-ion/ion-hive-serde/actions/workflows/main.yml/badge.svg?branch=hive2)](https://github.com/amazon-ion/ion-hive-serde/actions?query=branch%3Ahive2+)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive2-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive2-serde)
 [![javadoc.io](https://javadoc.io/badge2/com.amazon.ion/ion-hive2-serde/javadoc.io.svg)](http://www.javadoc.io/doc/com.amazon.ion/ion-hive2-serde)
 
@@ -10,13 +10,13 @@ An Apache Hive SerDe (short for serializer/deserializer) for the Ion file format
 * Read data stored in Ion format both binary and text.
 * Supports all Ion types including nested data structures, see [Type mapping documentation](docs/type-mapping.md)
 for more information.
-* Supports flattening of Ion documents through [path extraction](https://github.com/amzn/ion-java-path-extraction).
+* Supports flattening of Ion documents through [path extraction](https://github.com/amazon-ion/ion-java-path-extraction).
 * Supports importing shared symbol tables and custom symbol table catalogs.
 * `IonInputFormat` and `IonOutputFormat` are able to handle both Ion binary and Ion text.
 * Configurable through [SerDe properties](docs/serde-properties.md).
 
 ### Installation
-Download the latest `ion-hive2-serde-all-<version-number>.jar` from [https://github.com/amzn/ion-hive-serde/releases]
+Download the latest `ion-hive2-serde-all-<version-number>.jar` from [https://github.com/amazon-ion/ion-hive-serde/releases]
 and place the JARs into `hive/lib` or use `ADD JAR` in Hive. That jar contains the SerDe and all its dependencies.
 
 To build it locally run :`./gradlew :serde:singleJar`

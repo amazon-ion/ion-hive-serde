@@ -52,7 +52,7 @@ import org.apache.hadoop.io.Writable;
 
 /**
  * <p>
- * Hive SerDe for the <a href="https://amzn.github.io/ion-docs/docs.html">Amazon Ion</a> data format.
+ * Hive SerDe for the <a href="https://amazon-ion.github.io/ion-docs/docs.html">Amazon Ion</a> data format.
  * </p>
  * <p>
  * For more information on Hive SerDes see <a href="https://cwiki.apache.org/confluence/display/Hive/SerDe">wiki</a>.
@@ -142,7 +142,7 @@ public class IonHiveSerDe extends AbstractSerDe {
                 1. We need a key-value store to carry column values
                 2. The top-level IonStruct as a context object carries the IonSystem which we use as a ValueFactory in
                    the callbacks created in PathExtractionConfig
-                Refer to https://github.com/amzn/ion-hive-serde/issues/61.
+                Refer to https://github.com/amazon-ion/ion-hive-serde/issues/61.
             */
             IonStruct struct = domFactory.newEmptyStruct();
             if (!serDeProperties.pathExtractorCaseSensitivity()) {
