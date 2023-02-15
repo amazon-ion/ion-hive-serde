@@ -26,7 +26,7 @@ WITH SERDEPROPERTIES (
 ```
 
 `OFFSET` is represented as `<signal>hh:mm`, examples: `01:00`, `+01:00`, `-09:30`, `Z` (UTC, same
-as `00:00`), see [timestamp](http://amzn.github.io/ion-docs/docs/spec.html#timestamp) specification
+as `00:00`), see [timestamp](https://amazon-ion.github.io/ion-docs/docs/spec.html#timestamp) specification
 for more details.
 
 ## Serialize null columns
@@ -159,7 +159,7 @@ SELECT c1, c2 FROM myTable;
 ```
 
 ## Path extractor
-[Path extraction](https://github.com/amzn/ion-java-path-extraction) can be used to map between ion values and hive 
+[Path extraction](https://github.com/amazon-ion/ion-java-path-extraction) can be used to map between ion values and hive 
 columns. 
 
 Specification: 
@@ -350,10 +350,10 @@ Hive table
 
 ## Catalog
 Catalogs can be used by the SerDe to find any imported 
-[shared symbol tables](http://amzn.github.io/ion-docs/docs/symbols.html#shared-symbol-tables).
+[shared symbol tables](https://amazon-ion.github.io/ion-docs/docs/symbols.html#shared-symbol-tables).
 
 Catalogs can be defined in one of three ways, in order or priority: 
-1. Class: implementation of [IonCatalog](https://github.com/amzn/ion-java/blob/master/src/com/amazon/ion/IonCatalog.java).
+1. Class: implementation of [IonCatalog](https://github.com/amazon-ion/ion-java/blob/master/src/com/amazon/ion/IonCatalog.java).
 Must be added as a jar to hive in the same way the SerDe jar is included 
 1. Local File: shared symbol tables declared in a local file  
 1. URL: shared symbol tables resource URL 

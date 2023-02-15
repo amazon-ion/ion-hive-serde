@@ -28,7 +28,7 @@ import kotlin.test.assertTrue
 class IonLobToBinaryObjectInspectorTest
     : AbstractIonPrimitiveJavaObjectInspectorTest<IonLob, BytesWritable, ByteArray>() {
 
-    // CLOBs are encoded as 7 bit ASCII, see http://amzn.github.io/ion-docs/docs/spec.html#clob
+    // CLOBs are encoded as 7 bit ASCII, see https://amazon-ion.github.io/ion-docs/docs/spec.html#clob
     private val raw = "12345678".toByteArray(charset = Charsets.US_ASCII)
 
     override val subject = com.amazon.ionhiveserde.objectinspectors.IonLobToBinaryObjectInspector()

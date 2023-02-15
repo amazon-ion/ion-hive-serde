@@ -58,12 +58,12 @@ publishing {
             pom {
                 name = "Ion Hive SerDe"
                 packaging = "jar"
-                url = "https://github.com/amzn/ion-hive-serde"
+                url = "https://github.com/amazon-ion/ion-hive-serde"
                 description = "A Apache Hive SerDe (short for serializer/deserializer) for the Ion file format."
                 scm {
-                    connection = "scm:git@github.com:amzn/ion-hive-serde.git"
-                    developerConnection = "scm:git@github.com:amzn/ion-hive-serde.git"
-                    url = "git@github.com:amzn/ion-hive-serde.git"
+                    connection = "scm:git@github.com:amazon-ion/ion-hive-serde.git"
+                    developerConnection = "scm:git@github.com:amazon-ion/ion-hive-serde.git"
+                    url = "git@github.com:amazon-ion/ion-hive-serde.git"
                 }
 
                 licenses {
@@ -78,7 +78,7 @@ publishing {
                         name = "Amazon Ion Team"
                         email = "ion-team@amazon.com"
                         organization = "Amazon Labs"
-                        organizationUrl = "https://github.com/amzn"
+                        organizationUrl = "https://github.com/amazon-ion"
                     }
                 }
             }
