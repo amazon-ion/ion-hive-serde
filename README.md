@@ -1,3 +1,6 @@
+
+### :warning: Please refer to `hive2` branch for ion-hive2-serde and `hive3` branch for ion-hive3-serde.
+
 ## Amazon Ion Hive Serde
 
 A Apache Hive SerDe (short for serializer/deserializer) for the Ion file format.
