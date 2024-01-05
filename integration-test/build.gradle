@@ -82,7 +82,7 @@ test {
 }
 
 dependencies {
-    testCompile project(":serde")
+    testCompile project(":hive2")
 
     testCompile "org.apache.hive:hive-jdbc:${hive_version}"
 

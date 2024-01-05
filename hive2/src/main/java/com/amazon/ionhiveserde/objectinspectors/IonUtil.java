@@ -13,7 +13,20 @@
  * permissions and limitations under the License.
  */
 
-include ':hive2'
-include ':integration-test'
+package com.amazon.ionhiveserde.objectinspectors;
 
-enableFeaturePreview('STABLE_PUBLISHING') // gradle 5.0 compatibility
+import com.amazon.ion.IonValue;
+
+/**
+ * Utility methods for Ion values.
+ */
+public class IonUtil {
+
+    static boolean isIonNull(final IonValue ionValue) {
+        return ionValue == null || ionValue.isNullValue();
+    }
+
+    public static <T extends IonValue> T handleNull(final T value) {
+        return isIonNull(value) ? null : value;
+    }
+}
