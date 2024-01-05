@@ -15,5 +15,3 @@
 
 include ':hive2'
 include ':integration-test'
-
-enableFeaturePreview('STABLE_PUBLISHING') // gradle 5.0 compatibility

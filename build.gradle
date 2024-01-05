@@ -35,7 +35,7 @@ allprojects {
         mavenCentral()
     }
 
-    apply plugin: "kotlin"
+    // apply plugin: "kotlin"
 
 
     configurations {
@@ -58,26 +58,11 @@ allprojects {
         ignoreFailures = false
         maxWarnings = 0
         maxErrors = 0
-        configDir = file("$rootProject.projectDir/config/checkstyle")
     }
     tasks.withType(Checkstyle) {
         reports {
-            xml.enabled = false
-            html.enabled = true
+            xml.required = false
+            html.required = true
         }
     }
-}
-
-// clean all subprojects
-task cleanAll {
-    subprojects.each {
-        it.afterEvaluate {
-            def cleanTask = it.tasks.findByName('clean')
-            if (cleanTask) {
-                dependsOn(cleanTask)
-            }
-        }
-    }
-
-    dependsOn(clean)
 }

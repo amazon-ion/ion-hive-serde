@@ -12,6 +12,9 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
 
 version = "1.2.0-SNAPSHOT"
 group = "com.amazon.ion"
@@ -20,8 +23,6 @@ apply plugin: 'java-library'
 apply plugin: "maven-publish"
 apply plugin: "signing"
 
-jar.baseName = 'ion-hive2-serde'
-
 // only applicable for src/main/java source set
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -29,20 +30,18 @@ targetCompatibility = 1.8
 // Publishing
 // -------------------------------------------------------------------------------
 
+tasks.withType(Jar) {
+    archiveBaseName.set("ion-hive2-serde")
+}
+
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }
 
 task javadocJar(type: Jar) {
     from javadoc
-    classifier = 'javadoc'
-}
-
-task singleJar(dependsOn: 'build', type: Jar) {
-    baseName = "${jar.baseName}-all"
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+    archiveClassifier = 'javadoc'
 }
 
 
@@ -101,8 +100,8 @@ signing {
 
 dependencies {
     // Included in the single-jar
-    compile "com.amazon.ion:ion-java:${ionjava_version}"
-    compile "com.amazon.ion:ion-java-path-extraction:${pathextraction_version}"
+    implementation "com.amazon.ion:ion-java:${ionjava_version}"
+    implementation "com.amazon.ion:ion-java-path-extraction:${pathextraction_version}"
 
     // Provided by the Hive installation
     compileOnly "org.apache.hive:hive-serde:${hive_version}"
