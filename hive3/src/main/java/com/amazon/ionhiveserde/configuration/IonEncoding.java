@@ -13,6 +13,19 @@
  * permissions and limitations under the License.
  */
 
-include ':hive2'
-include ':hive3'
-include ':integration-test'
+package com.amazon.ionhiveserde.configuration;
+
+/**
+ * Possible Ion encodings.
+ */
+public enum IonEncoding {
+    /**
+     * Ion binary.
+     */
+    BINARY,
+
+    /**
+     * Ion text.
+     */
+    TEXT
+}

@@ -13,6 +13,21 @@
  * permissions and limitations under the License.
  */
 
-include ':hive2'
-include ':hive3'
-include ':integration-test'
+package com.amazon.ionhiveserde.configuration;
+
+import com.amazon.ionhiveserde.configuration.source.RawConfiguration;
+
+/**
+ * Encapsulates Ion related Hadoop job properties.
+ */
+public class HadoopProperties extends BaseProperties {
+
+    /**
+     * Constructor.
+     *
+     * @param configuration raw configuration.
+     */
+    public HadoopProperties(final RawConfiguration configuration) {
+        super(configuration);
+    }
+}

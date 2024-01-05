@@ -13,6 +13,24 @@
  * permissions and limitations under the License.
  */
 
-include ':hive2'
-include ':hive3'
-include ':integration-test'
+package com.amazon.ionhiveserde.configuration;
+
+/**
+ * Possible strategies for the serialize_null property.
+ */
+public enum SerializeNullStrategy {
+    /**
+     * Omit nulls.
+     */
+    OMIT,
+
+    /**
+     * Serialize strongly typed nulls.
+     */
+    TYPED,
+
+    /**
+     * Serialize untyped nulls.
+     */
+    UNTYPED;
+}

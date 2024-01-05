@@ -13,6 +13,20 @@
  * permissions and limitations under the License.
  */
 
-include ':hive2'
-include ':hive3'
-include ':integration-test'
+package com.amazon.ionhiveserde.objectinspectors;
+
+import com.amazon.ion.IonValue;
+
+/**
+ * Utility methods for Ion values.
+ */
+public class IonUtil {
+
+    static boolean isIonNull(final IonValue ionValue) {
+        return ionValue == null || ionValue.isNullValue();
+    }
+
+    public static <T extends IonValue> T handleNull(final T value) {
+        return isIonNull(value) ? null : value;
+    }
+}

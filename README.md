@@ -1,10 +1,12 @@
-## Amazon Ion Hive2 Serde
+## Amazon Ion Hive Serde
 
-An Apache Hive SerDe (short for serializer/deserializer) for the Ion file format, this package supports Hive 2.
+An Apache Hive SerDe (short for serializer/deserializer) for the Ion file format, with support for Hive 2 and Hive 3.
 
-[![Build Status](https://github.com/amazon-ion/ion-hive-serde/actions/workflows/main.yml/badge.svg?branch=hive2)](https://github.com/amazon-ion/ion-hive-serde/actions?query=branch%3Ahive2+)
+[![Build Status](https://github.com/amazon-ion/ion-hive-serde/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/amazon-ion/ion-hive-serde/actions?query=branch%3Amaster)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive2-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive2-serde)
 [![javadoc.io](https://javadoc.io/badge2/com.amazon.ion/ion-hive2-serde/javadoc.io.svg)](http://www.javadoc.io/doc/com.amazon.ion/ion-hive2-serde)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive3-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive3-serde)
+[![javadoc.io](https://javadoc.io/badge2/com.amazon.ion/ion-hive3-serde/javadoc.io.svg)](http://www.javadoc.io/doc/com.amazon.ion/ion-hive3-serde)
 
 ### Features
 * Read data stored in Ion format both binary and text.
@@ -16,19 +18,20 @@ for more information.
 * Configurable through [SerDe properties](docs/serde-properties.md).
 
 ### Installation
-Download the latest `ion-hive2-serde-all-<version-number>.jar` from [https://github.com/amazon-ion/ion-hive-serde/releases]
-and place the JARs into `hive/lib` or use `ADD JAR` in Hive. That jar contains the SerDe and all its dependencies.
+Download the latest `ion-hive2-serde-all-<version-number>.jar` or `ion-hive3-serde-all-<version-number>.jar`from [https://github.com/amazon-ion/ion-hive-serde/releases]
 
 To build it locally run :`./gradlew :serde:singleJar`
 
 ### Building
-Project is separated into two modules:
-1. `serde`: with the SerDe code and unit tests.
+Project is separated into modules:
+1. `hive2`: with the SerDe code and unit tests for Hive 2.
+1. `hive3`: with the SerDe code and unit tests for Hive 3.
 1. `integration-tests`: integration tests using a dockerized hive installation.
 
 To build only the SerDe code:
 ```
-./gradlew :serde:build
+./gradlew :hive2:build
+./gradlew :hive3:build
 ```
 
 To build the SerDe including integration tests:

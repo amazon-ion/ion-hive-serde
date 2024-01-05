@@ -81,6 +81,7 @@ tasks.withType(Test) {
     include "**/*Suite.class"
 }
 
+def hive_version = '[2.3.0,2.4.0)'
 dependencies {
     testCompile project(":hive2")
 

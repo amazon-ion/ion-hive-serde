@@ -13,6 +13,9 @@
  * permissions and limitations under the License.
  */
 
-include ':hive2'
-include ':hive3'
-include ':integration-test'
+/*
+ * ObjectInspectors are adapters from Ion types into Hive types. This package contains one ObjectInspector per
+ * valid Ion to Hive type combination
+ */
+package com.amazon.ionhiveserde.objectinspectors;
+

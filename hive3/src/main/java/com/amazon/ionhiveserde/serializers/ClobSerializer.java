@@ -13,6 +13,24 @@
  * permissions and limitations under the License.
  */
 
-include ':hive2'
-include ':hive3'
-include ':integration-test'
+package com.amazon.ionhiveserde.serializers;
+
+import com.amazon.ion.IonType;
+import com.amazon.ion.IonWriter;
+import java.io.IOException;
+
+/**
+ * Serializer for clob.
+ */
+class ClobSerializer extends AbstractLobSerializer {
+
+    @Override
+    public IonType getIonType() {
+        return IonType.CLOB;
+    }
+
+    @Override
+    protected void writeValue(final IonWriter writer, final byte[] bytes) throws IOException {
+        writer.writeClob(bytes);
+    }
+}
