@@ -18,9 +18,9 @@ for more information.
 * Configurable through [SerDe properties](docs/serde-properties.md).
 
 ### Installation
-Download the latest `ion-hive2-serde-all-<version-number>.jar` or `ion-hive3-serde-all-<version-number>.jar`from [https://github.com/amazon-ion/ion-hive-serde/releases]
+Download the latest `ion-hive(2|3)-serde-all-<version-number>.jar` from [https://github.com/amazon-ion/ion-hive-serde/releases]. (Some releases may have a slightly different jar name, such as `ion-hive(2|3)-serde-<version-number>-all.jar`.)
 
-To build it locally run :`./gradlew :serde:singleJar`
+To build it locally run :`./gradlew shadowJar` 
 
 ### Building
 Project is separated into modules:
@@ -30,8 +30,7 @@ Project is separated into modules:
 
 To build only the SerDe code:
 ```
-./gradlew :hive2:build
-./gradlew :hive3:build
+./gradlew :hive2:build :hive3:build
 ```
 
 To build the SerDe including integration tests:
