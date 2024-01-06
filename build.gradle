@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 /*
  * Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -15,7 +17,7 @@
 
 // sets up kotlin plugin
 buildscript {
-    ext.kotlin_version = '[1.2.0,1.4.10)'
+    ext.kotlin_version = '1.9.22'
     ext.ionjava_version = '[1.4.0,2.0.0)'
     ext.pathextraction_version = '[1.2.0,2.0.0)'
     ext.hadoop_version = '[2.7.0,2.8.0)'
@@ -25,8 +27,12 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
+}
+
+plugins {
+    id "org.jetbrains.kotlin.jvm" version '1.9.22'
 }
 
 allprojects {
@@ -34,21 +40,46 @@ allprojects {
         mavenCentral()
     }
 
-    // apply plugin: "kotlin"
-
-
-    configurations {
-        // to make compileOnly available to testing scope
-        testCompile.extendsFrom(compileOnly)
+    tasks.withType(JavaCompile) {
+        // Because we set the `release` option, you can no longer build ion-java using JDK 8. However, we continue to
+        // emit JDK 8 compatible classes due to widespread use of this library with JDK 8.
+        options.release.set(8)
     }
+
+    java {
+        sourceCompatibility = 8
+    }
+
+    kotlin {
+        jvmToolchain(8)
+    }
+
+    apply {
+        plugin("org.jetbrains.kotlin.jvm")
+    }
+
+    tasks.withType(KotlinCompile).all {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+
+    tasks.withType(Test) {
+        useJUnitPlatform()
+    }
+
+//    configurations {
+//        // to make compileOnly available to testing scope
+//        testCompile.extendsFrom(compileOnly)
+//    }
 
     dependencies {
         // using kotlin to make tests less verbose
-        testCompile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-        testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+        // testCompile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+        testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
-        testCompile "junit:junit:[4.0.0,5.0.0)"
-        testCompile "pl.pragmatists:JUnitParams:[1.1.0,1.2.0)"
+        testImplementation "junit:junit:[4.0.0,5.0.0)"
+        testImplementation "pl.pragmatists:JUnitParams:[1.1.0,1.2.0)"
     }
 
     apply plugin: 'checkstyle'

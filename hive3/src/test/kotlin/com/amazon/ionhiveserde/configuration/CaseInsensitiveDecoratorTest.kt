@@ -15,11 +15,7 @@
 
 package com.amazon.ionhiveserde.configuration
 
-<<<<<<<< HEAD:hive2/src/test/kotlin/com/amazon/ionhiveserde/configuration/CaseInsensitiveDecoratorTest.kt
-import com.amazon.ion.IonValue
-========
 import com.amazon.ion.*
->>>>>>>> hive3:hive3/src/test/kotlin/com/amazon/ionhiveserde/configuration/CaseInsensitiveDecoratorTest.kt
 import com.amazon.ionhiveserde.*
 import com.amazon.ionhiveserde.ION
 import com.amazon.ionhiveserde.caseinsensitivedecorator.IonSequenceCaseInsensitiveDecorator

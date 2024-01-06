@@ -28,6 +28,15 @@ apply plugin: "signing"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+configurations {
+    bundled
+    implementation.extendsFrom(bundled)
+}
+
+shadowJar {
+    configurations = [project.configurations.bundled]
+}
+
 // Publishing
 // -------------------------------------------------------------------------------
 
@@ -101,8 +110,11 @@ signing {
 
 dependencies {
     // Included in the single-jar
-    implementation "com.amazon.ion:ion-java:${ionjava_version}"
-    implementation "com.amazon.ion:ion-java-path-extraction:${pathextraction_version}"
+    bundled("com.amazon.ion:ion-java:${ionjava_version}")
+    bundled("com.amazon.ion:ion-java-path-extraction:${pathextraction_version}") {
+        // ion-java-path-extraction uses Kotlin only for testing
+        exclude(group: "org.jetbrains.kotlin")
+    }
 
     // Provided by the Hive installation
     compileOnly "org.apache.hive:hive-serde:${hive_version}"
@@ -110,5 +122,17 @@ dependencies {
     compileOnly "org.apache.hadoop:hadoop-common:${hadoop_version}"
     compileOnly "org.apache.hadoop:hadoop-main:${hadoop_version}"
     compileOnly "org.apache.hadoop:hadoop-mapreduce-client-core:${hadoop_version}"
+    // But we'll also use them for test implementation
+    testImplementation "org.apache.hive:hive-serde:${hive_version}"
+    testImplementation "org.apache.hive:hive-exec:${hive_version}", { transitive = false }
+    testImplementation "org.apache.hadoop:hadoop-common:${hadoop_version}"
+    testImplementation "org.apache.hadoop:hadoop-main:${hadoop_version}"
+    testImplementation "org.apache.hadoop:hadoop-mapreduce-client-core:${hadoop_version}"
+
+    // Test framework dependencies
+    testImplementation "pl.pragmatists:JUnitParams:[1.1.0,1.2.0)"
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+    testCompileOnly("junit:junit:4.13")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
 }
 

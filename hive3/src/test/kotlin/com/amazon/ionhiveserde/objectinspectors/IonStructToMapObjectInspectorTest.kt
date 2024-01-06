@@ -116,8 +116,4 @@ class IonStructToMapObjectInspectorTest {
     fun getCategory() {
         assertEquals(MAP, subject.category)
     }
-<<<<<<<< HEAD:hive2/src/test/kotlin/com/amazon/ionhiveserde/objectinspectors/IonStructToMapObjectInspectorTest.kt
 }
-========
-}
->>>>>>>> hive3:hive3/src/test/kotlin/com/amazon/ionhiveserde/objectinspectors/IonStructToMapObjectInspectorTest.kt

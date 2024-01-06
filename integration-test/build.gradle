@@ -83,11 +83,12 @@ tasks.withType(Test) {
 
 def hive_version = '[2.3.0,2.4.0)'
 dependencies {
-    testCompile project(":hive2")
+    testImplementation project(":hive2")
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
-    testCompile "org.apache.hive:hive-jdbc:${hive_version}"
+    testImplementation "org.apache.hive:hive-jdbc:${hive_version}"
 
     // compile only dependencies are not transitive so we need to redeclare some here
-    testCompile "org.apache.hive:hive-exec:${hive_version}", { transitive = false }
-    testCompile "org.apache.hadoop:hadoop-common:${hadoop_version}"
+    testImplementation "org.apache.hive:hive-exec:${hive_version}", { transitive = false }
+    testImplementation "org.apache.hadoop:hadoop-common:${hadoop_version}"
 }
