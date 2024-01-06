@@ -41,9 +41,10 @@ allprojects {
     }
 
     tasks.withType(JavaCompile) {
-        // Because we set the `release` option, you can no longer build ion-java using JDK 8. However, we continue to
-        // emit JDK 8 compatible classes due to widespread use of this library with JDK 8.
-        options.release.set(8)
+        // The release option is not available for the Java 8 compiler, but that's okay because we're targeting 8.
+        if(JavaVersion.current() != JavaVersion.VERSION_1_8){
+            options.release.set(8)
+        }
     }
 
     java {
