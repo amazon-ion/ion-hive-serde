@@ -29,12 +29,32 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 configurations {
+    // Dependencies that get bundled into the fat Jar
     bundled
-    api.extendsFrom(bundled)
+    // Dependencies provided by Hive
+    hiveRuntime
+    // Dependencies used by the test code that are not shared with anything else
+    testRunner
+
+    implementation.extendsFrom(bundled, hiveRuntime)
+    testImplementation.extendsFrom(testRunner)
 }
 
 shadowJar {
     configurations = [project.configurations.bundled]
+}
+
+task shadowJarTest(type: Test) {
+    group "verification"
+    dependsOn(shadowJar)
+    classpath = shadowJar.outputs.files +
+            project.configurations.hiveRuntime +
+            project.configurations.testRunner +
+            project.sourceSets.test.output
+}
+
+check {
+    dependsOn(shadowJarTest)
 }
 
 // Publishing
@@ -117,22 +137,16 @@ dependencies {
     }
 
     // Provided by the Hive installation
-    compileOnly "org.apache.hive:hive-serde:${hive_version}"
-    compileOnly "org.apache.hive:hive-exec:${hive_version}", { transitive = false }
-    compileOnly "org.apache.hadoop:hadoop-common:${hadoop_version}"
-    compileOnly "org.apache.hadoop:hadoop-main:${hadoop_version}"
-    compileOnly "org.apache.hadoop:hadoop-mapreduce-client-core:${hadoop_version}"
-    // But we'll also use them for test implementation
-    testImplementation "org.apache.hive:hive-serde:${hive_version}"
-    testImplementation "org.apache.hive:hive-exec:${hive_version}", { transitive = false }
-    testImplementation "org.apache.hadoop:hadoop-common:${hadoop_version}"
-    testImplementation "org.apache.hadoop:hadoop-main:${hadoop_version}"
-    testImplementation "org.apache.hadoop:hadoop-mapreduce-client-core:${hadoop_version}"
+    hiveRuntime "org.apache.hive:hive-serde:${hive_version}"
+    hiveRuntime "org.apache.hive:hive-exec:${hive_version}", { transitive = false }
+    hiveRuntime "org.apache.hadoop:hadoop-common:${hadoop_version}"
+    hiveRuntime "org.apache.hadoop:hadoop-main:${hadoop_version}"
+    hiveRuntime "org.apache.hadoop:hadoop-mapreduce-client-core:${hadoop_version}"
 
     // Test framework dependencies
-    testImplementation "pl.pragmatists:JUnitParams:[1.1.0,1.2.0)"
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    testCompileOnly("junit:junit:4.13")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine")
+    testRunner "pl.pragmatists:JUnitParams:[1.1.0,1.2.0)"
+    testRunner("org.junit.jupiter:junit-jupiter:5.7.1")
+    testRunner("org.junit.vintage:junit-vintage-engine")
+    testRunner("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
 
