@@ -4,14 +4,6 @@ plugins {
     id("java-test-fixtures")
 }
 
-// TODO: Move to all-projects
-group = "com.amazon.ion"
-version = "NO-VERSION"
-
-repositories {
-    mavenCentral()
-}
-
 // Dependencies used by the test code that are not shared with anything else
 val testImplementationHive2 by configurations.creating {
     extendsFrom(configurations.testImplementation.get(), configurations.hive2Runtime.get())
@@ -46,9 +38,10 @@ tasks {
     }
 
     val testHive2 = create<Test>("testHive2") {
+        dependsOn(compileJavaHive2)
         classpath = testImplementationHive2 + project.sourceSets.test.get().output
         useJUnitPlatform()
     }
 
-    check { dependsOn(compileJavaHive2, testHive2) }
+    check { dependsOn(testHive2) }
 }

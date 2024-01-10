@@ -13,14 +13,18 @@
  * permissions and limitations under the License.
  */
 
-// sets up kotlin plugin
-//buildscript {
-//    repositories {
-//        mavenCentral()
-//    }
-//}
+plugins {
+    id("ion-hive-serde.dependencies")
+    id("ion-hive-serde.conventions")
+    id("ion-hive-serde.publishing")
+}
 
-allprojects {
-    group = "com.amazon.ion"
-    version = "1.3.0-SNAPSHOT"
+configurations {
+    implementation { extendsFrom(bundled.get(), hive3Runtime.get()) }
+    testImplementation { extendsFrom(testFramework.get()) }
+}
+
+dependencies {
+    bundled(project(":hive-common"))
+    testFramework(testFixtures(project(":hive-common")))
 }

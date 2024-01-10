@@ -15,6 +15,6 @@
 
 include ':hive2'
 include ':hive3'
-// include ':integration-test'
+include ':integration-test'
 include ':hive-common'
 

@@ -1,4 +1,6 @@
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.URI
 
 repositories {
     mavenCentral()
@@ -43,11 +45,10 @@ tasks {
         }
     }
 
-    tasks.withType<Checkstyle>() {
+    withType<Checkstyle>().all {
         reports {
             xml.required.set(false)
             html.required.set(true)
         }
     }
 }
-
