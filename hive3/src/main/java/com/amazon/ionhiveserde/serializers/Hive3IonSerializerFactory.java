@@ -13,8 +13,13 @@
  * permissions and limitations under the License.
  */
 
-include ':hive2'
-include ':hive3'
-// include ':integration-test'
-include ':hive-common'
+package com.amazon.ionhiveserde.serializers;
 
+import com.amazon.ionhiveserde.configuration.SerDeProperties;
+
+public class Hive3IonSerializerFactory extends IonSerializerFactory {
+    @Override
+    protected IonSerializer newTimestampSerializer(final SerDeProperties properties) {
+        return new TimestampSerializer(properties.getTimestampOffsetInMinutes());
+    }
+}

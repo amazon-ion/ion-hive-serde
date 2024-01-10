@@ -13,8 +13,25 @@
  * permissions and limitations under the License.
  */
 
-include ':hive2'
-include ':hive3'
-// include ':integration-test'
-include ':hive-common'
+package com.amazon.ionhiveserde.serializers;
 
+import com.amazon.ion.IonType;
+import com.amazon.ion.IonWriter;
+
+import java.io.IOException;
+
+/**
+ * String serializer.
+ */
+class StringSerializer extends AbstractTextSerializer {
+
+    @Override
+    protected void writeText(final IonWriter writer, final String text) throws IOException {
+        writer.writeString(text);
+    }
+
+    @Override
+    public IonType getIonType() {
+        return IonType.STRING;
+    }
+}

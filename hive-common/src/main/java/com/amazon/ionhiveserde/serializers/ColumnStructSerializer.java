@@ -13,8 +13,16 @@
  * permissions and limitations under the License.
  */
 
-include ':hive2'
-include ':hive3'
-// include ':integration-test'
-include ':hive-common'
+package com.amazon.ionhiveserde.serializers;
 
+import com.amazon.ionhiveserde.configuration.SerDeProperties;
+
+/**
+ * Struct serializer.
+ */
+class ColumnStructSerializer extends AbstractStructSerializer {
+
+    ColumnStructSerializer(final IonSerializerFactory ionSerializerFactory, final SerDeProperties properties) {
+        super(ionSerializerFactory, properties);
+    }
+}

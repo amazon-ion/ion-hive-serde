@@ -14,11 +14,13 @@
  */
 plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id("ion-hive-serde.dependencies")
+    id("ion-hive-serde.conventions")
 }
-
-def hive_version = '[2.3.0,2.4.0)'
 version = "1.2.0-SNAPSHOT"
 group = "com.amazon.ion"
+
+
 
 apply plugin: 'java-library'
 apply plugin: "maven-publish"
@@ -29,15 +31,14 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 configurations {
-    // Dependencies that get bundled into the fat Jar
-    bundled
-    // Dependencies provided by Hive
-    hiveRuntime
-    // Dependencies used by the test code that are not shared with anything else
-    testRunner
+    implementation.extendsFrom(bundled, hive2Runtime)
+    testImplementation.extendsFrom(testFramework)
+}
 
-    implementation.extendsFrom(bundled, hiveRuntime)
-    testImplementation.extendsFrom(testRunner)
+
+dependencies {
+    bundled(project(":hive-common"))
+    testFramework(testFixtures(project(":hive-common")))
 }
 
 shadowJar {
@@ -48,8 +49,8 @@ task shadowJarTest(type: Test) {
     group "verification"
     dependsOn(shadowJar)
     classpath = shadowJar.outputs.files +
-            project.configurations.hiveRuntime +
-            project.configurations.testRunner +
+            project.configurations.hive2Runtime +
+            project.configurations.testFramework +
             project.sourceSets.test.output
 }
 
@@ -127,26 +128,3 @@ publishing {
 signing {
     sign publishing.publications.mavenJava
 }
-
-dependencies {
-    // Included in the single-jar
-    bundled("com.amazon.ion:ion-java:${ionjava_version}")
-    bundled("com.amazon.ion:ion-java-path-extraction:${pathextraction_version}") {
-        // ion-java-path-extraction uses Kotlin only for testing
-        exclude(group: "org.jetbrains.kotlin")
-    }
-
-    // Provided by the Hive installation
-    hiveRuntime "org.apache.hive:hive-serde:${hive_version}"
-    hiveRuntime "org.apache.hive:hive-exec:${hive_version}", { transitive = false }
-    hiveRuntime "org.apache.hadoop:hadoop-common:${hadoop_version}"
-    hiveRuntime "org.apache.hadoop:hadoop-main:${hadoop_version}"
-    hiveRuntime "org.apache.hadoop:hadoop-mapreduce-client-core:${hadoop_version}"
-
-    // Test framework dependencies
-    testRunner "pl.pragmatists:JUnitParams:[1.1.0,1.2.0)"
-    testRunner("org.junit.jupiter:junit-jupiter:5.7.1")
-    testRunner("org.junit.vintage:junit-vintage-engine")
-    testRunner("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-}
-
