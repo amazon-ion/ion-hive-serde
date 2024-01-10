@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.create
@@ -38,6 +41,10 @@ tasks {
 
     check {
         dependsOn(testShadowJar)
+    }
+
+    assemble {
+        dependsOn(shadowJar)
     }
 }
 
