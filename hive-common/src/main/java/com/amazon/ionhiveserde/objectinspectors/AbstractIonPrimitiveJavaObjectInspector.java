@@ -15,11 +15,11 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import com.amazon.ion.IonValue;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.AbstractPrimitiveObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.PrimitiveTypeInfo;
-
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
 
 /**
  * Base class for all Ion Primitive/Scalar, Object Inspectors.

@@ -17,12 +17,16 @@ package com.amazon.ionhiveserde.configuration;
 
 import com.amazon.ion.IonType;
 import com.amazon.ionhiveserde.configuration.source.RawConfiguration;
-import org.apache.hadoop.hive.serde.serdeConstants;
-import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.hadoop.hive.serde.serdeConstants;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 
 /**
  * Encapsulates the serialize_as configuration.

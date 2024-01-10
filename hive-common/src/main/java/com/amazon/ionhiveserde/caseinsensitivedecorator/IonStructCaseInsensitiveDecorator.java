@@ -15,7 +15,12 @@
 
 package com.amazon.ionhiveserde.caseinsensitivedecorator;
 
-import com.amazon.ion.*;
+import com.amazon.ion.ContainedValueException;
+import com.amazon.ion.IonStruct;
+import com.amazon.ion.IonValue;
+import com.amazon.ion.SymbolToken;
+import com.amazon.ion.UnknownSymbolException;
+import com.amazon.ion.ValueFactory;
 import java.util.Map;
 
 public class IonStructCaseInsensitiveDecorator extends IonContainerCaseInsensitiveDecorator implements IonStruct {

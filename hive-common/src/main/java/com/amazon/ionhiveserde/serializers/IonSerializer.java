@@ -17,9 +17,8 @@ package com.amazon.ionhiveserde.serializers;
 
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-
 import java.io.IOException;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 
 /**
  * Interface for Ion serializers.

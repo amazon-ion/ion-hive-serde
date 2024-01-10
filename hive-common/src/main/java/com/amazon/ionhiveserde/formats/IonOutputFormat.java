@@ -16,6 +16,10 @@
 package com.amazon.ionhiveserde.formats;
 
 import com.amazon.ionhiveserde.AbstractIonHiveSerDe;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.Optional;
+import java.util.Properties;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -32,11 +36,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.Progressable;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.Optional;
-import java.util.Properties;
 
 /**
  * <p>

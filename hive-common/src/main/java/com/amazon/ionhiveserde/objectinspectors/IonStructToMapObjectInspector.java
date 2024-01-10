@@ -15,18 +15,17 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static org.apache.hadoop.hive.serde.serdeConstants.MAP_TYPE_NAME;
+
 import com.amazon.ion.IonStruct;
 import com.amazon.ion.IonSymbol;
 import com.amazon.ion.IonValue;
-import org.apache.hadoop.hive.serde2.objectinspector.MapObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.StreamSupport;
-
-import static org.apache.hadoop.hive.serde.serdeConstants.MAP_TYPE_NAME;
+import org.apache.hadoop.hive.serde2.objectinspector.MapObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 
 /**
  * Adapts an {@link IonStruct} for the map Hive type.

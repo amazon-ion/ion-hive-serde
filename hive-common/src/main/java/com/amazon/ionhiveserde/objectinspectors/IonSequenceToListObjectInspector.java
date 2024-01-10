@@ -15,16 +15,15 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
-import com.amazon.ion.IonSequence;
-import com.amazon.ion.IonValue;
-import org.apache.hadoop.hive.serde2.objectinspector.ListObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
 import static org.apache.hadoop.hive.serde.serdeConstants.LIST_TYPE_NAME;
+
+import com.amazon.ion.IonSequence;
+import com.amazon.ion.IonValue;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.hadoop.hive.serde2.objectinspector.ListObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 
 /**
  * Adapts an {@link IonSequence} for the array Hive type.

@@ -15,9 +15,8 @@
 
 package com.amazon.ionhiveserde.configuration.source;
 
-import org.apache.hadoop.conf.Configuration;
-
 import java.util.Optional;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  * Adapts Hadoop {@link Configuration} instances to the {@link RawConfiguration} interface.

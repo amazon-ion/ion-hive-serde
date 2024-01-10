@@ -17,11 +17,10 @@ package com.amazon.ionhiveserde.serializers;
 
 import com.amazon.ion.IonType;
 import com.amazon.ionhiveserde.configuration.SerDeProperties;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 
 /**
  * Factory for Ion serializers, reuses serializers when possible.
@@ -29,6 +28,7 @@ import java.util.Map;
 abstract class IonSerializerFactory {
 
     private final Map<IonType, IonSerializer> serializerByTypeCache;
+
     {
         serializerByTypeCache = new HashMap<>();
         serializerByTypeCache.put(IonType.BOOL, new BoolSerializer());

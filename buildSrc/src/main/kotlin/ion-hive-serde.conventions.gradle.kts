@@ -18,7 +18,7 @@ java {
 checkstyle {
     toolVersion = "8.18"
     // TODO: Fix checkstyle failures
-    isIgnoreFailures = true
+    isIgnoreFailures = false
     maxWarnings = 0
     maxErrors = 0
 }

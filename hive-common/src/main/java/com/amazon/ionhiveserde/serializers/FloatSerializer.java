@@ -17,13 +17,12 @@ package com.amazon.ionhiveserde.serializers;
 
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
+import java.io.IOException;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector.PrimitiveCategory;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.DoubleObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.FloatObjectInspector;
-
-import java.io.IOException;
 
 /**
  * Float serializer.

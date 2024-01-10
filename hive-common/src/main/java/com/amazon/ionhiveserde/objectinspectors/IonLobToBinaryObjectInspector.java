@@ -15,13 +15,13 @@
 
 package com.amazon.ionhiveserde.objectinspectors;
 
+import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
+
 import com.amazon.ion.IonLob;
 import com.amazon.ion.IonValue;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.BinaryObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.io.BytesWritable;
-
-import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
 
 /**
  * Adapts an {@link IonLob} for the binary Hive type.

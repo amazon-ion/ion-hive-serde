@@ -19,14 +19,13 @@ import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
 import com.amazon.ionhiveserde.configuration.SerDeProperties;
 import com.amazon.ionhiveserde.configuration.SerializeNullStrategy;
+import java.io.IOException;
+import java.util.Map;
 import org.apache.hadoop.hive.serde2.objectinspector.MapObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
-
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * Base class for struct serializers.

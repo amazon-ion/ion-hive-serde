@@ -21,11 +21,10 @@ import com.amazon.ionhiveserde.AbstractIonHiveSerDe;
 import com.amazon.ionhiveserde.configuration.source.JavaPropertiesAdapter;
 import com.amazon.ionhiveserde.configuration.source.RawConfiguration;
 import com.amazon.ionpathextraction.PathExtractor;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
-
 import java.util.List;
 import java.util.Properties;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 
 /**
  * Encapsulates all SerDe properties.
@@ -44,7 +43,8 @@ public class SerDeProperties extends BaseProperties {
     /**
      * Constructor.
      *
-     * @param properties {@link Properties} passed to {@link AbstractIonHiveSerDe#initialize(Configuration, Properties)}.
+     * @param properties {@link Properties} passed to
+     *                   {@link AbstractIonHiveSerDe#initialize(Configuration, Properties)}.
      * @param columnNames table column names in the same order as types
      * @param columnTypes table column types in the same order as names
      */

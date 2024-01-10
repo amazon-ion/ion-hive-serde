@@ -16,14 +16,36 @@
 package com.amazon.ionhiveserde.objectinspectors.factories;
 
 import com.amazon.ionhiveserde.configuration.SerDeProperties;
-import com.amazon.ionhiveserde.objectinspectors.*;
+import com.amazon.ionhiveserde.objectinspectors.IonBooleanToBooleanObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonFloatToDoubleObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonFloatToFloatObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonIntToBigIntObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonIntToIntObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonIntToSmallIntObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonIntToTinyIntObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonLobToBinaryObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonNumberToDecimalObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonSequenceToListObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonStructToMapObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonStructToStructInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonTextToCharObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonTextToStringObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonTextToVarcharObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonUnionObjectInspector;
+import com.amazon.ionhiveserde.objectinspectors.IonValueToStringObjectInspector;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.DateObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.TimestampObjectInspector;
-import org.apache.hadoop.hive.serde2.typeinfo.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.hadoop.hive.serde2.typeinfo.CharTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.ListTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.MapTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.PrimitiveTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.UnionTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.VarcharTypeInfo;
 
 /**
  * Factory to create Ion object inspectors. Caches object inspectors based on {@link TypeInfo}.
@@ -31,47 +53,49 @@ import java.util.List;
 public class IonObjectInspectorFactory {
 
     // Non configurable object inspectors
-    private final IonBooleanToBooleanObjectInspector BOOLEAN_TO_BOOLEAN_OBJECT_INSPECTOR =
+    private static final IonBooleanToBooleanObjectInspector BOOLEAN_TO_BOOLEAN_OBJECT_INSPECTOR =
         new IonBooleanToBooleanObjectInspector();
-    private final IonIntToTinyIntObjectInspector INT_TO_TINYINT_FAIL_OBJECT_INSPECTOR =
+    private static final IonIntToTinyIntObjectInspector INT_TO_TINYINT_FAIL_OBJECT_INSPECTOR =
         new IonIntToTinyIntObjectInspector(true);
-    private final IonIntToTinyIntObjectInspector INT_TO_TINYINT_TRUNCATE_OBJECT_INSPECTOR =
+    private static final IonIntToTinyIntObjectInspector INT_TO_TINYINT_TRUNCATE_OBJECT_INSPECTOR =
         new IonIntToTinyIntObjectInspector(false);
-    private final IonIntToSmallIntObjectInspector INT_TO_SMALLINT_FAIL_OBJECT_INSPECTOR =
+    private static final IonIntToSmallIntObjectInspector INT_TO_SMALLINT_FAIL_OBJECT_INSPECTOR =
         new IonIntToSmallIntObjectInspector(true);
-    private final IonIntToSmallIntObjectInspector INT_TO_SMALLINT_TRUNCATE_OBJECT_INSPECTOR =
+    private static final IonIntToSmallIntObjectInspector INT_TO_SMALLINT_TRUNCATE_OBJECT_INSPECTOR =
         new IonIntToSmallIntObjectInspector(false);
-    private final IonIntToIntObjectInspector INT_TO_INT_FAIL_OBJECT_INSPECTOR =
+    private static final IonIntToIntObjectInspector INT_TO_INT_FAIL_OBJECT_INSPECTOR =
         new IonIntToIntObjectInspector(true);
-    private final IonIntToIntObjectInspector INT_TO_INT_TRUNCATE_OBJECT_INSPECTOR =
+    private static final IonIntToIntObjectInspector INT_TO_INT_TRUNCATE_OBJECT_INSPECTOR =
         new IonIntToIntObjectInspector(false);
-    private final IonIntToBigIntObjectInspector INT_TO_BIGINT_FAIL_OBJECT_INSPECTOR =
+    private static final IonIntToBigIntObjectInspector INT_TO_BIGINT_FAIL_OBJECT_INSPECTOR =
         new IonIntToBigIntObjectInspector(true);
-    private final IonIntToBigIntObjectInspector INT_TO_BIGINT_TRUNCATE_OBJECT_INSPECTOR =
+    private static final IonIntToBigIntObjectInspector INT_TO_BIGINT_TRUNCATE_OBJECT_INSPECTOR =
         new IonIntToBigIntObjectInspector(false);
-    private final IonFloatToFloatObjectInspector FLOAT_TO_FLOAT_FAIL_OBJECT_INSPECTOR =
+    private static final IonFloatToFloatObjectInspector FLOAT_TO_FLOAT_FAIL_OBJECT_INSPECTOR =
         new IonFloatToFloatObjectInspector(true);
-    private final IonFloatToFloatObjectInspector FLOAT_TO_FLOAT_TRUNCATE_OBJECT_INSPECTOR =
+    private static final IonFloatToFloatObjectInspector FLOAT_TO_FLOAT_TRUNCATE_OBJECT_INSPECTOR =
         new IonFloatToFloatObjectInspector(false);
-    private final IonFloatToDoubleObjectInspector FLOAT_TO_DOUBLE_OBJECT_INSPECTOR =
+    private static final IonFloatToDoubleObjectInspector FLOAT_TO_DOUBLE_OBJECT_INSPECTOR =
         new IonFloatToDoubleObjectInspector();
-    private final IonNumberToDecimalObjectInspector NUMBER_TO_DECIMAL_OBJECT_INSPECTOR =
+    private static final IonNumberToDecimalObjectInspector NUMBER_TO_DECIMAL_OBJECT_INSPECTOR =
         new IonNumberToDecimalObjectInspector();
-    private final IonTextToStringObjectInspector TEXT_TO_STRING_OBJECT_INSPECTOR =
+    private static final IonTextToStringObjectInspector TEXT_TO_STRING_OBJECT_INSPECTOR =
         new IonTextToStringObjectInspector();
-    private final IonLobToBinaryObjectInspector LOB_TO_BINARY_OBJECT_INSPECTOR =
+    private static final IonLobToBinaryObjectInspector LOB_TO_BINARY_OBJECT_INSPECTOR =
         new IonLobToBinaryObjectInspector();
-    private final DateObjectInspector TIMESTAMP_TO_DATE_OBJECT_INSPECTOR;
-    private final TimestampObjectInspector TIMESTAMP_TO_TIMESTAMP_OBJECT_INSPECTOR;
-    private final IonValueToStringObjectInspector ION_VALUE_TO_STRING_OBJECT_INSPECTOR =
+    private static final IonValueToStringObjectInspector ION_VALUE_TO_STRING_OBJECT_INSPECTOR =
             new IonValueToStringObjectInspector();
 
+    // Injected object inspectors
+    private final TimestampObjectInspector timestampToTimestampObjectInspector;
+    private final DateObjectInspector timestampToDateObjectInspector;
+
     public IonObjectInspectorFactory(
-            DateObjectInspector timestampToDateObjectInspector,
-            TimestampObjectInspector timestampToTimestampObjectInspector
+            final DateObjectInspector timestampToDateObjectInspector,
+            final TimestampObjectInspector timestampToTimestampObjectInspector
     ) {
-        TIMESTAMP_TO_DATE_OBJECT_INSPECTOR = timestampToDateObjectInspector;
-        TIMESTAMP_TO_TIMESTAMP_OBJECT_INSPECTOR = timestampToTimestampObjectInspector;
+        this.timestampToDateObjectInspector = timestampToDateObjectInspector;
+        this.timestampToTimestampObjectInspector = timestampToTimestampObjectInspector;
     }
 
     /**
@@ -182,11 +206,11 @@ public class IonObjectInspectorFactory {
                         break;
 
                     case DATE:
-                        objectInspector = TIMESTAMP_TO_DATE_OBJECT_INSPECTOR;
+                        objectInspector = timestampToDateObjectInspector;
                         break;
 
                     case TIMESTAMP:
-                        objectInspector = TIMESTAMP_TO_TIMESTAMP_OBJECT_INSPECTOR;
+                        objectInspector = timestampToTimestampObjectInspector;
                         break;
 
                     case VOID:

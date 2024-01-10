@@ -18,10 +18,9 @@ package com.amazon.ionhiveserde.serializers;
 import com.amazon.ion.IonType;
 import com.amazon.ion.IonWriter;
 import com.amazon.ionhiveserde.configuration.SerDeProperties;
+import java.io.IOException;
 import org.apache.hadoop.hive.serde2.objectinspector.ListObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-
-import java.io.IOException;
 
 /**
  * Serializer for sequences.
@@ -31,7 +30,11 @@ class SequenceSerializer implements IonSerializer {
     private final SerDeProperties properties;
     private final IonType sequenceType;
 
-    SequenceSerializer(final IonSerializerFactory ionSerializerFactory, final SerDeProperties properties, final IonType sequenceType) {
+    SequenceSerializer(
+            final IonSerializerFactory ionSerializerFactory,
+            final SerDeProperties properties,
+            final IonType sequenceType
+    ) {
         this.ionSerializerFactory = ionSerializerFactory;
         this.properties = properties;
         this.sequenceType = sequenceType;
