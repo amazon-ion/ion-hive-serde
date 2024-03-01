@@ -1,17 +1,10 @@
-/*
- * Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+plugins {
+    id("ion-hive-serde.dependencies")
+    id("ion-hive-serde.conventions")
+}
 
 task createTmpDir {
     doLast {
@@ -37,11 +30,11 @@ task stopDocker(type: Exec) {
 }
 
 task copySerDeJar {
-    dependsOn ':serde:singleJar'
+    dependsOn ':hive2:shadowJar'
 
     doLast {
         copy {
-            from file("../serde/build/libs/ion-hive-serde-all-${project(':serde').version}.jar")
+            from file("../serde/build/libs/ion-hive2-serde-${project(':hive2').version}-all.jar")
             into file("./docker-tmp/serde/")
             rename '.*\\.jar', 'serde-all.jar'
         }
@@ -72,7 +65,7 @@ task testTearDown {
  * - stop docker containers
  * - remove shared directories
  */
-test {
+tasks.withType(Test) {
     dependsOn testSetUp
     finalizedBy 'testTearDown'
 
@@ -81,12 +74,15 @@ test {
     include "**/*Suite.class"
 }
 
+def hive_version = '[2.3.0,2.4.0)'
+
+configurations {
+    testImplementation {
+        extendsFrom(testFramework, hive2Runtime)
+    }
+}
+
 dependencies {
-    testCompile project(":serde")
-
-    testCompile "org.apache.hive:hive-jdbc:${hive_version}"
-
-    // compile only dependencies are not transitive so we need to redeclare some here
-    testCompile "org.apache.hive:hive-exec:${hive_version}", { transitive = false }
-    testCompile "org.apache.hadoop:hadoop-common:${hadoop_version}"
+    testImplementation project(":hive2")
+    testImplementation "org.apache.hive:hive-jdbc:${hive_version}"
 }

@@ -1,37 +1,36 @@
-
-### :warning: Please refer to `hive2` branch for ion-hive2-serde and `hive3` branch for ion-hive3-serde.
-
 ## Amazon Ion Hive Serde
 
-A Apache Hive SerDe (short for serializer/deserializer) for the Ion file format.
+An Apache Hive SerDe (short for serializer/deserializer) for the Ion file format, with support for Hive 2 and Hive 3.
 
-[![Build Status](https://travis-ci.org/amzn/ion-hive-serde.svg?branch=master)](https://travis-ci.org/amzn/ion-hive-serde)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive-serde)
-[![Javadoc](https://javadoc-badge.appspot.com/com.amazon.ion/ion-hive-serde.svg?label=javadoc)](http://www.javadoc.io/doc/com.amazon.ion/ion-hive-serde)
+[![Build Status](https://github.com/amazon-ion/ion-hive-serde/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/amazon-ion/ion-hive-serde/actions?query=branch%3Amaster)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive2-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive2-serde)
+[![javadoc.io](https://javadoc.io/badge2/com.amazon.ion/ion-hive2-serde/javadoc.io.svg)](http://www.javadoc.io/doc/com.amazon.ion/ion-hive2-serde)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive3-serde/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.amazon.ion/ion-hive3-serde)
+[![javadoc.io](https://javadoc.io/badge2/com.amazon.ion/ion-hive3-serde/javadoc.io.svg)](http://www.javadoc.io/doc/com.amazon.ion/ion-hive3-serde)
 
 ### Features
 * Read data stored in Ion format both binary and text.
 * Supports all Ion types including nested data structures, see [Type mapping documentation](docs/type-mapping.md)
 for more information.
-* Supports flattening of Ion documents through [path extraction](https://github.com/amzn/ion-java-path-extraction).
+* Supports flattening of Ion documents through [path extraction](https://github.com/amazon-ion/ion-java-path-extraction).
 * Supports importing shared symbol tables and custom symbol table catalogs.
 * `IonInputFormat` and `IonOutputFormat` are able to handle both Ion binary and Ion text.
 * Configurable through [SerDe properties](docs/serde-properties.md).
 
 ### Installation
-Download the latest `ion-hive-serde-all-<version-number>.jar` from [https://github.com/amzn/ion-hive-serde/releases]
-and place the JARs into `hive/lib` or use `ADD JAR` in Hive. That jar contains the SerDe and all its dependencies.
+Download the latest `ion-hive(2|3)-serde-all-<version-number>.jar` from [https://github.com/amazon-ion/ion-hive-serde/releases]. (Some releases may have a slightly different jar name, such as `ion-hive(2|3)-serde-<version-number>-all.jar`.)
 
-To build it locally run :`./gradlew :serde:singleJar`
+To build it locally run :`./gradlew shadowJar` 
 
 ### Building
-Project is separated into two modules:
-1. `serde`: with the SerDe code and unit tests.
+Project is separated into modules:
+1. `hive2`: with the SerDe code and unit tests for Hive 2.
+1. `hive3`: with the SerDe code and unit tests for Hive 3.
 1. `integration-tests`: integration tests using a dockerized hive installation.
 
 To build only the SerDe code:
 ```
-./gradlew :serde:build
+./gradlew :hive2:build :hive3:build
 ```
 
 To build the SerDe including integration tests:
