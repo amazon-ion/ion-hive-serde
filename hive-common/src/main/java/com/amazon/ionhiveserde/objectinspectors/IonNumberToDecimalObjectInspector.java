@@ -5,8 +5,7 @@ package com.amazon.ionhiveserde.objectinspectors;
 
 import static com.amazon.ionhiveserde.objectinspectors.IonUtil.isIonNull;
 
-import com.amazon.ion.IonDecimal;
-import com.amazon.ion.IonInt;
+import com.amazon.ion.IonNumber;
 import com.amazon.ion.IonValue;
 import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.hive.serde2.io.HiveDecimalWritable;
@@ -14,7 +13,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.HiveDecimalObject
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 
 /**
- * Adapts an {@link IonDecimal} or {@link IonInt} for the decimal Hive type.
+ * Adapts an {@link IonNumber} for the decimal Hive type.
  */
 public class IonNumberToDecimalObjectInspector extends AbstractIonPrimitiveJavaObjectInspector implements
     HiveDecimalObjectInspector {
@@ -36,27 +35,14 @@ public class IonNumberToDecimalObjectInspector extends AbstractIonPrimitiveJavaO
     @Override
     public HiveDecimal getPrimitiveJavaObject(final Object o) {
         final IonValue value = (IonValue) o;
-        if (isIonNull((IonValue) o)) {
+        if (isIonNull(value)) {
             return null;
         }
 
-        switch (value.getType()) {
-            case INT:
-                return getPrimitiveJavaObject((IonInt) o);
-
-            case DECIMAL:
-                return getPrimitiveJavaObject((IonDecimal) o);
-
-            default:
-                throw new IllegalArgumentException("Invalid Ion type: " + value.getType());
+        if (value instanceof IonNumber) {
+            return HiveDecimal.create(((IonNumber) value).bigDecimalValue());
+        } else {
+            throw new IllegalArgumentException("Invalid Ion type: " + value.getType());
         }
-    }
-
-    private HiveDecimal getPrimitiveJavaObject(final IonDecimal ionValue) {
-        return HiveDecimal.create(ionValue.bigDecimalValue());
-    }
-
-    private HiveDecimal getPrimitiveJavaObject(final IonInt ionValue) {
-        return HiveDecimal.create(ionValue.bigIntegerValue());
     }
 }

@@ -22,7 +22,7 @@ object Versions {
     val hive2_version = "[2.3.0,2.4.0)"
     val hive3_version = "[3.1.2,3.1.17)"
     val kotlin_version = "1.9.22"
-    val ionjava_version = "[1.4.0,2.0.0)"
+    val ionjava_version = "[1.9.1,2.0.0)"
     val pathextraction_version = "[1.2.0,2.0.0)"
     val hadoop_version = "[2.7.0,2.8.0)"
 }
